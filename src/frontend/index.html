@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- 📋 EXAMPLE FILE — use this as a reference when creating your own HTML pages. -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
+
+  <!-- Link to our stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- Page header -->
+  <header>
+    <h1>Task Manager</h1>
+    <p>A simple app to manage your tasks</p>
+  </header>
+
+  <main>
+
+    <!-- Form to add a new task -->
+    <section id="add-task-section">
+      <h2>Add a Task</h2>
+      <form id="task-form">
+        <label for="task-title">Task title:</label>
+        <input type="text" id="task-title" name="title" placeholder="Enter a task..." required>
+        <button type="submit">Add</button>
+      </form>
+    </section>
+
+    <!-- Task list section -->
+    <section id="task-list-section">
+      <h2>Your Tasks</h2>
+
+      <!--
+        This is where tasks will be rendered by JavaScript.
+        The main.js file fetches tasks from the API and
+        adds <li> elements inside this list.
+      -->
+      <ul id="task-list">
+        <!-- Tasks are loaded here by main.js -->
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- Link to our JavaScript file (defer loads it after the HTML is parsed) -->
+  <script src="main.js" defer></script>
+
+</body>
+
+</html>

@@ -1,0 +1,33 @@
+{
+  "name": "student-assignment-template",
+  "version": "1.0.0",
+  "description": "Base template for ST0503 BED using Express.js, libsql, and Drizzle ORM",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon --config _extras/nodemon.json index.js",
+    "db": "node src/db/seed.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --roots=_extras/tests",
+    "export": "zip -r export.zip . -x 'node_modules/*' 'export.zip'"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.15.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.0",
+    "express": "^4.21.0",
+    "express-validator": "^7.2.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.30.0",
+    "fast-check": "^3.23.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.0",
+    "supertest": "^7.0.0"
+  },
+  "keywords": [],
+  "author": "larrythng96",
+  "license": "ISC"
+}
