@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 /**
  * Property-based tests for correctness properties defined in the design document.
- * Uses fast-check for property-based testing with Jest as the test runner.
+ * Uses fast-check for property-based testing with Vitest as the test runner.
  */
 
 // Feature: student-assignment-template, Property 1: Structured error responses

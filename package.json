@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "nodemon --config _extras/nodemon.json index.js",
     "db": "node src/db/seed.js",
-    "test": "node --experimental-vm-modules node_modules/.bin/jest --roots=_extras/tests",
+    "test": "vitest run",
     "export": "zip -r export.zip . -x 'node_modules/*' 'export.zip'"
   },
   "dependencies": {
@@ -23,9 +23,9 @@
   "devDependencies": {
     "drizzle-kit": "^0.30.0",
     "fast-check": "^3.23.0",
-    "jest": "^29.7.0",
     "nodemon": "^3.1.0",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "vitest": "^2.1.8"
   },
   "keywords": [],
   "author": "larrythng96",

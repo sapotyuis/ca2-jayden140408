@@ -19,7 +19,7 @@ project-root/
 ├── _extras/
 │   ├── api-docs/             # Swagger API documentation setup
 │   ├── frontend-prompts/     # AI prompt templates for frontend tasks
-│   ├── tests/                # Jest + Supertest test files
+│   ├── tests/                # Vitest + Supertest test files
 │   └── nodemon.json          # Nodemon auto-reload settings
 └── .vscode/                  # VS Code settings and recommended extensions
 ```
@@ -29,7 +29,7 @@ project-root/
 - **Express.js** — web framework
 - **libsql** — SQLite-compatible database
 - **Drizzle ORM** — database operations and schema definitions
-- **Jest + Supertest** — testing
+- **Vitest + Supertest** — testing
 - **express-validator** — input validation
 - **ES Modules** — `import`/`export` syntax, `"type": "module"` in package.json (no CommonJS `require`/`module.exports`)
 
@@ -67,7 +67,7 @@ Swagger docs live in `_extras/api-docs/swagger.js`. This file auto-generates API
 
 The `_extras/` directory contains tooling and support files that students don't need to edit directly:
 
-- `_extras/tests/` — Jest + Supertest test files (run with `npm test`)
+- `_extras/tests/` — Vitest + Supertest test files (run with `npm test`)
 - `_extras/api-docs/` — Swagger auto-generation and UI setup
 - `_extras/frontend-prompts/` — AI prompt templates for frontend tasks
 - `_extras/nodemon.json` — Nodemon configuration for the dev server

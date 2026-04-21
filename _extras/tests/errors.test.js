@@ -1,6 +1,5 @@
 // ⚠️ DO NOT MODIFY THIS FILE — it tests the project's error handling infrastructure.
 
-import { jest } from '@jest/globals';
 import { ERROR_CODES, AppError, errorHandler } from '../../src/utils/_errors.js';
 
 describe('AppError', () => {
@@ -33,7 +32,7 @@ describe('errorHandler', () => {
 
   beforeEach(() => {
     // Suppress console.error output during tests
-    jest.spyOn(console, 'error').mockImplementation(() => { });
+    vi.spyOn(console, 'error').mockImplementation(() => { });
 
     res = {
       statusCode: null,
@@ -47,7 +46,7 @@ describe('errorHandler', () => {
         return this;
       },
     };
-    next = jest.fn();
+    next = vi.fn();
   });
 
   afterEach(() => {
