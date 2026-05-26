@@ -1,4 +1,4 @@
-// ✏️ EDIT THIS FILE — add seed data for your own tables below the example tasks.
+// ✏️ EDIT THIS FILE — add seed data for your own tables.
 
 /**
  * Seed data and database reset script. Run with: npm run db
@@ -15,24 +15,13 @@ import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
 
-// Import your table schemas here
-import { tasks } from './schema.js';
-
-// --- Seed data ---
-
-/** Sample tasks inserted when the database is reset. */
-const sampleTasks = [
-  { title: 'Buy groceries', completed: false },
-  { title: 'Read a book', completed: true },
-  { title: 'Go for a walk', completed: false },
-];
-
 // --- Seed function ---
 
 /** Insert seed data into the database. */
 export const seed = async (db) => {
-  await db.insert(tasks).values(sampleTasks);
-  console.log(`  Inserted ${sampleTasks.length} tasks`);
+  // Add your own db.insert(...) calls here once you define tables in schema.js.
+  void db;
+  console.log('  No seed data configured yet.');
 };
 
 // --- Database reset (no need to modify below) ---

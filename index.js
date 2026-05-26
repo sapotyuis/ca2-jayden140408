@@ -4,7 +4,6 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { exampleRouter } from './src/routes/exampleRoute.js';
 import { setupSwagger } from './_extras/api-docs/swagger.js';
 import { errorHandler } from './src/utils/_errors.js';
 
@@ -17,7 +16,6 @@ app.use(express.static('src/frontend'));
 
 // Routes
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
-app.use('/api/tasks', exampleRouter);
 
 // Add your routes here — before the error handler, like this:
 // app.use('/api/your-resource', yourRoutes);
