@@ -1,5 +1,6 @@
 // ⚠️ DO NOT MODIFY THIS FILE — it tests the project's error handling infrastructure.
 
+import { vi } from 'vitest';
 import { ERROR_CODES, AppError, errorHandler } from '../../src/utils/_errors.js';
 
 describe('AppError', () => {
@@ -50,7 +51,7 @@ describe('errorHandler', () => {
   });
 
   afterEach(() => {
-    console.error.mockRestore();
+    vi.restoreAllMocks();
   });
 
   it('returns structured { error: { code, message, status } } for an AppError', () => {

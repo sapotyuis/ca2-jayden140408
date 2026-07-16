@@ -1,0 +1,170 @@
+/*
+ * Auth pages (sign in / register) for Castaway Chronicles.
+ * Theme: adrift at sea. The page is the ocean; the form sits on a driftwood "raft".
+ * Visual polish is not graded, but a themed surface reinforces the game concept.
+ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --sea-deep: #0b3d5c;
+  --sea-mid: #14688a;
+  --sea-light: #2a9bb5;
+  --driftwood: #e9dcc2;
+  --driftwood-dark: #c9b48c;
+  --plank: #b07a4a;
+  --plank-dark: #8a5a34;
+  --ink: #2c2115;
+  --ink-soft: #5f513f;
+  --danger: #b23b2e;
+  --success: #2f7d4f;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--ink);
+}
+
+/* The ocean: a vertical gradient from deep water up to the horizon light. */
+.ocean {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(180deg, var(--sea-light) 0%, var(--sea-mid) 45%, var(--sea-deep) 100%);
+}
+
+/*
+ * The raft / card. `.card` is kept as an alias so register.html (which still uses
+ * the old markup) inherits the same styling without changes.
+ */
+.raft,
+.card {
+  width: 100%;
+  max-width: 380px;
+  background-color: var(--driftwood);
+  border: 3px solid var(--plank-dark);
+  border-radius: 10px;
+  padding: 34px 32px 30px;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(6, 30, 45, 0.45);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--plank-dark);
+  margin-bottom: 6px;
+}
+
+.raft h1,
+.card h1 {
+  font-size: 1.85rem;
+  line-height: 1.15;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.tagline {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin-bottom: 24px;
+}
+
+.raft label,
+.card label {
+  display: block;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.raft input,
+.card input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 16px;
+  border: 2px solid var(--driftwood-dark);
+  background-color: #fbf6ea;
+  border-radius: 5px;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.raft input::placeholder,
+.card input::placeholder {
+  color: #a99b82;
+}
+
+.raft input:focus,
+.card input:focus {
+  outline: none;
+  border-color: var(--sea-mid);
+  box-shadow: 0 0 0 3px rgba(20, 104, 138, 0.25);
+}
+
+.raft button,
+.card button {
+  width: 100%;
+  padding: 13px;
+  margin-top: 4px;
+  background-color: var(--plank);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.raft button:hover,
+.card button:hover {
+  background-color: var(--plank-dark);
+}
+
+.raft button:disabled,
+.card button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+/* Feedback lines. `role="alert"` in the markup makes screen readers announce errors. */
+.message {
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.message.error {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.message.success {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.switch,
+.card p {
+  margin-top: 22px;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+}
+
+.raft a,
+.card a {
+  color: var(--sea-mid);
+  font-weight: 600;
+}

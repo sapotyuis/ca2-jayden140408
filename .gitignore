@@ -1,6 +1,18 @@
 # Dependencies
 node_modules
 
+# Environment variables — never commit secrets (JWT_SECRET_KEY).
+# Copy .env.example to .env and fill it in locally.
+.env
+
+# Local database — regenerate it with `npm run db`.
+# Binary file that changes on every seed and every play session, so tracking it
+# would churn on every commit and conflict on every merge.
+local.db
+local.db-journal
+*.sqlite
+*.sqlite3
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -15,10 +27,7 @@ Thumbs.db
 # Test coverage
 coverage
 
-# Test coverage
-coverage
-
-# Generated API docs
+# Generated API docs — swagger-autogen rewrites this on every server boot
 _extras/api-docs/swagger-output.json
 
 # Drizzle migrations

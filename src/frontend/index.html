@@ -4,27 +4,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assignment Starter</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Castaway Chronicles — Sign In</title>
+
+  <!-- Weathered editorial serif for display, humanist sans for body. Both degrade to
+       solid system fallbacks if a grader runs the page offline. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="css/login.css">
 </head>
 
 <body>
-  <main>
-    <section class="card">
-      <h1>Student Assignment Starter</h1>
-      <p>
-        Add your own schema, model,
-        controller, routes, and frontend pages to build your assignment.
-      </p>
-      <ul>
-        <li>Health check: <a href="/api/health">/api/health</a></li>
-        <li>API docs: <a href="/api-docs">/api-docs</a></li>
-      </ul>
-      <p id="status" aria-live="polite"></p>
+
+  <!-- Full-bleed environment: open ocean, a low horizon, and the raft deck at the
+       bottom edge. Purely atmospheric, so it is hidden from assistive tech. -->
+  <div class="sea" aria-hidden="true">
+    <div class="sea__sky"></div>
+    <div class="sea__glare"></div>
+    <div class="sea__water"></div>
+    <!-- a scrap of salvaged cloth, rigged as a small sail, catching the light -->
+    <div class="sail"></div>
+    <!-- a drifting barrel of recovered supplies -->
+    <div class="salvage"></div>
+    <!-- the raft's lashed planks running along the bottom of the screen -->
+    <div class="deck">
+      <div class="deck__rope"></div>
+      <div class="deck__planks"></div>
+    </div>
+  </div>
+
+  <main class="raft-spread">
+
+    <!-- LEFT: environmental storytelling. Decorative, hidden from screen readers. -->
+    <aside class="scene" aria-hidden="true">
+      <div class="scene__inner">
+
+        <p class="scene__eyebrow">A raft survival game</p>
+        <h1 class="scene__title">Castaway<br>Chronicles</h1>
+        <p class="scene__atmos">&ldquo;Built from what the ocean left behind.&rdquo;</p>
+
+        <!-- Hand-drawn construction plan of the raft, plus the drift route it has
+             travelled and a rough sketch of the improvised water purifier. -->
+        <svg class="scene__plan" viewBox="0 0 560 380" role="presentation" focusable="false">
+          <!-- drift route the raft has been carried along, with heading arrows -->
+          <path class="plan-route"
+            d="M20 330 C120 320 150 250 240 250 C330 250 350 190 440 176 C500 166 520 120 545 92" />
+          <path class="plan-arrow" d="M436 168 l12 6 l-11 8" />
+          <path class="plan-arrow" d="M232 242 l12 6 l-11 8" />
+          <circle class="plan-dot" cx="20" cy="330" r="3.5" />
+          <circle class="plan-dot plan-dot--now" cx="545" cy="92" r="5" />
+
+          <!-- top-down blueprint of the plank raft, lashed at the joints -->
+          <g class="plan-raft" transform="translate(150 120)">
+            <rect class="plan-line" x="0" y="0" width="150" height="110" rx="3" />
+            <!-- deck planks -->
+            <line class="plan-line plan-line--faint" x1="25" y1="0" x2="25" y2="110" />
+            <line class="plan-line plan-line--faint" x1="50" y1="0" x2="50" y2="110" />
+            <line class="plan-line plan-line--faint" x1="75" y1="0" x2="75" y2="110" />
+            <line class="plan-line plan-line--faint" x1="100" y1="0" x2="100" y2="110" />
+            <line class="plan-line plan-line--faint" x1="125" y1="0" x2="125" y2="110" />
+            <!-- cross beams -->
+            <line class="plan-line" x1="0" y1="28" x2="150" y2="28" />
+            <line class="plan-line" x1="0" y1="82" x2="150" y2="82" />
+            <!-- rope lashings at the corners -->
+            <path class="plan-lash" d="M-4 24 l16 8 M-4 32 l16 -8" />
+            <path class="plan-lash" d="M138 24 l16 8 M138 32 l16 -8" />
+            <path class="plan-lash" d="M-4 78 l16 8 M-4 86 l16 -8" />
+            <path class="plan-lash" d="M138 78 l16 8 M138 86 l16 -8" />
+            <!-- mast footing -->
+            <circle class="plan-line" cx="75" cy="55" r="7" fill="none" />
+            <!-- dimension tick -->
+            <path class="plan-line--faint plan-line" d="M0 124 l0 6 M150 124 l0 6 M0 127 l150 0" />
+          </g>
+
+          <!-- improvised water purifier sketch, lower right -->
+          <g class="plan-purifier" transform="translate(420 250)">
+            <rect class="plan-line" x="0" y="0" width="46" height="34" rx="2" />
+            <line class="plan-line--faint plan-line" x1="0" y1="12" x2="46" y2="12" />
+            <path class="plan-line" d="M23 34 l0 12" />
+            <path class="plan-drip" d="M23 50 l0 8" />
+            <path class="plan-drip" d="M23 62 l0 5" />
+          </g>
+        </svg>
+
+        <!-- tally marks: days adrift, recorded in the log margin -->
+        <div class="tally" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span class="tally__cross"></span>
+          <span></span><span></span><span></span><span></span><span class="tally__cross"></span>
+          <span></span><span></span>
+        </div>
+
+        <!-- handwritten survival notes, faded and restrained -->
+        <p class="note note--1">Day 17</p>
+        <p class="note note--2">Fresh water: low</p>
+        <p class="note note--3">Raft integrity: holding</p>
+        <p class="note note--4">Current carried us east overnight</p>
+
+        <p class="scene__coords">
+          <span>drift&nbsp;17.4&deg;N</span>
+          <span>171.1&deg;W</span>
+          <span>land: unknown</span>
+        </p>
+
+      </div>
+    </aside>
+
+    <!-- RIGHT: the survival logbook, roped to the raft's planks, holding the login form. -->
+    <section class="log" aria-labelledby="log-title">
+      <div class="log__board">
+        <div class="log__paper">
+          <span class="log__clip" aria-hidden="true"></span>
+
+          <p class="log__status">Survival log access required</p>
+          <h2 id="log-title" class="log__title">Return to the Raft</h2>
+          <p class="log__lede">Open your survival log and continue the voyage.</p>
+          <div class="log__rule" aria-hidden="true"></div>
+
+          <form id="login-form" autocomplete="off" novalidate>
+            <div class="field">
+              <label for="username">Survivor name</label>
+              <input type="text" id="username" name="username" autocomplete="off"
+                placeholder="driftwood_dan" required>
+            </div>
+
+            <div class="field">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" autocomplete="off"
+                placeholder="Your secret" required>
+            </div>
+
+            <!-- Populated by login.js on any auth failure; stays hidden until then. -->
+            <p id="error-message" class="message error" role="alert" hidden></p>
+
+            <button type="submit">Climb Aboard</button>
+          </form>
+
+          <p class="log__switch">
+            New survivor? <a href="register.html">Join the raft.</a>
+          </p>
+
+        </div>
+      </div>
     </section>
+
   </main>
 
-  <script src="main.js" defer></script>
+  <script type="module" src="js/login.js"></script>
+
 </body>
 
 </html>

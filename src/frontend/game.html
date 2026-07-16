@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castaway Chronicles — Your Raft</title>
+  <style>
+    /*
+     * PLACEHOLDER PAGE (Phase 3 replaces this with the real game view).
+     * Its only job right now is to confirm the auth flow works: it is protected
+     * by game.js and greets the logged-in survivor. Styles are inline and minimal
+     * on purpose so there is no throwaway CSS file to clean up later.
+     */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, Segoe UI, Roboto, sans-serif;
+      color: #e7d9b5;
+      background-color: #142b3a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .panel {
+      max-width: 460px;
+      text-align: center;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 2.4rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p { color: rgba(231, 217, 181, 0.8); line-height: 1.5; }
+
+    .greeting { margin: 1.25rem 0 0.5rem; font-size: 1.05rem; }
+    .greeting strong { color: #e7d9b5; }
+
+    .note {
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: rgba(231, 217, 181, 0.55);
+    }
+
+    button {
+      margin-top: 1.75rem;
+      padding: 0.7rem 1.4rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #142b3a;
+      background-color: #e7d9b5;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    button:hover { background-color: #d5c29a; }
+  </style>
+</head>
+
+<body>
+
+  <main class="panel">
+    <h1>You made it back aboard.</h1>
+    <p class="greeting">Welcome, <strong id="survivor-name">survivor</strong>.</p>
+    <p>Your raft is waiting. The full game — collecting debris, crafting, and
+       expeditions — is built here in a later step.</p>
+    <p class="note">This is a temporary landing page that confirms your login works.</p>
+
+    <button id="logout" type="button">Sign out</button>
+  </main>
+
+  <script type="module" src="js/game.js"></script>
+
+</body>
+
+</html>

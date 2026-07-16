@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castaway Chronicles — Register</title>
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+
+<body>
+
+  <div class="card">
+    <h1>Register Form</h1>
+
+    <form id="register-form" autocomplete="off">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" autocomplete="off" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autocomplete="off" minlength="6" required>
+
+      <p id="error-message" class="message error" hidden></p>
+      <p id="success-message" class="message success" hidden></p>
+
+      <button type="submit">Sign Up</button>
+    </form>
+
+    <p> <a href="index.html">Log in</a></p>
+  </div>
+
+  <script type="module" src="js/register.js"></script>
+
+</body>
+
+</html>
