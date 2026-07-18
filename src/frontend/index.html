@@ -14,26 +14,106 @@
     href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap"
     rel="stylesheet">
 
-  <link rel="stylesheet" href="css/login.css">
+  <link rel="stylesheet" href="css/auth.css">
 </head>
 
 <body>
 
-  <!-- Full-bleed environment: open ocean, a low horizon, and the raft deck at the
-       bottom edge. Purely atmospheric, so it is hidden from assistive tech. -->
+  <!-- Full-bleed environment: night at sea. Starfield, a low moon, its broken
+       path on the water, and the raft adrift with one lit lantern. Purely
+       atmospheric, so the whole layer is hidden from assistive tech. -->
   <div class="sea" aria-hidden="true">
     <div class="sea__sky"></div>
-    <div class="sea__glare"></div>
+    <div class="sea__stars"></div>
+    <div class="sea__shooting"></div>
+    <div class="sea__moon"></div>
     <div class="sea__water"></div>
-    <!-- a scrap of salvaged cloth, rigged as a small sail, catching the light -->
-    <div class="sail"></div>
-    <!-- a drifting barrel of recovered supplies -->
-    <div class="salvage"></div>
-    <!-- the raft's lashed planks running along the bottom of the screen -->
-    <div class="deck">
-      <div class="deck__rope"></div>
-      <div class="deck__planks"></div>
+    <div class="sea__glare"></div>
+
+    <!-- three wave bands, back to front; each path repeats at half the svg
+         width so the scroll animation loops seamlessly -->
+    <div class="wave wave--1">
+      <svg viewBox="0 0 2880 90" preserveAspectRatio="none" focusable="false">
+        <path
+          d="M0 46 Q180 30 360 46 T720 46 T1080 46 T1440 46 T1800 46 T2160 46 T2520 46 T2880 46 V90 H0 Z" />
+      </svg>
     </div>
+
+    <!-- the raft, backlit by the moon path, lantern lit -->
+    <div class="raft">
+      <svg viewBox="0 0 360 240" focusable="false">
+        <defs>
+          <radialGradient id="lantern-halo">
+            <stop offset="0%" stop-color="#f2b556" stop-opacity="0.55" />
+            <stop offset="45%" stop-color="#f2b556" stop-opacity="0.18" />
+            <stop offset="100%" stop-color="#f2b556" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="reflection-fade" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0%" stop-color="#fff" stop-opacity="0.9" />
+            <stop offset="100%" stop-color="#fff" stop-opacity="0" />
+          </linearGradient>
+          <mask id="reflection-mask">
+            <rect x="0" y="0" width="360" height="240" fill="url(#reflection-fade)" />
+          </mask>
+
+          <!-- the raft silhouette, drawn once and reused for its reflection -->
+          <g id="raft-shape">
+            <!-- lashed deck planks, deliberately uneven -->
+            <rect x="70" y="140" width="52" height="11" rx="2" fill="#0b141b" />
+            <rect x="118" y="138" width="60" height="13" rx="2" fill="#0d1720" />
+            <rect x="174" y="141" width="48" height="11" rx="2" fill="#0b141b" />
+            <rect x="218" y="139" width="56" height="12" rx="2" fill="#0d1720" />
+            <rect x="270" y="141" width="26" height="10" rx="2" fill="#0b141b" />
+            <!-- rope lashings between planks -->
+            <path d="M120 138 l-4 14 M124 138 l-4 14 M176 139 l-4 14 M180 139 l-4 14 M220 139 l-4 13 M224 139 l-4 13"
+              stroke="#0f1c26" stroke-width="1.6" fill="none" />
+            <!-- supply barrel and crate -->
+            <rect x="240" y="116" width="20" height="24" rx="3" fill="#0b141b" />
+            <path d="M240 124 h20 M240 132 h20" stroke="#111f2b" stroke-width="1.4" />
+            <rect x="212" y="126" width="16" height="14" rx="1" fill="#0d1720" />
+            <!-- mast, leaning slightly with the drift -->
+            <path d="M148 140 L136 26" stroke="#0b141b" stroke-width="5" stroke-linecap="round" />
+            <!-- gaff spar holding the salvaged sail -->
+            <path d="M139 50 L214 84" stroke="#0b141b" stroke-width="3" stroke-linecap="round" />
+            <!-- patched scrap-cloth sail: two salvaged pieces, sewn -->
+            <path d="M141 56 L206 84 L146 116 Z" fill="#101c26" />
+            <path d="M141 56 L179 72 L144 92 Z" fill="#16242f" />
+            <path d="M158 78 l10 5 M150 92 l12 6" stroke="#0b141b" stroke-width="1.2" />
+            <!-- rope stays from the masthead down to the deck -->
+            <path d="M136 28 L74 140 M136 28 L226 138" stroke="#0f1c26" stroke-width="1.2" fill="none" />
+            <!-- the lantern, hung from a short boom off the mast -->
+            <path d="M144 96 L172 102 L172 110" stroke="#0b141b" stroke-width="2" fill="none" />
+            <circle class="lantern-glow" cx="172" cy="115" r="22" fill="url(#lantern-halo)" />
+            <rect x="168" y="110" width="8" height="10" rx="2" fill="#0b141b" />
+            <circle cx="172" cy="115" r="2.6" fill="#f2b556" />
+          </g>
+        </defs>
+
+        <use href="#raft-shape" />
+        <!-- reflection in the water, fading with depth -->
+        <g transform="translate(0 304) scale(1 -1)" opacity="0.16" mask="url(#reflection-mask)">
+          <use href="#raft-shape" />
+        </g>
+        <!-- warm lantern shimmer on the water -->
+        <ellipse cx="172" cy="160" rx="26" ry="6" fill="#f2b556" opacity="0.14" />
+      </svg>
+    </div>
+
+    <div class="wave wave--2">
+      <svg viewBox="0 0 2880 90" preserveAspectRatio="none" focusable="false">
+        <path
+          d="M0 42 Q180 64 360 42 T720 42 T1080 42 T1440 42 T1800 42 T2160 42 T2520 42 T2880 42 V90 H0 Z" />
+      </svg>
+    </div>
+
+    <div class="wave wave--3">
+      <svg viewBox="0 0 2880 90" preserveAspectRatio="none" focusable="false">
+        <path
+          d="M0 40 Q180 18 360 40 T720 40 T1080 40 T1440 40 T1800 40 T2160 40 T2520 40 T2880 40 V90 H0 Z" />
+      </svg>
+    </div>
+
+    <div class="sea__vignette"></div>
   </div>
 
   <main class="raft-spread">
@@ -45,50 +125,6 @@
         <p class="scene__eyebrow">A raft survival game</p>
         <h1 class="scene__title">Castaway<br>Chronicles</h1>
         <p class="scene__atmos">&ldquo;Built from what the ocean left behind.&rdquo;</p>
-
-        <!-- Hand-drawn construction plan of the raft, plus the drift route it has
-             travelled and a rough sketch of the improvised water purifier. -->
-        <svg class="scene__plan" viewBox="0 0 560 380" role="presentation" focusable="false">
-          <!-- drift route the raft has been carried along, with heading arrows -->
-          <path class="plan-route"
-            d="M20 330 C120 320 150 250 240 250 C330 250 350 190 440 176 C500 166 520 120 545 92" />
-          <path class="plan-arrow" d="M436 168 l12 6 l-11 8" />
-          <path class="plan-arrow" d="M232 242 l12 6 l-11 8" />
-          <circle class="plan-dot" cx="20" cy="330" r="3.5" />
-          <circle class="plan-dot plan-dot--now" cx="545" cy="92" r="5" />
-
-          <!-- top-down blueprint of the plank raft, lashed at the joints -->
-          <g class="plan-raft" transform="translate(150 120)">
-            <rect class="plan-line" x="0" y="0" width="150" height="110" rx="3" />
-            <!-- deck planks -->
-            <line class="plan-line plan-line--faint" x1="25" y1="0" x2="25" y2="110" />
-            <line class="plan-line plan-line--faint" x1="50" y1="0" x2="50" y2="110" />
-            <line class="plan-line plan-line--faint" x1="75" y1="0" x2="75" y2="110" />
-            <line class="plan-line plan-line--faint" x1="100" y1="0" x2="100" y2="110" />
-            <line class="plan-line plan-line--faint" x1="125" y1="0" x2="125" y2="110" />
-            <!-- cross beams -->
-            <line class="plan-line" x1="0" y1="28" x2="150" y2="28" />
-            <line class="plan-line" x1="0" y1="82" x2="150" y2="82" />
-            <!-- rope lashings at the corners -->
-            <path class="plan-lash" d="M-4 24 l16 8 M-4 32 l16 -8" />
-            <path class="plan-lash" d="M138 24 l16 8 M138 32 l16 -8" />
-            <path class="plan-lash" d="M-4 78 l16 8 M-4 86 l16 -8" />
-            <path class="plan-lash" d="M138 78 l16 8 M138 86 l16 -8" />
-            <!-- mast footing -->
-            <circle class="plan-line" cx="75" cy="55" r="7" fill="none" />
-            <!-- dimension tick -->
-            <path class="plan-line--faint plan-line" d="M0 124 l0 6 M150 124 l0 6 M0 127 l150 0" />
-          </g>
-
-          <!-- improvised water purifier sketch, lower right -->
-          <g class="plan-purifier" transform="translate(420 250)">
-            <rect class="plan-line" x="0" y="0" width="46" height="34" rx="2" />
-            <line class="plan-line--faint plan-line" x1="0" y1="12" x2="46" y2="12" />
-            <path class="plan-line" d="M23 34 l0 12" />
-            <path class="plan-drip" d="M23 50 l0 8" />
-            <path class="plan-drip" d="M23 62 l0 5" />
-          </g>
-        </svg>
 
         <!-- tally marks: days adrift, recorded in the log margin -->
         <div class="tally" aria-hidden="true">
