@@ -1,0 +1,47 @@
+import { Router } from 'express';
+import { body } from 'express-validator';
+import { verifyToken } from '../middlewares/jwtMiddleware.js';
+import { loadCurrentUser } from '../middlewares/currentUserMiddleware.js';
+import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
+import { getAllUserEvents, getUserEventById, createUserEvent, patchUserEvent, deleteUserEvent } from '../controllers/userEventController.js';
+
+export const userEventRouter = Router();
+
+userEventRouter.get('/', getAllUserEvents);
+userEventRouter.get('/:user_event_id', getUserEventById);
+
+userEventRouter.post(
+  '/',
+  verifyToken,
+  loadCurrentUser,
+  [
+    body('user_id').notEmpty().withMessage('user_id is required'),
+    body('event_id').isInt({ min: 1 }).withMessage('event_id must be a positive integer'),
+    body('outcome').notEmpty().withMessage('outcome is required'),
+    body('materials_change').optional().isInt().withMessage('materials_change must be an integer'),
+    body('hunger_change').optional().isInt().withMessage('hunger_change must be an integer'),
+    body('reward_item_type_id').optional().isInt({ min: 1 }).withMessage('reward_item_type_id must be a positive integer'),
+    body('reward_item_quantity').optional().isInt({ min: 0 }).withMessage('reward_item_quantity must be non-negative'),
+    body('occurred_at').optional().isString().notEmpty().withMessage('occurred_at must be a non-empty string'),
+  ],
+  handleValidationErrors,
+  createUserEvent
+);
+
+userEventRouter.patch(
+  '/:user_event_id',
+  verifyToken,
+  loadCurrentUser,
+  [
+    body('outcome').optional().notEmpty().withMessage('outcome must be non-empty'),
+    body('materials_change').optional().isInt().withMessage('materials_change must be an integer'),
+    body('hunger_change').optional().isInt().withMessage('hunger_change must be an integer'),
+    body('reward_item_type_id').optional().isInt({ min: 1 }).withMessage('reward_item_type_id must be a positive integer'),
+    body('reward_item_quantity').optional().isInt({ min: 0 }).withMessage('reward_item_quantity must be non-negative'),
+    body('occurred_at').optional().isString().notEmpty().withMessage('occurred_at must be a non-empty string'),
+  ],
+  handleValidationErrors,
+  patchUserEvent
+);
+
+userEventRouter.delete('/:user_event_id', verifyToken, loadCurrentUser, deleteUserEvent);

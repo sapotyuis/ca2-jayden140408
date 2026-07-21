@@ -2,6 +2,7 @@ import { Router } from 'express';
 // body() attaches validation rules to the route as middleware; errors are collected with validationResult() inside the controller
 import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
+import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
 import { getAllCraftingRecipes, getCraftingRecipeById, createCraftingRecipe, patchCraftingRecipe, deleteCraftingRecipe } from '../controllers/craftingRecipeController.js';
 
 export const craftingRecipeRouter = Router();
@@ -17,6 +18,7 @@ craftingRecipeRouter.post(
     body('ingredient_item_type_id').isInt({ min: 1 }).withMessage('ingredient_item_type_id must be a positive integer'),
     body('quantity_required').optional().isInt({ min: 1 }).withMessage('quantity_required must be a positive integer'),
   ],
+  handleValidationErrors,
   createCraftingRecipe
 );
 
@@ -27,6 +29,7 @@ craftingRecipeRouter.patch(
   [
     body('quantity_required').optional().isInt({ min: 1 }).withMessage('quantity_required must be a positive integer'),
   ],
+  handleValidationErrors,
   patchCraftingRecipe
 );
 

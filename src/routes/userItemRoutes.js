@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
+import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
 import { getAllUserItems, getUserItemById, createUserItem, patchUserItem, deleteUserItem } from '../controllers/userItemController.js';
 
 export const userItemRouter = Router();
@@ -17,6 +18,7 @@ userItemRouter.post(
     body('quantity').optional().isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
     body('acquired_at').optional().isString().notEmpty().withMessage('acquired_at must be a non-empty string'),
   ],
+  handleValidationErrors,
   createUserItem
 );
 
@@ -27,6 +29,7 @@ userItemRouter.patch(
     body('quantity').optional().isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
     body('acquired_at').optional().isString().notEmpty().withMessage('acquired_at must be a non-empty string'),
   ],
+  handleValidationErrors,
   patchUserItem
 );
 

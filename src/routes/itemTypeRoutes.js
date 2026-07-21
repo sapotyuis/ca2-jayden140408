@@ -2,6 +2,7 @@ import { Router } from 'express';
 // body() attaches validation rules to the route as middleware; errors are collected with validationResult() inside the controller
 import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
+import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
 import { getAllItemTypes, getItemTypeById, createItemType, patchItemType, deleteItemType } from '../controllers/itemTypeController.js';
 
 export const itemTypeRouter = Router();
@@ -19,6 +20,7 @@ itemTypeRouter.post(
     body('hunger_restore').isInt({ min: 0 }).withMessage('hunger_restore must be a non-negative integer'),
     body('raft_points').isInt({ min: 0 }).withMessage('raft_points must be a non-negative integer'),
   ],
+  handleValidationErrors,
   createItemType
 );
 
@@ -33,6 +35,7 @@ itemTypeRouter.patch(
     body('hunger_restore').optional().isInt({ min: 0 }).withMessage('hunger_restore must be a non-negative integer'),
     body('raft_points').optional().isInt({ min: 0 }).withMessage('raft_points must be a non-negative integer'),
   ],
+  handleValidationErrors,
   patchItemType
 );
 

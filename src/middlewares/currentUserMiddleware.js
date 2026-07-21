@@ -3,7 +3,7 @@ import { findUserById } from '../models/userModel.js';
 /**
  * Express middleware — loads the survivor named by the verified JWT and attaches it to `req.user`.
  *
- * Runs immediately after verifyToken, which sets `req.userId` from the token payload.
+ * Runs immediately after verifyToken, which sets `res.locals.userId` from the token payload.
  * Every /api/me handler needs the current user's row, so the lookup lives here once
  * instead of being repeated at the top of each controller.
  *
@@ -13,7 +13,7 @@ import { findUserById } from '../models/userModel.js';
  */
 export const loadCurrentUser = async (req, res, next) => {
   try {
-    const user = await findUserById(req.userId);
+    const user = await findUserById(res.locals.userId);
 
     if (!user) {
       return res.status(401).json({

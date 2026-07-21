@@ -1,5 +1,4 @@
-// Validation rules are defined on the route using body() middleware; validationResult() collects any failures here
-import { validationResult } from 'express-validator';
+// Validation rules are defined on the route using body() + handleValidationErrors middleware
 import { findAllItemTypes, findItemTypeById, insertItemType, updateItemType, removeItemType } from '../models/itemTypeModel.js';
 import { AppError } from '../utils/_errors.js';
 
@@ -54,12 +53,6 @@ export const getItemTypeById = async (req, res, next) => {
 /** Create a new item type. Validation rules are on the route; results checked here. */
 export const createItemType = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new AppError('VALIDATION_ERROR', errors.array()[0].msg); // [0] returns only the first validation error message
-    }
-
     const data = {
       item_name: req.body.item_name,
       category: req.body.category,
@@ -78,12 +71,6 @@ export const createItemType = async (req, res, next) => {
 /** Update an item type by ID. Accepts any combination of fields in the body. */
 export const patchItemType = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new AppError('VALIDATION_ERROR', errors.array()[0].msg); // [0] returns only the first validation error message
-    }
-
     const itemTypeId = parsePositiveInt(req.params.item_type_id, 'item_type_id');
 
     // Only include fields that were actually sent — avoids overwriting fields the client didn't touch

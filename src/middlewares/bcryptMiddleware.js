@@ -1,13 +1,39 @@
 import bcrypt from 'bcrypt';
 
-const SALT_ROUNDS = 10;
+const saltRounds = 10;
 
-/** Hashes a plaintext password for storage. Never store or return plaintext passwords. */
-export const hashPassword = async (password) => {
-	return await bcrypt.hash(password, SALT_ROUNDS);
+export const comparePassword = (req, res, next) => {
+    const callback = (err, isMatch) => {
+        if (err) {
+            console.log('password comparison error', err);
+            console.error('Error bcrypt:', err);
+            res.status(500).json(err);
+        } else {
+            if (isMatch) {
+                next();
+            } else {
+                console.log('password comparison rejected');
+                res.status(401).json({
+                    message: 'Wrong password',
+                });
+            }
+        }
+    };
+
+    bcrypt.compare(req.body.password, res.locals.hash, callback);
 };
 
-/** Compares a plaintext password against a stored hash. Returns true/false. */
-export const comparePassword = async (password, hash) => {
-return await bcrypt.compare(password, hash)
+export const hashPassword = (req, res, next) => {
+    const callback = (err, hash) => {
+        if (err) {
+            console.log('password hashing error', err);
+            console.error('Error bcrypt:', err);
+            res.status(500).json(err);
+        } else {
+            res.locals.hash = hash;
+            next();
+        }
+    };
+
+    bcrypt.hash(req.body.password, saltRounds, callback);
 };

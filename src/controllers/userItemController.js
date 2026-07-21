@@ -1,5 +1,4 @@
-// Validation rules are defined on the route using body() middleware; validationResult() collects any failures here
-import { validationResult } from 'express-validator';
+// Validation rules are defined on the route using body() + handleValidationErrors middleware
 import { findAllUserItems, findUserItemById, insertUserItem, updateUserItem, removeUserItem } from '../models/userItemModel.js';
 import { findUserById } from '../models/userModel.js';
 import { findItemTypeById } from '../models/itemTypeModel.js';
@@ -56,12 +55,6 @@ export const getUserItemById = async (req, res, next) => {
 /** Create a new user item. Validation rules are on the route; results checked here. */
 export const createUserItem = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new AppError('VALIDATION_ERROR', errors.array()[0].msg); // [0] returns only the first validation error message
-    }
-
     // Check FKs exist before inserting — skipping this causes the DB to throw a raw constraint error (500)
     const user = await findUserById(req.body.user_id);
     if (!user) {
@@ -90,12 +83,6 @@ export const createUserItem = async (req, res, next) => {
 /** Update a user item by ID. Accepts `quantity` and/or `acquired_at` in the body. */
 export const patchUserItem = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new AppError('VALIDATION_ERROR', errors.array()[0].msg); // [0] returns only the first validation error message
-    }
-
     const userItemId = parsePositiveInt(req.params.user_item_id, 'user_item_id');
 
     // Only include fields that were actually sent — avoids overwriting fields the client didn't touch

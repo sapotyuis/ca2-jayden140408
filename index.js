@@ -8,6 +8,10 @@ import { userItemRouter } from './src/routes/userItemRoutes.js';
 import { itemTypeRouter } from './src/routes/itemTypeRoutes.js';
 import { craftingRecipeRouter } from './src/routes/craftingRecipeRoutes.js';
 import { raftUpgradeRouter } from './src/routes/raftUpgradeRoutes.js';
+import { questRouter } from './src/routes/questRoutes.js';
+import { userQuestRouter } from './src/routes/userQuestRoutes.js';
+import { oceanEventRouter } from './src/routes/oceanEventRoutes.js';
+import { userEventRouter } from './src/routes/userEventRoutes.js';
 import { setupSwagger } from './_extras/api-docs/swagger.js';
 import { errorHandler } from './src/utils/_errors.js';
 
@@ -33,6 +37,10 @@ app.use('/api/item-types', itemTypeRouter);
 app.use('/api/crafting-recipes', craftingRecipeRouter);
 app.use('/api/user-items', userItemRouter);
 app.use('/api/raft-upgrades', raftUpgradeRouter);
+app.use('/api/quests', questRouter);
+app.use('/api/user-quests', userQuestRouter);
+app.use('/api/ocean-events', oceanEventRouter);
+app.use('/api/user-events', userEventRouter);
 
 // Swagger API docs
 await setupSwagger(app);

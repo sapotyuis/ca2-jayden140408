@@ -1,5 +1,4 @@
-// Validation rules are defined on the route using body() middleware; validationResult() collects any failures here
-import { validationResult } from 'express-validator';
+// Validation rules are defined on the route using body() + handleValidationErrors middleware
 import { findAllRaftUpgrades, findRaftUpgradeById, insertRaftUpgrade, updateRaftUpgrade, removeRaftUpgrade } from '../models/raftUpgradeModel.js';
 import { findUserById } from '../models/userModel.js';
 import { AppError } from '../utils/_errors.js';
@@ -55,12 +54,6 @@ export const getRaftUpgradeById = async (req, res, next) => {
 /** Create a new raft upgrade. Validation rules are on the route; results checked here. */
 export const createRaftUpgrade = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new AppError('VALIDATION_ERROR', errors.array()[0].msg); // [0] returns only the first validation error message
-    }
-
     // Check FK exists before inserting — skipping this causes the DB to throw a raw constraint error (500)
     const user = await findUserById(req.body.user_id);
     if (!user) {
@@ -83,12 +76,6 @@ export const createRaftUpgrade = async (req, res, next) => {
 /** Update a raft upgrade by ID. Accepts `upgrade_type` and `material_cost` in the body. */
 export const patchRaftUpgrade = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      throw new AppError('VALIDATION_ERROR', errors.array()[0].msg); // [0] returns only the first validation error message
-    }
-
     const upgradeId = parsePositiveInt(req.params.upgrade_id, 'upgrade_id');
 
     // Only include fields that were actually sent — avoids overwriting fields the client didn't touch

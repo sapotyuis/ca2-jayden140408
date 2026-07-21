@@ -1,4 +1,4 @@
-import { loginRequest, saveSession, getToken, getErrorMessage } from './auth.js';
+import { loginRequest, getCurrentUser, saveSession, getToken, getErrorMessage } from './auth.js';
 
 const loginForm = document.getElementById('login-form');
 const usernameInput = document.getElementById('username');
@@ -47,7 +47,8 @@ loginForm.addEventListener('submit', async (event) => {
       return;
     }
 
-    saveSession(data.token, data.user);
+    const user = await getCurrentUser(data.token);
+    saveSession(data.token, user);
     window.location.href = GAME_PAGE;
   } catch (error) {
     showError('Could not reach the server. Please try again.');

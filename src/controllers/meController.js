@@ -5,7 +5,6 @@
  * always `req.user`, loaded by loadCurrentUser from the verified JWT. That is what makes it
  * impossible for one player to collect debris on, upgrade, or delete another player's raft.
  */
-import { validationResult } from 'express-validator';
 import { findUserByUsername, updateUser, removeUser, upgradeRaftAtomic, findUserUpgradeTypes, collectDebrisAtomic } from '../models/userModel.js';
 import { findAllUserItems, craftItemAtomic } from '../models/userItemModel.js';
 import { findAllItemTypes, findItemTypeById } from '../models/itemTypeModel.js';
@@ -13,15 +12,6 @@ import { findAllCraftingRecipes } from '../models/craftingRecipeModel.js';
 import { findAllRaftUpgrades } from '../models/raftUpgradeModel.js';
 import { UPGRADE_SPECS, VALID_UPGRADE_TYPES } from '../config/gameRules.js';
 import { AppError } from '../utils/_errors.js';
-
-/** Throws VALIDATION_ERROR if the route's express-validator rules failed. */
-const assertValid = (req) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    // Surface only the first failure — the frontend shows one message at a time.
-    throw new AppError('VALIDATION_ERROR', errors.array()[0].msg);
-  }
-};
 
 /** GET /api/me — the logged-in survivor's own profile. */
 export const getMyProfile = async (req, res) => {
@@ -38,8 +28,6 @@ export const getMyProfile = async (req, res) => {
  */
 export const updateMyProfile = async (req, res, next) => {
   try {
-    assertValid(req);
-
     // Progression stats (materials, raft_size) are intentionally not editable here —
     // they may only change by playing the game via the action routes below.
     const data = {};
@@ -196,8 +184,6 @@ export const collectDebris = async (req, res, next) => {
  */
 export const performRaftUpgrade = async (req, res, next) => {
   try {
-    assertValid(req);
-
     const user = req.user;
     const spec = UPGRADE_SPECS[req.body.upgrade_type];
 
@@ -234,8 +220,6 @@ export const performRaftUpgrade = async (req, res, next) => {
  */
 export const craftItem = async (req, res, next) => {
   try {
-    assertValid(req);
-
     const user = req.user;
     const resultItemTypeId = req.body.result_item_type_id;
 
