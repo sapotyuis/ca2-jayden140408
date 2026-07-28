@@ -13,8 +13,8 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
-import 'dotenv/config';
 import bcrypt from 'bcrypt';
+import 'dotenv/config';
 
 // Import your table schemas here
 import {
@@ -30,8 +30,6 @@ import {
 } from './schema.js';
 
 // --- Seed data ---
-
-
 
 const sampleUsers = [
   {
@@ -88,7 +86,7 @@ const sampleItemType = [
   },
   {
     item_name: 'Emergency Rations', category: 'food', material_cost: 8, hunger_restore: 55, raft_points: 0,
-    description: 'Dense trail food reserved for the most dangerous ocean runs.', rarity: 'uncommon',
+    description: 'Dense trail food reserved for the most dangerous expeditions.', rarity: 'uncommon',
   },
   {
     item_name: 'Storm Lantern', category: 'equipment', material_cost: 12, hunger_restore: 0, raft_points: 0,
@@ -224,6 +222,45 @@ const sampleOceanEvents = [
     hunger_delta: -10,
     reward_item_type_id: 8,
     reward_item_quantity: 3,
+  },
+  {
+    event_name: 'Shark Attack',
+    description: 'A hungry shark circles the raft and lunges for the food stores.',
+    event_type: 'shark_attack',
+    is_unexpected: 1,
+    min_raft_size: 1,
+    risk_percent: 100,
+    hunger_delta: -10,
+    prevention_upgrade_type: 'Spear Rack',
+    loss_item_type_id: 4,
+    loss_item_quantity: 1,
+    cooldown_seconds: 60,
+  },
+  {
+    event_name: 'Tsunami',
+    description: 'A sudden wall of water sweeps across the raft and tears loose unsecured planks.',
+    event_type: 'tsunami',
+    is_unexpected: 1,
+    min_raft_size: 1,
+    risk_percent: 100,
+    hunger_delta: -15,
+    prevention_upgrade_type: 'Shelter',
+    loss_item_type_id: 1,
+    loss_item_quantity: 2,
+    cooldown_seconds: 90,
+  },
+  {
+    event_name: 'Heavy Downpour',
+    description: 'Rain lashes the deck until exposed supplies and rope begin to wash overboard.',
+    event_type: 'heavy_downpour',
+    is_unexpected: 1,
+    min_raft_size: 1,
+    risk_percent: 100,
+    hunger_delta: -5,
+    prevention_upgrade_type: 'Roof',
+    loss_item_type_id: 3,
+    loss_item_quantity: 1,
+    cooldown_seconds: 45,
   },
 ];
 

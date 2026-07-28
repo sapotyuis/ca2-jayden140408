@@ -1,6 +1,6 @@
-import { eq, like, and } from 'drizzle-orm';
+import { eq, like, and, desc } from 'drizzle-orm';
 import { db } from '../db/connection.js';
-import { users, raft_upgrades, user_items } from '../db/schema.js';
+import { users, raft_upgrades, user_items, user_quests, debris_collection_logs } from '../db/schema.js';
 
 export { users };
 
@@ -68,27 +68,20 @@ export const findUserUpgradeTypes = async (userId) => {
   return rows.map((r) => r.upgrade_type);
 };
 
-/**
- * Atomically adds materials to a user and inserts debris items into user_items.
- * Both succeed or both roll back.
- * tx -> transaction version of db. Any database changes with tx are grouped together. If everything succeeds, they are saved. If one fails, all changes with tx are cancelled
- */
-export const collectDebrisAtomic = async (userId, newMaterials, debrisItems) => {
-  return await db.transaction(async (tx) => {
-    const [updatedUser] = await tx
-      .update(users)
-      .set({ materials: newMaterials })
-      .where(eq(users.user_id, String(userId)))
-      .returning(publicUserFields);
+/** Insert an immutable server-side record of a debris collection attempt. */
+export const insertDebrisCollectionLog = async (data) => {
+  const rows = await db.insert(debris_collection_logs).values(data).returning();
+  return rows[0];
+};
 
-    const now = new Date().toISOString();
-    const insertedItems = [];
-    for (const item of debrisItems) {
-      await tx.insert(user_items).values({ user_id: String(userId), item_type_id: item.item_type_id, quantity: item.quantity, acquired_at: now });
-      insertedItems.push({ item_name: item.item_name, quantity: item.quantity });
-    }
-    return { updatedUser, insertedItems };
-  });
+/** Get the most recent debris collection attempts for one survivor. */
+export const findDebrisCollectionLogs = async (userId, limit = 50) => {
+  return await db
+    .select()
+    .from(debris_collection_logs)
+    .where(eq(debris_collection_logs.user_id, String(userId)))
+    .orderBy(desc(debris_collection_logs.attempted_at))
+    .limit(limit);
 };
 
 /**
@@ -105,5 +98,38 @@ export const upgradeRaftAtomic = async (userId, newMaterials, newRaftSize, upgra
 
     const [upgrade] = await tx.insert(raft_upgrades).values(upgradeData).returning();
     return { updatedUser, upgrade };
+  });
+};
+
+/**
+ * Atomically pays out a completed quest: marks the user_quest row claimed, credits the
+ * material reward to the survivor, and — if the quest carries one — grants the reward item.
+ * All three writes succeed or roll back together, same pattern as collectDebrisAtomic.
+ */
+export const claimQuestRewardAtomic = async ({ userQuestId, userId, newMaterials, rewardItemTypeId, rewardItemQuantity }) => {
+  return await db.transaction(async (tx) => {
+    const now = new Date().toISOString();
+
+    await tx
+      .update(user_quests)
+      .set({ status: 'claimed', claimed_at: now })
+      .where(eq(user_quests.user_quest_id, userQuestId));
+
+    const [updatedUser] = await tx
+      .update(users)
+      .set({ materials: newMaterials })
+      .where(eq(users.user_id, String(userId)))
+      .returning(publicUserFields);
+
+    let grantedItem = null;
+    if (rewardItemTypeId && rewardItemQuantity > 0) {
+      const [row] = await tx
+        .insert(user_items)
+        .values({ user_id: String(userId), item_type_id: rewardItemTypeId, quantity: rewardItemQuantity, acquired_at: now })
+        .returning();
+      grantedItem = row;
+    }
+
+    return { updatedUser, grantedItem };
   });
 };

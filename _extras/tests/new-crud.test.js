@@ -123,10 +123,12 @@ describe('User quest CRUD', () => {
     const list = await request(app).get('/api/user-quests?user_id=rafter_SurvivorJay');
     expect(list.status).toBe(200);
 
+    // quest_id 1 is skipped here — the seed data already gives survivorId a progress row for
+    // it, and user_quests now enforces one row per (user_id, quest_id) pair.
     const created = await request(app)
       .post('/api/user-quests')
       .set(authHeader())
-      .send({ user_id: survivorId, quest_id: 1, progress: 0, status: 'active' });
+      .send({ user_id: survivorId, quest_id: 2, progress: 0, status: 'active' });
     expect(created.status).toBe(201);
 
     const userQuestId = created.body.user_quest_id;

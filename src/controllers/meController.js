@@ -5,11 +5,16 @@
  * always `req.user`, loaded by loadCurrentUser from the verified JWT. That is what makes it
  * impossible for one player to collect debris on, upgrade, or delete another player's raft.
  */
-import { findUserByUsername, updateUser, removeUser, upgradeRaftAtomic, findUserUpgradeTypes, collectDebrisAtomic } from '../models/userModel.js';
+import { findUserByUsername, updateUser, removeUser, upgradeRaftAtomic, findUserUpgradeTypes, insertDebrisCollectionLog, findDebrisCollectionLogs, claimQuestRewardAtomic } from '../models/userModel.js';
+import { ensureActiveDebris, collectDebrisByIdAtomic } from '../models/debrisModel.js';
 import { findAllUserItems, craftItemAtomic } from '../models/userItemModel.js';
-import { findAllItemTypes, findItemTypeById } from '../models/itemTypeModel.js';
+import { findItemTypeById } from '../models/itemTypeModel.js';
 import { findAllCraftingRecipes } from '../models/craftingRecipeModel.js';
 import { findAllRaftUpgrades } from '../models/raftUpgradeModel.js';
+import { findUnexpectedEvents, findUnexpectedEventById, resolveUnexpectedEventAtomic } from '../models/unexpectedEventModel.js';
+import { findQuestBoardForUser, findQuestById } from '../models/questModel.js';
+import { findUserQuestByUserAndQuest } from '../models/userQuestModel.js';
+import { advanceQuestProgress } from '../utils/questProgress.js';
 import { UPGRADE_SPECS, VALID_UPGRADE_TYPES } from '../config/gameRules.js';
 import { AppError } from '../utils/_errors.js';
 
@@ -116,63 +121,161 @@ export const getMyStatus = async (req, res, next) => {
   }
 };
 
-/**
- * POST /api/me/collect-debris — sweep the ocean for materials.
- *
- * Yield scales with raft_size, so upgrades compound: a bigger raft sweeps a wider net.
- * Sail unlocks a chance at rare equipment; Net Launcher adds flat bonus materials.
- */
-export const collectDebris = async (req, res, next) => {
+/** GET /api/me/collection-logs — return recent debris attempts with elapsed time between them. */
+export const getMyCollectionLogs = async (req, res, next) => {
   try {
-    const user = req.user;
+    const rows = await findDebrisCollectionLogs(req.user.user_id, 50);
+    const chronological = [...rows].reverse();
+    const logs = chronological.map((row, index) => {
+      const previous = chronological[index - 1];
+      const previousTime = previous ? Date.parse(previous.attempted_at) : NaN;
+      const currentTime = Date.parse(row.attempted_at);
+      const intervalSeconds = Number.isFinite(previousTime) && Number.isFinite(currentTime)
+        ? Math.max(0, (currentTime - previousTime) / 1000)
+        : null;
 
-    const userUpgrades = await findUserUpgradeTypes(user.user_id);
-    const hasSail = userUpgrades.includes('Sail');
-    const hasNetLauncher = userUpgrades.includes('Net Launcher');
+      let foundItems = [];
+      try {
+        foundItems = JSON.parse(row.found_items || '[]');
+      } catch (error) {
+        foundItems = [];
+      }
 
-    const materialItems = await findAllItemTypes({ category: 'material' });
-    const equipmentItems = await findAllItemTypes({ category: 'equipment' });
+      return { ...row, found_items: foundItems, seconds_since_previous: intervalSeconds };
+    });
 
-    // Pick 2–3 random material types; each yields a quantity capped by raft_size.
-    const shuffled = [...materialItems].sort(() => Math.random() - 0.5).slice(0, Math.min(3, materialItems.length));
-    const debrisItems = shuffled.map((item) => ({
-      item_type_id: item.item_type_id,
-      item_name: item.item_name,
-      quantity: Math.floor(Math.random() * user.raft_size) + 1,
-    }));
+    res.status(200).json(logs.reverse());
+  } catch (error) {
+    next(error);
+  }
+};
 
-    let totalMaterials = debrisItems.reduce((sum, i) => sum + i.quantity, 0);
-    const bonusReasons = [];
+/** GET /api/me/debris — return the current survivor's server-owned floating debris. */
+export const getMyDebris = async (req, res, next) => {
+  try {
+    const activeDebris = await ensureActiveDebris(req.user.user_id);
+    res.status(200).json(activeDebris);
+  } catch (error) {
+    next(error);
+  }
+};
 
-    if (hasNetLauncher) {
-      totalMaterials += user.raft_size * 2;
-      bonusReasons.push('Net Launcher auto-collected bonus materials');
+/** GET /api/me/unexpected-events — return the server-authored event catalogue for the HUD. */
+export const getMyUnexpectedEvents = async (req, res, next) => {
+  try {
+    const events = await findUnexpectedEvents();
+    res.status(200).json(events);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** POST /api/me/unexpected-events/resolve — resolve one server-authored event by event_id. */
+export const resolveMyUnexpectedEvent = async (req, res, next) => {
+  try {
+    const eventId = Number(req.body.event_id);
+    if (!Number.isInteger(eventId) || eventId <= 0) {
+      throw new AppError('VALIDATION_ERROR', 'event_id must be a positive integer');
     }
 
-    // Sail: 30% chance to spot a rare equipment item floating past.
-    if (hasSail && equipmentItems.length > 0 && Math.random() < 0.3) {
-      const rare = equipmentItems[Math.floor(Math.random() * equipmentItems.length)];
-      debrisItems.push({ item_type_id: rare.item_type_id, item_name: rare.item_name, quantity: 1 });
-      bonusReasons.push('Sail spotted rare debris');
+    const event = await findUnexpectedEventById(eventId);
+    if (!event) throw new AppError('NOT_FOUND', 'Unexpected event not found or inactive');
+
+    const result = await resolveUnexpectedEventAtomic({ userId: req.user.user_id, event });
+    if (!result) throw new AppError('NOT_FOUND', 'Survivor not found');
+
+    if (result.cooldownSecondsRemaining > 0) {
+      return res.status(429).json({
+        error: {
+          code: 'EVENT_COOLDOWN',
+          message: `This event is cooling down. Try again in ${result.cooldownSecondsRemaining} seconds.`,
+          seconds_remaining: result.cooldownSecondsRemaining,
+        },
+      });
     }
 
-    const { updatedUser, insertedItems } = await collectDebrisAtomic(
-      user.user_id,
-      user.materials + totalMaterials,
-      debrisItems
-    );
-
+    const completedQuests = await advanceQuestProgress(result.updatedUser, 'survive_event', 1);
     const response = {
-      message: 'You swept the ocean and found useful debris.',
-      found: insertedItems,
-      collected: totalMaterials,
-      new_materials: updatedUser.materials,
-      raft_size: updatedUser.raft_size,
+      message: result.outcome.message,
+      event: {
+        event_id: event.event_id,
+        event_name: event.event_name,
+        event_type: event.event_type,
+        description: event.description,
+      },
+      outcome: result.outcome.outcome,
+      prevented: result.outcome.prevented,
+      protection_upgrade_type: result.outcome.protectionUpgradeType,
+      lost_item: result.outcome.lostItemQuantity > 0
+        ? {
+          item_type_id: result.outcome.lostItemTypeId,
+          item_name: result.lostItemName,
+          quantity: result.outcome.lostItemQuantity,
+        }
+        : null,
+      hunger_change: result.outcome.hungerChange,
+      user: result.updatedUser,
+      event_history: result.eventHistory,
     };
-    if (bonusReasons.length > 0) response.bonus_reason = bonusReasons.join('; ');
+    if (completedQuests.length > 0) response.completed_quests = completedQuests;
 
     res.status(200).json(response);
   } catch (error) {
+    next(error);
+  }
+};
+
+const recordRejectedCollection = async (userId, debrisId, reason, attemptedAt) => {
+  try {
+    await insertDebrisCollectionLog({
+      user_id: userId,
+      debris_id: debrisId || null,
+      result: 'rejected',
+      reason,
+      collected_materials: 0,
+      found_items: '[]',
+      attempted_at: attemptedAt,
+    });
+  } catch (logError) {
+    console.log('collection audit log write failed', logError);
+  }
+};
+
+/** POST /api/me/debris/:debris_id/collect — claim one server-owned debris row. */
+export const collectDebris = async (req, res, next) => {
+  const attemptedAt = new Date().toISOString();
+  const userId = req.user?.user_id;
+  const debrisId = req.params.debris_id || req.body?.debris_id;
+  let collectionCommitted = false;
+
+  if (!debrisId) {
+    await recordRejectedCollection(userId, null, 'debris_id is required', attemptedAt);
+    return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'debris_id is required' } });
+  }
+
+  try {
+    const result = await collectDebrisByIdAtomic(userId, String(debrisId), attemptedAt);
+    if (!result) {
+      await recordRejectedCollection(userId, String(debrisId), 'Debris was already collected or does not belong to this survivor', attemptedAt);
+      return res.status(409).json({ error: { code: 'CONFLICT', message: 'Debris was already collected or is unavailable' } });
+    }
+    collectionCommitted = true;
+
+    const completedQuests = await advanceQuestProgress(result.updatedUser, 'collect_debris', 1);
+    const response = {
+      message: 'You collected server-confirmed debris.',
+      found: result.found,
+      collected: result.collected,
+      new_materials: result.updatedUser.materials,
+      raft_size: result.raft_size,
+    };
+    if (completedQuests.length > 0) response.completed_quests = completedQuests;
+
+    res.status(200).json(response);
+  } catch (error) {
+    if (!collectionCommitted && userId) {
+      await recordRejectedCollection(userId, String(debrisId), error.message || 'Collection failed', attemptedAt);
+    }
     next(error);
   }
 };
@@ -255,7 +358,12 @@ export const craftItem = async (req, res, next) => {
 
     const crafted = await craftItemAtomic(user.user_id, deductions, resultItemTypeId);
 
-    res.status(200).json({
+    // Core Mechanic 2 hook: crafting a food item is what 'craft_food' quests are tracking —
+    // other categories (equipment, materials) don't touch the quest board.
+    const completedQuests =
+      resultItem.category === 'food' ? await advanceQuestProgress(user, 'craft_food', 1) : [];
+
+    const response = {
       message: `Successfully crafted ${resultItem.item_name}!`,
       crafted: {
         item_name: resultItem.item_name,
@@ -263,6 +371,74 @@ export const craftItem = async (req, res, next) => {
         user_item_id: crafted.user_item_id,
         quantity: crafted.quantity,
       },
+    };
+    if (completedQuests.length > 0) response.completed_quests = completedQuests;
+
+    res.status(200).json(response);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/me/quests — the survivor's quest board: every active quest, with this survivor's
+ * progress merged in (null fields for a quest they haven't triggered yet via gameplay).
+ */
+export const getMyQuests = async (req, res, next) => {
+  try {
+    const board = await findQuestBoardForUser(req.user.user_id);
+    res.status(200).json(board);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/me/quests/:quest_id/claim — pay out a completed quest's reward.
+ *
+ * Progress itself is never edited here — that only ever happens as a side effect of
+ * collectDebris/craftItem via advanceQuestProgress. This route just turns an already-earned
+ * 'completed' status into materials/items in hand and locks the row as 'claimed'.
+ */
+export const claimMyQuestReward = async (req, res, next) => {
+  try {
+    const questId = Number(req.params.quest_id);
+    if (!Number.isInteger(questId) || questId <= 0) {
+      throw new AppError('VALIDATION_ERROR', 'quest_id must be a positive integer');
+    }
+
+    const quest = await findQuestById(questId);
+    if (!quest) throw new AppError('NOT_FOUND', 'Quest not found');
+
+    const userQuest = await findUserQuestByUserAndQuest(req.user.user_id, questId);
+    if (!userQuest) throw new AppError('NOT_FOUND', "You haven't started this quest yet");
+    // A second claim attempt on the same quest is a conflicting state, not bad input —
+    // matches the 409 CONFLICT shape already used for username conflicts in this file.
+    if (userQuest.status === 'claimed') {
+      return res.status(409).json({
+        error: { code: 'CONFLICT', message: 'This quest reward has already been claimed' },
+      });
+    }
+    if (userQuest.status !== 'completed') {
+      throw new AppError(
+        'VALIDATION_ERROR',
+        `Quest not complete yet (${userQuest.progress}/${quest.target_value})`
+      );
+    }
+
+    const { updatedUser, grantedItem } = await claimQuestRewardAtomic({
+      userQuestId: userQuest.user_quest_id,
+      userId: req.user.user_id,
+      newMaterials: req.user.materials + quest.reward_materials,
+      rewardItemTypeId: quest.reward_item_type_id,
+      rewardItemQuantity: quest.reward_item_quantity,
+    });
+
+    res.status(200).json({
+      message: `Claimed reward for "${quest.title}"!`,
+      materials_gained: quest.reward_materials,
+      item_gained: grantedItem,
+      user: updatedUser,
     });
   } catch (error) {
     next(error);

@@ -1,4 +1,7 @@
 import 'dotenv/config';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import cors from 'cors';
 import { authRouter } from './src/routes/authRoutes.js';
@@ -17,10 +20,20 @@ import { errorHandler } from './src/utils/_errors.js';
 
 const app = express();
 
+// The React frontend is a separate Vite project in ./frontend. In development it runs on its
+// own dev server and proxies /api here (see frontend/vite.config.js). If someone has built it
+// (`cd frontend && npm run build`), we also serve that production bundle from this origin so the
+// whole game is reachable from one server — handy for a quick demo without two terminals.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distPath = path.join(__dirname, 'frontend', 'dist');
+const hasBuiltFrontend = fs.existsSync(path.join(distPath, 'index.html'));
+
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('src/frontend'));
+if (hasBuiltFrontend) {
+  app.use(express.static(distPath));
+}
 
 // Routes
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
@@ -44,6 +57,16 @@ app.use('/api/user-events', userEventRouter);
 
 // Swagger API docs
 await setupSwagger(app);
+
+// SPA fallback: when a production build is being served, any non-API GET returns the React
+// app's index.html so client-side routes (/camp, /voyage) resolve on a hard refresh instead of
+// 404ing. API and docs paths are left alone so they keep their real responses.
+if (hasBuiltFrontend) {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/api-docs')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 // Global error handler (must be last)
 app.use(errorHandler);

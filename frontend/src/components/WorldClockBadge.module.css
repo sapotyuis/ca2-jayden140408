@@ -1,0 +1,100 @@
+.clock {
+  display: grid;
+  grid-template-columns: 2rem auto;
+  grid-template-rows: auto 0.25rem;
+  gap: 0.1rem 0.55rem;
+  min-width: 9rem;
+  padding: 0.45rem 0.65rem;
+  color: var(--text);
+  background: rgba(5, 13, 22, 0.72);
+  border: 2px solid var(--wood-light);
+  border-radius: var(--r-sm);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(12px);
+}
+
+.compact {
+  min-width: 7.8rem;
+  padding: 0.32rem 0.5rem;
+  grid-template-columns: 1.55rem auto;
+  gap: 0 0.4rem;
+}
+
+.icon {
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  color: var(--accent-bright);
+  font-size: 1.1rem;
+  line-height: 1;
+  text-shadow: 0 0 12px currentColor;
+}
+
+.compact .icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 0.82rem;
+}
+
+.copy {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.label {
+  color: var(--text-dim);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.copy strong {
+  color: var(--accent-bright);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  grid-column: 2;
+  height: 0.2rem;
+  overflow: hidden;
+  background: rgba(240, 228, 196, 0.12);
+  border-radius: 999px;
+}
+
+.fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  border-radius: inherit;
+  transition: width 1s linear, background 0.8s ease;
+}
+
+.day .icon,
+.dawn .icon {
+  color: #ffe19b;
+}
+
+.dusk .icon {
+  color: #d9956c;
+}
+
+.dusk .fill {
+  background: #c97b50;
+}
+
+@media (max-width: 640px) {
+  .clock {
+    min-width: 8rem;
+  }
+}

@@ -1,0 +1,138 @@
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--sans);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    transform 0.1s var(--ease-out),
+    box-shadow 0.1s var(--ease-out),
+    filter 0.18s ease,
+    opacity 0.18s ease;
+}
+
+/* the pressable lip — the button sits above a darker edge, and pushes down on click */
+.btn:active {
+  transform: translateY(3px);
+}
+.btn:focus-visible {
+  outline: 3px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  filter: saturate(0.55);
+}
+
+/* sizes */
+.md {
+  padding: 0.7rem 1.15rem;
+  font-size: 0.76rem;
+}
+.sm {
+  padding: 0.48rem 0.8rem;
+  font-size: 0.66rem;
+}
+.lg {
+  padding: 0.95rem 1.55rem;
+  font-size: 0.85rem;
+}
+.block {
+  width: 100%;
+}
+
+/* lantern (primary) — warm brass, chunky */
+.lantern {
+  color: #3a1f05;
+  background: linear-gradient(180deg, var(--accent-bright), var(--accent));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.45),
+    0 4px 0 var(--accent-deep),
+    0 8px 16px rgba(201, 118, 31, 0.4);
+}
+.lantern:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+.lantern:active {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    0 1px 0 var(--accent-deep),
+    0 3px 8px rgba(201, 118, 31, 0.4);
+}
+
+/* ghost (secondary) — carved wood tab */
+.ghost {
+  color: var(--text);
+  background: linear-gradient(180deg, var(--wood-light), var(--wood));
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.14),
+    0 4px 0 var(--wood-darker),
+    0 8px 14px rgba(0, 0, 0, 0.28);
+}
+.ghost {
+  color: #f4e6c8;
+}
+.ghost:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.ghost:active {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.1),
+    0 1px 0 var(--wood-darker);
+}
+
+/* danger */
+.danger {
+  color: #ffe6e0;
+  background: linear-gradient(180deg, #d9584a, #a5382c);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    0 4px 0 #6f2419,
+    0 8px 14px rgba(143, 50, 38, 0.4);
+}
+.danger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.danger:active {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    0 1px 0 #6f2419;
+}
+
+/* loading */
+.loading {
+  cursor: progress;
+}
+.hiddenLabel {
+  visibility: hidden;
+}
+.spinner {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(58, 31, 5, 0.3);
+  border-top-color: #3a1f05;
+  animation: btn-spin 0.7s linear infinite;
+}
+.ghost .spinner,
+.danger .spinner {
+  border-color: rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

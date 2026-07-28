@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Castaway Chronicles — Ocean Voyage</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
+  <!-- auth.css supplies the shared palette (:root custom properties) + reset; only its
+       tokens are used here, not its .sea backdrop — the 3D scene is the ocean now. -->
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/ocean.css">
+
+  <!-- Three.js, loaded as an ES module straight from a CDN — the same "CDN script, no
+       build step" approach this project already uses for Google Fonts. No npm install,
+       no bundler: src/frontend is served as plain static files (index.js: express.static). -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+
+<body>
+
+  <div id="loading-screen">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <p>Casting off…</p>
+  </div>
+
+  <canvas id="ocean-canvas"></canvas>
+  <div class="hud__vignette" aria-hidden="true"></div>
+  <div class="hud__reticle" id="reticle" aria-hidden="true"></div>
+
+  <div class="hud">
+    <div class="hud__row">
+      <div class="hud__panel">
+        <a class="hud__back" href="game.html">← Raft Camp</a>
+        <span class="hud__stats">
+          <span class="hud__stat">🪵<b id="hud-materials">0</b></span>
+          <span class="hud__stat">🍖<b id="hud-hunger">0</b></span>
+          <span class="hud__stat">⛵<b id="hud-raft-size">1</b></span>
+        </span>
+      </div>
+      <button class="hud__pov-btn" id="pov-toggle" type="button">👁 Third Person</button>
+    </div>
+
+    <p class="hud__instructions" id="hud-instructions">
+      <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or arrow keys to sail · drag the water to look around ·
+      <kbd>V</kbd> to switch point of view<br>
+      Steer your raft into the glowing debris to collect it.
+    </p>
+
+    <div class="hud__log" id="hud-log"></div>
+  </div>
+
+  <script type="module" src="js/ocean.js"></script>
+
+</body>
+
+</html>

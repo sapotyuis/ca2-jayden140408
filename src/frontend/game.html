@@ -4,71 +4,158 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Castaway Chronicles — Your Raft</title>
-  <style>
+  <title>Castaway Chronicles — Raft Camp</title>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap"
+    rel="stylesheet">
 
-    body {
-      font-family: 'Inter', system-ui, Segoe UI, Roboto, sans-serif;
-      color: #e7d9b5;
-      background-color: #142b3a;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    .panel {
-      max-width: 460px;
-      text-align: center;
-    }
-
-    h1 {
-      font-family: 'Cormorant Garamond', Georgia, serif;
-      font-size: 2.4rem;
-      margin-bottom: 0.5rem;
-    }
-
-    p { color: rgba(231, 217, 181, 0.8); line-height: 1.5; }
-
-    .greeting { margin: 1.25rem 0 0.5rem; font-size: 1.05rem; }
-    .greeting strong { color: #e7d9b5; }
-
-    .note {
-      margin-top: 1.5rem;
-      font-size: 0.85rem;
-      color: rgba(231, 217, 181, 0.55);
-    }
-
-    button {
-      margin-top: 1.75rem;
-      padding: 0.7rem 1.4rem;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #142b3a;
-      background-color: #e7d9b5;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-
-    button:hover { background-color: #d5c29a; }
-  </style>
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/game.css">
 </head>
 
 <body>
 
-  <main class="panel">
-    <h1>You made it back aboard.</h1>
-    <p class="greeting">Welcome, <strong id="survivor-name">survivor</strong>.</p>
-    <p>Your raft is waiting. The full game — collecting debris, crafting, and
-       surviving ocean events — is built here in a later step.</p>
-    <button id="logout" type="button">Sign out</button>
-  </main>
+  <!-- Same night-sea backdrop as the auth pages, minus the raft (the raft is the
+       whole point of the page now — it doesn't need to float in the background too). -->
+  <div class="sea" aria-hidden="true">
+    <div class="sea__sky"></div>
+    <div class="sea__stars"></div>
+    <div class="sea__moon"></div>
+    <div class="sea__water"></div>
+    <div class="sea__glare"></div>
+    <div class="wave wave--1">
+      <svg viewBox="0 0 2880 90" preserveAspectRatio="none" focusable="false">
+        <path d="M0 46 Q180 30 360 46 T720 46 T1080 46 T1440 46 T1800 46 T2160 46 T2520 46 T2880 46 V90 H0 Z" />
+      </svg>
+    </div>
+    <div class="wave wave--2">
+      <svg viewBox="0 0 2880 90" preserveAspectRatio="none" focusable="false">
+        <path d="M0 42 Q180 64 360 42 T720 42 T1080 42 T1440 42 T1800 42 T2160 42 T2520 42 T2880 42 V90 H0 Z" />
+      </svg>
+    </div>
+    <div class="wave wave--3">
+      <svg viewBox="0 0 2880 90" preserveAspectRatio="none" focusable="false">
+        <path d="M0 40 Q180 18 360 40 T720 40 T1080 40 T1440 40 T1800 40 T2160 40 T2520 40 T2880 40 V90 H0 Z" />
+      </svg>
+    </div>
+    <div class="sea__vignette"></div>
+  </div>
+
+  <div class="dash">
+
+    <header class="dash__header">
+      <div>
+        <div class="dash__brand">
+          <span class="dash__brand-mark">Castaway Chronicles</span>
+          <span class="dash__brand-sub">Raft Camp</span>
+        </div>
+        <p class="dash__survivor">Welcome back, <strong id="survivor-name">survivor</strong>.</p>
+      </div>
+
+      <div class="dash__stats" id="stat-pills">
+        <span class="stat-pill"><span class="stat-pill__icon">🪵</span><span class="stat-pill__value" id="stat-materials">—</span><span class="stat-pill__label">Materials</span></span>
+        <span class="stat-pill"><span class="stat-pill__icon">🍖</span><span class="stat-pill__value" id="stat-hunger">—</span><span class="stat-pill__label">Hunger</span></span>
+        <span class="stat-pill"><span class="stat-pill__icon">⛵</span><span class="stat-pill__value" id="stat-raft-size">—</span><span class="stat-pill__label">Raft size</span></span>
+      </div>
+
+      <div class="dash__actions">
+        <a class="btn btn--lantern" id="set-sail-btn" href="ocean.html">⛵ Set Sail</a>
+        <button class="btn btn--ghost" id="logout-btn" type="button">Sign out</button>
+      </div>
+    </header>
+
+    <main class="dash__grid">
+
+      <!-- STATUS -->
+      <section class="card" aria-labelledby="status-title">
+        <div class="card__head">
+          <h2 class="card__title" id="status-title">Raft Status</h2>
+        </div>
+        <div class="status-row">
+          <div class="meter">
+            <div class="meter__label"><span>Hunger</span><span id="hunger-text">—</span></div>
+            <div class="meter__track"><div class="meter__fill meter__fill--hunger" id="hunger-fill" style="width:0%"></div></div>
+          </div>
+          <div class="meter">
+            <div class="meter__label"><span>Materials on hand</span><span id="materials-text">—</span></div>
+            <div class="meter__track"><div class="meter__fill" id="materials-fill" style="width:0%"></div></div>
+          </div>
+          <div class="status-next" id="status-next">Loading raft status…</div>
+        </div>
+      </section>
+
+      <!-- INVENTORY -->
+      <section class="card card--wide" aria-labelledby="inventory-title">
+        <div class="card__head">
+          <h2 class="card__title" id="inventory-title">Inventory</h2>
+          <span class="card__hint">Collected from the ocean or crafted at camp</span>
+        </div>
+        <div class="inv-grid" id="inventory-grid">
+          <p class="card__empty">Loading inventory…</p>
+        </div>
+      </section>
+
+      <!-- CRAFTING -->
+      <section class="card card--wide" aria-labelledby="craft-title">
+        <div class="card__head">
+          <h2 class="card__title" id="craft-title">Crafting Bench</h2>
+          <span class="card__hint">Consumes ingredients from your inventory</span>
+        </div>
+        <div class="recipe-list" id="recipe-list">
+          <p class="card__empty">Loading recipes…</p>
+        </div>
+      </section>
+
+      <!-- RAFT UPGRADES -->
+      <section class="card" aria-labelledby="upgrades-title">
+        <div class="card__head">
+          <h2 class="card__title" id="upgrades-title">Raft Upgrades</h2>
+        </div>
+        <div class="upgrade-list" id="upgrade-list">
+          <p class="card__empty">Loading upgrades…</p>
+        </div>
+      </section>
+
+      <!-- QUESTS -->
+      <section class="card card--wide" aria-labelledby="quests-title">
+        <div class="card__head">
+          <h2 class="card__title" id="quests-title">Quest Board</h2>
+          <span class="card__hint">Progress advances automatically as you play</span>
+        </div>
+        <div class="quest-list" id="quest-list">
+          <p class="card__empty">Loading quests…</p>
+        </div>
+      </section>
+
+      <!-- PROFILE -->
+      <section class="card" aria-labelledby="profile-title">
+        <div class="card__head">
+          <h2 class="card__title" id="profile-title">Survivor Log</h2>
+        </div>
+
+        <form id="rename-form">
+          <div class="profile-row">
+            <div class="field">
+              <label for="rename-input">Survivor name</label>
+              <input class="game-input" type="text" id="rename-input" placeholder="New name" required>
+            </div>
+            <button class="btn btn--ghost" type="submit">Rename</button>
+          </div>
+        </form>
+
+        <div class="danger-zone">
+          <p>Abandoning your raft permanently deletes your survivor and everything aboard.</p>
+          <button class="btn btn--danger btn--block" id="delete-account-btn" type="button">Abandon Raft</button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div id="toast-root" aria-live="polite"></div>
 
   <script type="module" src="js/game.js"></script>
 

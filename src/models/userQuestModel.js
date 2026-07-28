@@ -22,6 +22,15 @@ export const findUserQuestById = async (id) => {
   return rows[0];
 };
 
+/** Get one survivor's progress record for a specific quest. Returns undefined if never started. */
+export const findUserQuestByUserAndQuest = async (userId, questId) => {
+  const rows = await db
+    .select()
+    .from(user_quests)
+    .where(and(eq(user_quests.user_id, String(userId)), eq(user_quests.quest_id, Number(questId))));
+  return rows[0];
+};
+
 /** Insert a survivor quest record and return it. */
 export const insertUserQuest = async (data) => {
   const rows = await db.insert(user_quests).values(data).returning();

@@ -50,3 +50,37 @@ export const getToken = () => localStorage.getItem('token');
 export const getErrorMessage = (data) => {
   return data?.error?.message || data?.message || data?.error || 'Something went wrong. Please try again.';
 };
+
+/** Clears the session and sends the survivor back to sign in. */
+export const clearSession = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+};
+
+/**
+ * Fetch wrapper for every authenticated /api/me and catalogue call the game views make.
+ * Attaches the bearer token, JSON-encodes a body when given, and normalizes the result to
+ * { ok, status, data } so callers never touch Response objects directly. A 401 means the
+ * session is dead (expired/forged token, or the account no longer exists) — redirecting here
+ * once means no game view has to duplicate that check.
+ */
+export const authedFetch = async (path, { method = 'GET', body } = {}) => {
+  const token = getToken();
+  const headers = { Authorization: `Bearer ${token}` };
+  if (body !== undefined) headers['Content-Type'] = 'application/json';
+
+  const response = await fetch(path, {
+    method,
+    headers,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+
+  if (response.status === 401) {
+    clearSession();
+    window.location.href = 'index.html';
+    return { ok: false, status: 401, data: null };
+  }
+
+  const data = response.status === 204 ? null : await response.json();
+  return { ok: response.ok, status: response.status, data };
+};

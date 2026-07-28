@@ -11,9 +11,15 @@ import {
   getMyInventory,
   getMyUpgrades,
   getMyStatus,
+  getMyCollectionLogs,
+  getMyDebris,
+  getMyUnexpectedEvents,
+  resolveMyUnexpectedEvent,
   collectDebris,
   performRaftUpgrade,
   craftItem,
+  getMyQuests,
+  claimMyQuestReward,
 } from '../controllers/meController.js';
 
 export const meRouter = Router();
@@ -47,9 +53,22 @@ meRouter.delete('/', deleteMyAccount);
 meRouter.get('/status', getMyStatus);
 meRouter.get('/inventory', getMyInventory);
 meRouter.get('/upgrades', getMyUpgrades);
+meRouter.get('/quests', getMyQuests);
+meRouter.get('/collection-logs', getMyCollectionLogs);
+meRouter.get('/debris', getMyDebris);
+meRouter.get('/unexpected-events', getMyUnexpectedEvents);
 
 // Game actions
+meRouter.post('/debris/:debris_id/collect', collectDebris);
+// Compatibility path: it now requires a server-issued debris_id in the body and cannot grant random loot.
 meRouter.post('/collect-debris', collectDebris);
+
+meRouter.post(
+  '/unexpected-events/resolve',
+  [body('event_id').isInt({ min: 1 }).withMessage('event_id must be a positive integer')],
+  handleValidationErrors,
+  resolveMyUnexpectedEvent
+);
 
 meRouter.post(
   '/craft',
@@ -70,3 +89,5 @@ meRouter.post(
   handleValidationErrors,
   performRaftUpgrade
 );
+
+meRouter.post('/quests/:quest_id/claim', claimMyQuestReward);
