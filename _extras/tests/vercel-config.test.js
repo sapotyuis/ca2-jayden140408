@@ -9,7 +9,12 @@ describe('Vercel deployment configuration', () => {
     expect(config.$schema).toBe('https://openapi.vercel.sh/vercel.json');
     expect(config.buildCommand).toBe('npm --prefix frontend run build');
     expect(config.installCommand).toBe('npm install && npm --prefix frontend install');
-    expect(config.outputDirectory).toBe('public');
+    expect(config.outputDirectory).toBeNull();
+    expect(config.functions).toEqual({
+      'index.js': {
+        includeFiles: 'public/**',
+      },
+    });
     expect(config.rewrites).toEqual([
       {
         source: '/((?!api(?:/|$)).*)',
