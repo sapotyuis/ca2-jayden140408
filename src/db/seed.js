@@ -326,15 +326,19 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..', '..');
 
 const dbUrl = process.env.DATABASE_URL || 'file:local.db';
-const dbPath = dbUrl.replace('file:', '');
-const absoluteDbPath = path.resolve(projectRoot, dbPath);
+const isFileDatabase = dbUrl.startsWith('file:');
 
 const resetDatabase = async () => {
   try {
     // Step 1 — Delete the old database file
-    if (fs.existsSync(absoluteDbPath)) {
-      fs.unlinkSync(absoluteDbPath);
-      console.log(`Deleted old database: ${dbPath}`);
+    if (isFileDatabase) {
+      const dbPath = dbUrl.slice('file:'.length);
+      const absoluteDbPath = path.resolve(projectRoot, dbPath);
+
+      if (fs.existsSync(absoluteDbPath)) {
+        fs.unlinkSync(absoluteDbPath);
+        console.log(`Deleted old database: ${dbPath}`);
+      }
     }
 
     // Step 2 — Recreate tables from schema.js
