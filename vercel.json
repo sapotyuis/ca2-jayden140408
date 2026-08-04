@@ -5,7 +5,7 @@
   "outputDirectory": null,
   "functions": {
     "index.js": {
-      "includeFiles": ["public/**"]
+      "includeFiles": "public/**"
     }
   },
   "rewrites": [
