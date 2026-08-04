@@ -3,6 +3,11 @@
   "buildCommand": "npm --prefix frontend run build",
   "installCommand": "npm install && npm --prefix frontend install",
   "outputDirectory": null,
+  "functions": {
+    "index.js": {
+      "includeFiles": "public/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/((?!api(?:/|$)).*)",

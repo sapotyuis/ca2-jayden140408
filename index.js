@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './src/config/environment.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -31,7 +32,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicPath = path.join(__dirname, 'public');
 const distPath = path.join(__dirname, 'frontend', 'dist');
 const staticPath = fs.existsSync(path.join(publicPath, 'index.html')) ? publicPath : distPath;
-const hasBuiltFrontend = !isVercel && fs.existsSync(path.join(staticPath, 'index.html'));
+const hasBuiltFrontend = fs.existsSync(path.join(staticPath, 'index.html'));
 
 // Middleware
 app.use(cors());
