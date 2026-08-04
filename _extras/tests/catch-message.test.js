@@ -1,0 +1,18 @@
+import { describe, expect, it } from 'vitest';
+import { describeCatch } from '../../frontend/src/ocean/catchMessage.js';
+
+describe('debris collection message', () => {
+  it('does not show zero materials for an item-only reward', () => {
+    expect(describeCatch({
+      collected: 0,
+      found: [{ item_name: 'Grilled Fish', quantity: 1 }],
+    })).toBe('Grilled Fish ×1');
+  });
+
+  it('shows the material total for a material reward', () => {
+    expect(describeCatch({
+      collected: 3,
+      found: [{ item_name: 'Wood Plank', quantity: 3 }],
+    })).toBe('+3 materials · Wood Plank ×3');
+  });
+});

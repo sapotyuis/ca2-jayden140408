@@ -22,9 +22,9 @@ export default function AuthShell({ tone = 'night', status, title, lede, childre
           <div className={styles.sceneInner}>
             <div className={styles.signalBar}>
               <span>CASTAWAY CHRONICLES</span>
-              <span>WORLD 01 / OPEN SEA</span>
+              <span>WORLD 01 / OPEN OCEAN</span>
             </div>
-            <p className={styles.eyebrow}>RAFT SURVIVAL / PERSONAL LOG</p>
+            <p className={styles.eyebrow}>RAFT SURVIVAL GAME / PLAYER ACCOUNT</p>
             <h1 className={styles.brand}>
               Castaway
               <br />
@@ -34,11 +34,11 @@ export default function AuthShell({ tone = 'night', status, title, lede, childre
             <div className={styles.sceneRule} />
             <div className={styles.sceneStats}>
               <div>
-                <span>LAST KNOWN</span>
+                <span>CURRENT LOCATION</span>
                 <strong>OPEN OCEAN</strong>
               </div>
               <div>
-                <span>MISSION</span>
+                <span>OBJECTIVE</span>
                 <strong>STAY AFLOAT</strong>
               </div>
               <div>

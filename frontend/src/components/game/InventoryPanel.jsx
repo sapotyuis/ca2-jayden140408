@@ -12,9 +12,9 @@ const RARITY_COLOR = {
 /** The survivor's hold — every item type they own, tinted by rarity along its left edge. */
 export default function InventoryPanel({ items, index }) {
   return (
-    <Panel title="Inventory" subtitle="Collected from the ocean or crafted at camp" wide index={index}>
+    <Panel title="Inventory" subtitle="Items you collected or crafted" wide index={index}>
       {items.length === 0 ? (
-        <p className={styles.empty}>Nothing collected yet — set sail and sweep the ocean for debris.</p>
+        <p className={styles.empty}>Your inventory is empty. Start a voyage and sail over debris to collect items.</p>
       ) : (
         <div className={styles.invGrid}>
           {items.map(({ item, quantity }) => {

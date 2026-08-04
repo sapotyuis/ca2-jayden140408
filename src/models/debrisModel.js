@@ -4,7 +4,9 @@ import { db } from '../db/connection.js';
 import { debris, debris_collection_logs, item_types, user_items, users } from '../db/schema.js';
 import { chooseDebrisSpawnPosition, chooseStarterItemName } from '../utils/debrisSpawn.js';
 
-const TARGET_ACTIVE_DEBRIS = 5;
+// Scaled up with the spawn field in utils/debrisSpawn.js: the ocean is far larger than it was, so
+// a handful of active pieces would leave the survivor sailing through empty water for too long.
+const TARGET_ACTIVE_DEBRIS = 14;
 
 const debrisDetails = {
   debris_id: debris.debris_id,

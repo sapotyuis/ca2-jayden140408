@@ -7,7 +7,7 @@ import styles from './game.module.css';
 
 const STATUS_BADGE = {
   active: { label: 'In Progress', tone: 'active' },
-  available: { label: 'In Progress', tone: 'active' },
+  available: { label: 'Not Started', tone: 'active' },
   completed: { label: 'Ready to Claim', tone: 'ready' },
   claimed: { label: 'Claimed', tone: 'done' },
 };
@@ -36,9 +36,9 @@ export default function QuestsPanel({ quests, itemsById, onClaim, index }) {
   };
 
   return (
-    <Panel title="Quest Board" subtitle="Progress advances automatically as you play" wide index={index}>
+    <Panel title="Quest board" subtitle="Complete objectives while you play and claim rewards" wide index={index}>
       {quests.length === 0 ? (
-        <p className={styles.empty}>No quests available.</p>
+        <p className={styles.empty}>No quests are available right now.</p>
       ) : (
         <div className={styles.list}>
           {quests.map((quest) => {
@@ -56,11 +56,11 @@ export default function QuestsPanel({ quests, itemsById, onClaim, index }) {
                 <Meter tone="quest" value={progress} max={quest.target_value} compact />
                 <div className={styles.questFooter}>
                   <span className={styles.questReward}>
-                    {progress}/{quest.target_value} · Reward: <b>{rewardText(quest)}</b>
+                      Progress: {progress}/{quest.target_value} · Reward: <b>{rewardText(quest)}</b>
                   </span>
                   {quest.status === 'completed' && (
                     <Button variant="lantern" size="sm" loading={pending === quest.quest_id} onClick={() => handleClaim(quest.quest_id)}>
-                      Claim Reward
+                      CLAIM REWARD
                     </Button>
                   )}
                 </div>

@@ -45,12 +45,14 @@ export default function LoginPage() {
 
   return (
     <AuthShell
-      status="Ship's log — sign in"
-      title="Return to the Raft"
-      lede="Sign back into your log and take the helm."
+      status="Sign in to your survivor account"
+      title="Sign in to Castaway Chronicles"
+      lede="Enter your survivor name and password to continue."
       footer={
         <>
-          New to the drift? <Link to="/register">Sign the manifest.</Link>
+          New player? <Link to="/register">Create a survivor account.</Link>
+          <br />
+          <Link to="/leaderboard">View the public leaderboard.</Link>
         </>
       }
     >
@@ -61,7 +63,7 @@ export default function LoginPage() {
             className={form.input}
             id="username"
             type="text"
-            placeholder="driftwood_dan"
+            placeholder="Enter your survivor name"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoComplete="off"
@@ -75,7 +77,7 @@ export default function LoginPage() {
             className={form.input}
             id="password"
             type="password"
-            placeholder="Your secret"
+            placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="off"
@@ -90,7 +92,7 @@ export default function LoginPage() {
         )}
 
         <Button type="submit" className={`${form.submit}`} loading={busy} variant="lantern" size="lg" style={{ width: '100%' }}>
-          Take the Helm
+          SIGN IN
         </Button>
       </form>
     </AuthShell>

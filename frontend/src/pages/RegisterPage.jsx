@@ -36,7 +36,7 @@ export default function RegisterPage() {
         setError(result.message);
         return;
       }
-      setSuccess('Manifest signed! Redirecting to sign in…');
+      setSuccess('Account created. Redirecting to sign in…');
       setTimeout(() => navigate('/', { replace: true }), 1200);
     } catch {
       setError('Could not reach the server. Please try again.');
@@ -48,12 +48,12 @@ export default function RegisterPage() {
   return (
     <AuthShell
       tone="dawn"
-      status="New survivor — manifest"
-      title="Join the Raft"
-      lede="Sign the manifest and take your place aboard."
+      status="Create a new survivor account"
+      title="Create your survivor account"
+      lede="Create an account to start playing."
       footer={
         <>
-          Already aboard? <Link to="/">Return to sign in.</Link>
+          Already have an account? <Link to="/">Sign in.</Link>
         </>
       }
     >
@@ -64,7 +64,7 @@ export default function RegisterPage() {
             className={form.input}
             id="username"
             type="text"
-            placeholder="driftwood_dan"
+            placeholder="Enter your survivor name"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             autoComplete="off"
@@ -78,14 +78,14 @@ export default function RegisterPage() {
             className={form.input}
             id="password"
             type="password"
-            placeholder="Your secret"
+            placeholder="Enter a password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="off"
             minLength={6}
             required
           />
-          <p className={form.hint}>At least 6 characters.</p>
+          <p className={form.hint}>Password must be at least 6 characters.</p>
         </div>
 
         {error && (
@@ -100,7 +100,7 @@ export default function RegisterPage() {
         )}
 
         <Button type="submit" className={form.submit} loading={busy} variant="lantern" size="lg" style={{ width: '100%' }}>
-          Sign the Manifest
+          CREATE ACCOUNT
         </Button>
       </form>
     </AuthShell>

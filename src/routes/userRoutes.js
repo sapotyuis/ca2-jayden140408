@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllUsers, getUserById } from '../controllers/userController.js';
+import { getAllUsers, getLeaderboard, getUserById } from '../controllers/userController.js';
 
 export const userRouter = Router();
 
@@ -12,4 +12,5 @@ export const userRouter = Router();
  * Changing or deleting one is PATCH / DELETE /api/me, which act on the token's owner.
  */
 userRouter.get('/', getAllUsers);
+userRouter.get('/leaderboard', getLeaderboard);
 userRouter.get('/:user_id', getUserById);

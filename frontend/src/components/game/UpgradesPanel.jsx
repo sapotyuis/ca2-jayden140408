@@ -21,7 +21,7 @@ export default function UpgradesPanel({ status, onUpgrade, index }) {
   };
 
   return (
-    <Panel title="Raft Upgrades" subtitle="Each one reshapes the raft you sail" index={index}>
+    <Panel title="Raft upgrades" subtitle="Buy upgrades to expand and protect your raft" index={index}>
       <div className={styles.list}>
         {Object.entries(UPGRADE_SPECS).map(([type, spec]) => {
           const isOwned = owned.has(type);
@@ -31,10 +31,10 @@ export default function UpgradesPanel({ status, onUpgrade, index }) {
               <div>
                 <div className={styles.rowName}>{type}</div>
                 <div className={styles.rowMeta}>
-                  {spec.material_cost} materials
+                  Cost: {spec.material_cost} materials
                   {spec.protects_against
-                    ? ` · protects against ${spec.protects_against.replaceAll('_', ' ')}`
-                    : ` · +${spec.raft_size_gain} raft size`}
+                    ? ` · Protects against: ${spec.protects_against.replaceAll('_', ' ')}`
+                    : ` · Adds ${spec.raft_size_gain} raft tile${spec.raft_size_gain === 1 ? '' : 's'}`}
                 </div>
               </div>
               {isOwned ? (
@@ -47,7 +47,7 @@ export default function UpgradesPanel({ status, onUpgrade, index }) {
                   loading={pending === type}
                   onClick={() => handleUpgrade(type)}
                 >
-                  Buy
+                  BUY UPGRADE
                 </Button>
               )}
             </div>

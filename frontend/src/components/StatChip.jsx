@@ -1,4 +1,5 @@
 import { useCountUp } from '../hooks/useCountUp';
+import PixelIcon from './PixelIcon';
 import styles from './StatChip.module.css';
 
 /**
@@ -11,7 +12,7 @@ export default function StatChip({ icon, value, label, tone = 'default' }) {
   return (
     <div className={`${styles.chip} ${styles[tone]}`}>
       <span className={styles.icon} aria-hidden="true">
-        {icon}
+        <PixelIcon name={icon} />
       </span>
       <span className={styles.body}>
         <span className={styles.value} key={value} data-pulse>

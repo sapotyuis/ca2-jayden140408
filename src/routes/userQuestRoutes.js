@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
-import { loadCurrentUser } from '../middlewares/currentUserMiddleware.js';
 import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
+import { loadCurrentUser } from '../controllers/meController.js';
 import { getAllUserQuests, getUserQuestById, createUserQuest, patchUserQuest, deleteUserQuest } from '../controllers/userQuestController.js';
 
 export const userQuestRouter = Router();

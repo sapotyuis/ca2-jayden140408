@@ -8,12 +8,12 @@
 
 /** Material cost and raft_size gained for each raft upgrade. */
 export const UPGRADE_SPECS = {
-  'Floor Extension': { material_cost: 10, raft_size_gain: 1 },
-  'Sail': { material_cost: 20, raft_size_gain: 2 },
-  'Net Launcher': { material_cost: 35, raft_size_gain: 3 },
-  'Spear Rack': { material_cost: 30, raft_size_gain: 0, protects_against: 'shark_attack' },
-  'Shelter': { material_cost: 45, raft_size_gain: 0, protects_against: 'tsunami' },
-  'Roof': { material_cost: 35, raft_size_gain: 0, protects_against: 'heavy_downpour' },
+  'Floor Extension': { material_cost: 10, raft_size_gain: 1, repeatable: true },
+  'Sail': { material_cost: 20, raft_size_gain: 2, repeatable: true },
+  'Net Launcher': { material_cost: 35, raft_size_gain: 3, repeatable: true },
+  'Spear Rack': { material_cost: 30, raft_size_gain: 0, repeatable: false, protects_against: 'shark_attack' },
+  'Shelter': { material_cost: 45, raft_size_gain: 0, repeatable: false, protects_against: 'tsunami' },
+  'Roof': { material_cost: 35, raft_size_gain: 0, repeatable: false, protects_against: 'heavy_downpour' },
 };
 
 // Derived from UPGRADE_SPECS so the valid list can never drift from the cost table above.

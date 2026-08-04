@@ -1,29 +1,28 @@
 .gameShell {
-  position: relative;
-  z-index: 1;
   min-height: 100vh;
   min-height: 100svh;
-  overflow: hidden;
+  padding: clamp(0.75rem, 2vw, 1.35rem);
   color: var(--text);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(242, 163, 60, 0.12), transparent 28rem),
+    linear-gradient(180deg, var(--sky-top), var(--sky-mid) 48%, var(--sky-horizon));
 }
 
 /* ---- top survival HUD ---- */
 .hud {
-  position: fixed;
+  position: relative;
   z-index: 10;
-  top: clamp(0.75rem, 2vw, 1.35rem);
-  right: clamp(0.75rem, 2vw, 1.35rem);
-  left: clamp(0.75rem, 2vw, 1.35rem);
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) auto minmax(320px, 1fr);
+  grid-template-columns: minmax(240px, 1fr) auto minmax(500px, auto);
   align-items: center;
   gap: 1rem;
+  max-width: 1240px;
+  margin: 0 auto;
   padding: 0.65rem 0.7rem 0.65rem 1rem;
-  background: linear-gradient(180deg, rgba(25, 45, 62, 0.93), rgba(8, 18, 29, 0.9));
+  background: linear-gradient(180deg, rgba(25, 45, 62, 0.96), rgba(8, 18, 29, 0.94));
   border: 3px solid var(--wood-light);
   border-radius: var(--r-md);
   box-shadow: 0 0 0 3px var(--wood-darker), 0 7px 0 var(--wood-darker), var(--shadow-md);
-  backdrop-filter: blur(13px);
   animation: cc-rise 0.45s var(--ease-out) both;
 }
 
@@ -33,10 +32,12 @@
 
 .brandKicker,
 .brandUser,
-.readoutLabel,
+.hubKicker,
+.hubLocation span,
+.sectionHeading span,
+.sailKicker,
 .dockLabel,
-.drawerKicker,
-.promptKey {
+.drawerKicker {
   display: block;
   color: var(--text-dim);
   font-size: 0.56rem;
@@ -46,8 +47,8 @@
 }
 
 .brandKicker {
-  color: var(--rope);
   margin-bottom: 0.28rem;
+  color: var(--rope);
 }
 
 .brandLine {
@@ -59,7 +60,7 @@
 
 .brandMark {
   overflow: hidden;
-  color: var(--text-strong);
+  color: #fff1c8;
   font-family: var(--sans);
   font-size: 0.95rem;
   font-weight: 900;
@@ -77,7 +78,7 @@
 
 .brandUser {
   overflow: hidden;
-  color: var(--text-dim);
+  color: #d9c49c;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -97,162 +98,240 @@
   min-width: 0;
 }
 
-/* ---- scene-first camp stage ---- */
-.stage {
+/* ---- quest hub ---- */
+.questHub {
   position: relative;
-  z-index: 2;
-  min-height: 100vh;
-  min-height: 100svh;
-  pointer-events: none;
+  z-index: 1;
+  width: min(1240px, 100%);
+  margin: 0 auto;
+  padding: clamp(2.2rem, 5vw, 4.8rem) 0 7rem;
 }
 
-.stage > * {
-  pointer-events: auto;
+.hubHero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.25rem clamp(1rem, 3vw, 2rem) 1.4rem;
+  background: linear-gradient(180deg, rgba(25, 45, 62, 0.94), rgba(8, 18, 29, 0.82));
+  border: 3px solid var(--wood-light);
+  border-radius: var(--r-md);
+  box-shadow: 0 0 0 3px var(--wood-darker), 0 7px 0 var(--wood-darker), var(--shadow-md);
 }
 
-.locationReadout,
-.raftReadout {
-  position: fixed;
-  z-index: 4;
-  top: 7.1rem;
+.hubKicker,
+.sectionHeading span,
+.sailKicker {
+  color: var(--accent-bright);
+}
+
+.hubHero h1 {
+  margin-top: 0.45rem;
+  color: #fff1c8;
+  font-family: var(--serif);
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+}
+
+.hubHero p {
+  max-width: 48ch;
+  margin-top: 0.8rem;
+  color: #f1d9af;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.hubLocation {
+  flex: 0 0 auto;
+  min-width: 170px;
+  padding: 0.75rem 0.9rem;
+  text-align: right;
+  background: rgba(3, 9, 15, 0.48);
+  border-right: 3px solid var(--accent);
+}
+
+.hubLocation span {
+  color: #d9c49c;
+}
+
+.hubLocation strong,
+.hubLocation b {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-strong);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hubLocation b {
+  color: var(--success);
+  font-size: 0.61rem;
+  letter-spacing: 0.14em;
+}
+
+.questLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 330px);
+  align-items: start;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.questPrimary,
+.hubSidebar {
+  min-width: 0;
+}
+
+.sectionHeading {
+  margin-bottom: 0.65rem;
+  padding: 0 0.35rem;
+}
+
+.sectionHeading strong {
+  display: block;
+  margin-top: 0.22rem;
+  color: #fff1c8;
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.sectionHeading p {
+  margin-top: 0.35rem;
+  color: #d9c49c;
+  font-size: 0.72rem;
+}
+
+.questPrimary > section,
+.hubSidebar > section {
+  height: 100%;
+}
+
+.workspacePage {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+.workspaceHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem clamp(1rem, 3vw, 1.6rem);
+  background: linear-gradient(180deg, rgba(25, 45, 62, 0.96), rgba(8, 18, 29, 0.9));
+  border: 3px solid var(--wood-light);
+  border-radius: var(--r-md);
+  box-shadow: 0 0 0 3px var(--wood-darker), 0 7px 0 var(--wood-darker), var(--shadow-md);
+}
+
+.workspaceKicker,
+.workspaceStatus {
+  display: block;
+  color: var(--accent-bright);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.workspaceHeader h1 {
+  margin-top: 0.35rem;
+  color: #fff1c8;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 3.3rem);
+  line-height: 0.95;
+}
+
+.workspaceHeader p {
+  margin-top: 0.45rem;
+  color: #d9c49c;
+  font-size: 0.76rem;
+}
+
+.workspaceStatus {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.65rem;
+  color: #d9c49c;
+  background: rgba(3, 9, 15, 0.45);
+  border: 1px solid rgba(216, 176, 106, 0.42);
+  border-radius: var(--r-sm);
+}
+
+.workspaceBody {
+  margin-top: 1rem;
+}
+
+.workspaceBody > section {
+  width: 100%;
+}
+
+.hubSidebar {
   display: flex;
   flex-direction: column;
-  gap: 0.18rem;
-  padding: 0.7rem 0.85rem;
-  color: var(--text-strong);
-  background: rgba(8, 18, 29, 0.58);
-  border-left: 3px solid var(--accent);
-  backdrop-filter: blur(9px);
-  box-shadow: var(--shadow-sm);
+  gap: 1rem;
 }
 
-.locationReadout {
-  left: clamp(0.75rem, 2vw, 1.35rem);
+.sailCard {
+  padding: 1rem;
+  background: linear-gradient(180deg, rgba(91, 58, 28, 0.88), rgba(42, 25, 14, 0.92));
+  border: 3px solid var(--wood-light);
+  border-radius: var(--r-md);
+  box-shadow: 0 0 0 3px var(--wood-darker), var(--shadow-md);
 }
 
-.raftReadout {
-  right: clamp(0.75rem, 2vw, 1.35rem);
-  text-align: right;
-  border-right: 3px solid var(--accent);
-  border-left: 0;
+.sailCard h2 {
+  margin-top: 0.35rem;
+  color: #fff1c8;
+  font-family: var(--serif);
+  font-size: 1.45rem;
+  line-height: 1;
 }
 
-.locationReadout strong,
-.raftReadout strong {
-  color: var(--text-strong);
-  font-size: 0.72rem;
+.sailCard p {
+  margin-top: 0.55rem;
+  color: #f1d9af;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.sailFacts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.sailFacts span {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.55rem;
+  color: #fff1c8;
+  background: rgba(3, 9, 15, 0.3);
+  border: 1px solid rgba(255, 232, 182, 0.25);
+  border-radius: var(--r-sm);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.sailFacts b {
+  color: #f1d9af;
+  font-size: 0.56rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.locationReadout span:last-child,
-.raftReadout span:last-child {
-  color: var(--text-dim);
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
-}
-
-.locationReadout .readoutSignal {
-  color: var(--success);
-  font-weight: 800;
-  letter-spacing: 0.13em;
-}
-
-.centerMarker {
-  position: fixed;
-  top: 48%;
-  left: 50%;
-  z-index: 3;
-  width: 48px;
-  height: 48px;
-  pointer-events: none;
-  opacity: 0.58;
-  transform: translate(-50%, -50%);
-}
-
-.centerMarker::before,
-.centerMarker::after {
-  position: absolute;
-  content: '';
-  background: var(--rope);
-  box-shadow: 0 0 12px rgba(216, 176, 106, 0.5);
-}
-
-.centerMarker::before {
-  top: 50%;
-  right: 0;
-  left: 0;
-  height: 1px;
-}
-
-.centerMarker::after {
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  width: 1px;
-}
-
-.centerMarker span {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 9px;
-  height: 9px;
-  border: 1px solid var(--rope);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.centerMarker span + span {
-  width: 30px;
-  height: 30px;
-  border-color: rgba(216, 176, 106, 0.35);
-}
-
-.survivalPrompt {
-  position: fixed;
-  bottom: 7.2rem;
-  left: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.22rem;
-  color: var(--text-strong);
-  text-align: center;
-  transform: translateX(-50%);
-  pointer-events: none;
-}
-
-.survivalPrompt strong {
-  font-family: var(--serif);
-  font-size: clamp(1.3rem, 2.2vw, 2rem);
-  font-weight: 700;
-  line-height: 1;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.6);
-}
-
-.survivalPrompt > span:last-child {
-  color: var(--text-dim);
-  font-size: 0.68rem;
-  letter-spacing: 0.04em;
-}
-
-.promptKey {
-  color: var(--accent-bright);
-}
-
-/* ---- station drawer ---- */
+/* ---- management drawer ---- */
 .stationDrawer {
-  position: fixed;
-  z-index: 8;
-  bottom: 7.25rem;
-  left: clamp(0.75rem, 2vw, 1.35rem);
   display: flex;
   flex-direction: column;
-  width: min(420px, calc(100vw - 2rem));
-  max-height: min(61vh, 650px);
+  width: min(900px, 100%);
+  max-height: min(66vh, 680px);
+  margin: 1.5rem auto 0;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(22, 42, 58, 0.96), rgba(8, 18, 29, 0.97));
+  background: linear-gradient(180deg, rgba(22, 42, 58, 0.98), rgba(8, 18, 29, 0.98));
   border: 3px solid var(--wood-light);
   border-radius: var(--r-md);
   box-shadow: 0 0 0 3px var(--wood-darker), 0 8px 0 var(--wood-darker), var(--shadow-lg);
@@ -275,7 +354,7 @@
 
 .drawerHeader h1 {
   margin-top: 0.2rem;
-  color: var(--text-strong);
+  color: #fff1c8;
   font-family: var(--serif);
   font-size: 1.8rem;
   line-height: 0.95;
@@ -283,7 +362,7 @@
 
 .drawerHeader p {
   margin-top: 0.35rem;
-  color: var(--text-dim);
+  color: #d9c49c;
   font-size: 0.7rem;
 }
 
@@ -292,7 +371,7 @@
   place-items: center;
   width: 2rem;
   height: 2rem;
-  color: var(--text);
+  color: #fff1c8;
   font-size: 1.5rem;
   line-height: 1;
   background: rgba(3, 9, 15, 0.42);
@@ -312,16 +391,7 @@
   padding: 0.9rem;
 }
 
-.overviewStack {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* The panel components retain their backend-facing boundaries, but the drawer supplies the one
-   outer frame so stations feel like a single in-world console instead of nested web cards. */
-.drawerBody > section,
-.drawerBody .overviewStack > section {
+.drawerBody > section {
   padding: 0;
   background: transparent;
   border: 0;
@@ -331,37 +401,27 @@
 }
 
 .drawerBody > section::before,
-.drawerBody > section::after,
-.drawerBody .overviewStack > section::before,
-.drawerBody .overviewStack > section::after {
+.drawerBody > section::after {
   display: none;
 }
 
-.drawerBody > section :global(.head),
-.drawerBody .overviewStack > section :global(.head) {
-  margin-bottom: 0.75rem;
-}
-
-.drawerBody > section :global(.title),
-.drawerBody .overviewStack > section :global(.title) {
-  font-size: 1.2rem;
-}
-
-/* ---- bottom station rail ---- */
+/* ---- management rail ---- */
 .stationDock {
-  position: fixed;
+  position: sticky;
+  bottom: 1rem;
   z-index: 9;
-  bottom: 1.15rem;
-  left: 50%;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.9rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1.5rem auto 0;
   padding: 0.55rem 0.7rem 0.55rem 0.95rem;
-  background: linear-gradient(180deg, rgba(25, 45, 62, 0.96), rgba(8, 18, 29, 0.97));
+  background: linear-gradient(180deg, rgba(25, 45, 62, 0.98), rgba(8, 18, 29, 0.98));
   border: 3px solid var(--wood-light);
   border-radius: var(--r-md);
   box-shadow: 0 0 0 3px var(--wood-darker), 0 6px 0 var(--wood-darker), var(--shadow-md);
-  transform: translateX(-50%);
 }
 
 .dockLabel {
@@ -415,13 +475,11 @@
 }
 
 .loading {
-  position: fixed;
-  inset: 0;
-  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
+  min-height: 70vh;
   color: var(--text-strong);
   font-size: 0.75rem;
   font-weight: 800;
@@ -441,8 +499,8 @@
 }
 
 @keyframes drawer-in {
-  from { opacity: 0; transform: translateX(-16px) translateY(10px); }
-  to { opacity: 1; transform: translateX(0) translateY(0); }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes loading-orbit {
@@ -453,12 +511,14 @@
   .hud {
     grid-template-columns: minmax(220px, 1fr) auto;
   }
+
   .gauges {
     grid-column: 1 / -1;
     grid-row: 2;
     justify-content: flex-start;
     order: 3;
   }
+
   .actions {
     grid-column: 2;
     grid-row: 1;
@@ -472,9 +532,11 @@
     gap: 0.65rem;
     padding: 0.7rem;
   }
+
   .brandBlock {
     flex: 1 1 100%;
   }
+
   .gauges {
     order: 3;
     width: 100%;
@@ -482,49 +544,67 @@
     overflow-x: auto;
     padding-bottom: 0.1rem;
   }
+
   .actions {
-    margin-left: auto;
+    width: 100%;
+    margin-left: 0;
   }
-  .locationReadout,
-  .raftReadout {
-    top: 8.8rem;
+
+  .actions > :first-child {
+    min-width: 0;
+    flex: 1.35;
   }
-  .locationReadout {
-    max-width: 46%;
+
+  .actions > :not(:first-child) {
+    flex: 1;
   }
-  .raftReadout {
-    max-width: 42%;
+
+  .questHub {
+    padding-top: 2rem;
   }
-  .survivalPrompt {
-    bottom: 7.1rem;
+
+  .hubHero {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
   }
+
+  .hubLocation {
+    text-align: left;
+    border-right: 0;
+    border-left: 3px solid var(--accent);
+  }
+
+  .questLayout {
+    grid-template-columns: 1fr;
+  }
+
   .stationDrawer {
-    right: 0.75rem;
-    bottom: 6.8rem;
-    left: 0.75rem;
-    width: auto;
-    max-height: 55vh;
+    max-height: 58vh;
   }
+
   .stationDock {
     right: 0.75rem;
-    bottom: 0.75rem;
     left: 0.75rem;
-    justify-content: center;
+    width: auto;
     padding: 0.5rem;
-    transform: none;
   }
+
   .dockLabel {
     display: none;
   }
+
   .stationButtons {
     width: 100%;
     justify-content: space-between;
   }
+
   .stationButton {
     flex: 1;
     justify-content: center;
     padding-inline: 0.4rem;
   }
+
   .stationButton span:last-child {
     display: none;
   }
@@ -534,30 +614,21 @@
   .brandMark {
     font-size: 0.82rem;
   }
+
   .actions {
     width: 100%;
     margin-left: 0;
   }
+
   .actions > * {
     flex: 1;
   }
+
   .actions > :first-child {
     flex: 1.35;
   }
-  .locationReadout,
-  .raftReadout {
-    top: 11.9rem;
-    padding: 0.5rem 0.6rem;
-  }
-  .locationReadout strong,
-  .raftReadout strong {
-    font-size: 0.58rem;
-  }
-  .locationReadout span:last-child,
-  .raftReadout span:last-child {
-    display: none;
-  }
-  .survivalPrompt {
-    display: none;
+
+  .sailFacts {
+    grid-template-columns: 1fr;
   }
 }

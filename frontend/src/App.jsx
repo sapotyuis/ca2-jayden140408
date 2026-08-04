@@ -7,6 +7,7 @@ import PhaseTheme from './components/PhaseTheme';
 import RequireAuth from './components/RequireAuth';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import LeaderboardPage from './pages/LeaderboardPage';
 import GamePage from './pages/GamePage';
 
 // The voyage pulls in Three.js + post-processing (~500 kB). Lazy-loading it keeps that weight
@@ -30,6 +31,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route
                 path="/camp"
                 element={
@@ -42,7 +44,7 @@ export default function App() {
                 path="/voyage"
                 element={
                   <RequireAuth>
-                    <Suspense fallback={<div style={{ padding: 40, color: '#ecdfbe' }}>Casting off…</div>}>
+                    <Suspense fallback={<div style={{ padding: 40, color: '#ecdfbe' }}>Loading Castaway Chronicles…</div>}>
                       <OceanPage />
                     </Suspense>
                   </RequireAuth>

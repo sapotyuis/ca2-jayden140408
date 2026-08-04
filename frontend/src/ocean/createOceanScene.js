@@ -7,6 +7,7 @@ import { stepRaftMotion } from './raftMotion.js';
 import { createUnexpectedEventEffects } from './unexpectedEventEffects.js';
 import { findUnexpectedEventByType, getNextUnexpectedEventDelay, pickUnexpectedEvent } from './unexpectedEventFlow.js';
 import { getFirstPersonLookTarget } from './firstPersonCamera.js';
+import { describeCatch } from './catchMessage.js';
 import { CYCLE_DURATION_MS } from '../lib/worldClock.js';
 
 /**
@@ -893,14 +894,6 @@ export function createOceanScene({
       item.mesh.scale.setScalar((0.95 + Math.sin(elapsed * 2.4 + item.bobSeed) * 0.04) * (item.itemName.includes('Plank') ? 1.1 : 1));
       if (item.light) item.light.position.set(x, waterY + 0.9, z);
     }
-  };
-
-  const describeCatch = (data) => {
-    const items = (data.found || []).map((f) => `${f.item_name} ×${f.quantity}`).join(', ');
-    const parts = [`+${data.collected} materials`];
-    if (items) parts.push(items);
-    if (data.bonus_reason) parts.push(data.bonus_reason);
-    return parts.join(' · ');
   };
 
   const catchCollectible = async (item) => {

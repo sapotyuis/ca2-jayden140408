@@ -18,9 +18,9 @@ export default function CraftingPanel({ craftables, onCraft, index }) {
   };
 
   return (
-    <Panel title="Crafting Bench" subtitle="Consumes ingredients from your inventory" wide index={index}>
+    <Panel title="Crafting bench" subtitle="Use materials from your inventory to make items" wide index={index}>
       {craftables.length === 0 ? (
-        <p className={styles.empty}>No recipes available.</p>
+        <p className={styles.empty}>No crafting recipes are available right now.</p>
       ) : (
         <div className={styles.list}>
           {craftables.map(({ resultId, result, ingredients, canCraft }) => (
@@ -28,10 +28,10 @@ export default function CraftingPanel({ craftables, onCraft, index }) {
               <div>
                 <div className={styles.rowName}>{result.item_name}</div>
                 <div className={styles.rowMeta}>
-                  Needs:{' '}
+                  Required: {' '}
                   {ingredients.map((ing, i) => (
                     <span key={i} className={ing.short ? styles.short : ''}>
-                      {ing.need}× {ing.name} (have {ing.have}){i < ingredients.length - 1 ? ', ' : ''}
+                      {ing.need}× {ing.name} (you have {ing.have}){i < ingredients.length - 1 ? ', ' : ''}
                     </span>
                   ))}
                 </div>
@@ -43,7 +43,7 @@ export default function CraftingPanel({ craftables, onCraft, index }) {
                 loading={pending === resultId}
                 onClick={() => handleCraft(resultId)}
               >
-                Craft
+                CRAFT ITEM
               </Button>
             </div>
           ))}

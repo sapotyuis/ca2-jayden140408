@@ -29,11 +29,11 @@ export default function ProfilePanel({ index }) {
     if (!ok) return pushToast(extractErrorMessage(data), 'error');
     setUser(data);
     setName('');
-    pushToast('Survivor renamed.', 'success');
+    pushToast('Survivor name updated.', 'success');
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('This permanently deletes your survivor and everything aboard. Continue?')) return;
+    if (!window.confirm('This will permanently delete your survivor, raft, inventory, and progress. Continue?')) return;
 
     setDeleting(true);
     const { ok, data } = await api('/api/me', { method: 'DELETE' });
@@ -47,7 +47,7 @@ export default function ProfilePanel({ index }) {
   };
 
   return (
-    <Panel title="Survivor Log" index={index}>
+    <Panel title="Survivor profile" index={index}>
       <form className={styles.profileForm} onSubmit={handleRename}>
         <div className={styles.profileField}>
           <label className={styles.profileLabel} htmlFor="rename">
@@ -57,20 +57,20 @@ export default function ProfilePanel({ index }) {
             id="rename"
             className={styles.profileInput}
             type="text"
-            placeholder="New name"
+            placeholder="Enter a new survivor name"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
         </div>
         <Button type="submit" variant="ghost" size="md" loading={renaming} disabled={!name.trim()}>
-          Rename
+          SAVE NEW NAME
         </Button>
       </form>
 
       <div className={styles.dangerZone}>
-        <p className={styles.dangerNote}>Abandoning your raft permanently deletes your survivor and everything aboard.</p>
+        <p className={styles.dangerNote}>Deleting your raft permanently deletes your survivor, inventory, and all progress.</p>
         <Button variant="danger" size="md" loading={deleting} onClick={handleDelete} style={{ width: '100%' }}>
-          Abandon Raft
+          DELETE SURVIVOR AND RAFT
         </Button>
       </div>
     </Panel>

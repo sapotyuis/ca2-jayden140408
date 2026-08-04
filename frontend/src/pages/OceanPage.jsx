@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWorldClock } from '../context/WorldClockContext';
 import { createOceanScene } from '../ocean/createOceanScene';
+import PixelIcon from '../components/PixelIcon';
 import WorldClockBadge from '../components/WorldClockBadge';
 import styles from './OceanPage.module.css';
 
@@ -66,7 +67,8 @@ export default function OceanPage() {
     };
   }, []);
 
-  const povLabel = pov === 'third' ? '👁 Third Person' : '🧭 First Person';
+  const povIcon = pov === 'third' ? 'third-person' : 'first-person';
+  const povLabel = pov === 'third' ? 'VIEW: THIRD PERSON' : 'VIEW: FIRST PERSON';
 
   return (
     <div className={styles.wrap}>
@@ -81,7 +83,7 @@ export default function OceanPage() {
       {loading && (
         <div className={styles.loading}>
           <span className={styles.spinner} aria-hidden="true" />
-          <p>Casting off…</p>
+          <p>Loading your voyage…</p>
         </div>
       )}
 
@@ -89,22 +91,22 @@ export default function OceanPage() {
         {eventAlert && (
           <div className={`${styles.eventAlert} ${eventAlert.prevented ? styles.eventProtected : styles.eventDanger}`} role="status">
             <div className={styles.eventKicker}>
-              {eventAlert.prevented ? 'Defences hold' : 'Unexpected event'}
+              {eventAlert.prevented ? 'Defence successful' : 'DANGER ALERT'}
             </div>
             <div className={styles.eventTitle}>
-              {eventAlert.event?.event_name || 'Something is moving in the dark'}
+              {eventAlert.event?.event_name || 'Danger approaching'}
             </div>
             <p className={styles.eventDescription}>
-              {eventAlert.message || eventAlert.event?.description || 'The open sea has turned against you.'}
+              {eventAlert.message || eventAlert.event?.description || 'An unexpected hazard is threatening your raft.'}
             </p>
             {eventAlert.lost_item && (
               <div className={styles.eventConsequence}>
-                Lost {eventAlert.lost_item.item_name} ×{eventAlert.lost_item.quantity}
+                Lost item: {eventAlert.lost_item.item_name} ×{eventAlert.lost_item.quantity}
               </div>
             )}
             {eventAlert.prevented && eventAlert.protection_upgrade_type && (
               <div className={styles.eventConsequence}>
-                Protected by {eventAlert.protection_upgrade_type}
+                Protection used: {eventAlert.protection_upgrade_type}
               </div>
             )}
           </div>
@@ -113,17 +115,20 @@ export default function OceanPage() {
         <div className={styles.topRow}>
           <div className={styles.panel}>
             <button className={styles.back} onClick={() => navigate('/camp')}>
-              ← Raft Camp
+              ← BACK TO RAFT CAMP
             </button>
             <span className={styles.stats}>
               <span className={styles.stat}>
-                🪵<b>{stats.materials}</b>
+                <PixelIcon name="materials" />
+                <b>{stats.materials}</b>
               </span>
               <span className={styles.stat}>
-                🍖<b>{stats.hunger}</b>
+                <PixelIcon name="hunger" />
+                <b>{stats.hunger}</b>
               </span>
               <span className={styles.stat}>
-                ⛵<b>{stats.raftSize}</b>
+                <PixelIcon name="raft" />
+                <b>{stats.raftSize}</b>
               </span>
             </span>
           </div>
@@ -131,7 +136,8 @@ export default function OceanPage() {
           <div className={styles.topActions}>
             <WorldClockBadge compact />
             <button className={styles.pov} onClick={() => sceneRef.current?.togglePov()}>
-              {povLabel}
+              <PixelIcon name={povIcon} />
+              <span>{povLabel}</span>
             </button>
           </div>
         </div>
@@ -140,36 +146,39 @@ export default function OceanPage() {
           <kbd>W</kbd>
           <kbd>A</kbd>
           <kbd>S</kbd>
-          <kbd>D</kbd> or arrow keys to sail · drag to look around · <kbd>V</kbd> to switch view
+          <kbd>D</kbd> or the arrow keys to move the raft · drag to look around · press <kbd>V</kbd> to change view
           <br />
-          Steer into floating salvage — planks, fish, tools, and supplies — to collect it.
+          Sail over floating debris to collect planks, fish, tools, and supplies.
         </p>
 
-        <div className={styles.demoPanel} aria-label="Demo event controls">
-          <span className={styles.demoLabel}>Demo events</span>
+        <div className={styles.demoPanel} aria-label="Test hazard controls">
+          <span className={styles.demoLabel}>TEST AN EVENT</span>
           <button
             type="button"
             className={`${styles.demoButton} ${styles.demoShark}`}
             disabled={loading}
+            aria-label="Test a shark attack"
             onClick={() => sceneRef.current?.triggerDemoEvent('shark_attack')}
           >
-            Shark
+            SHARK ATTACK
           </button>
           <button
             type="button"
             className={`${styles.demoButton} ${styles.demoTsunami}`}
             disabled={loading}
+            aria-label="Test a tsunami wave"
             onClick={() => sceneRef.current?.triggerDemoEvent('tsunami')}
           >
-            Tsunami
+            TSUNAMI WAVE
           </button>
           <button
             type="button"
             className={`${styles.demoButton} ${styles.demoDownpour}`}
             disabled={loading}
+            aria-label="Test heavy rain"
             onClick={() => sceneRef.current?.triggerDemoEvent('heavy_downpour')}
           >
-            Downpour
+            HEAVY RAIN
           </button>
         </div>
 

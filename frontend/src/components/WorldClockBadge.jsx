@@ -1,4 +1,5 @@
 import { useWorldClock } from '../context/WorldClockContext';
+import PixelIcon from './PixelIcon';
 import styles from './WorldClockBadge.module.css';
 
 const formatTime = (seconds) => {
@@ -12,7 +13,9 @@ export default function WorldClockBadge({ compact = false }) {
 
   return (
     <div className={`${styles.clock} ${compact ? styles.compact : ''} ${styles[visualPhase]}`}>
-      <span className={styles.icon} aria-hidden="true">{visualPhase === 'day' || visualPhase === 'dawn' ? '☼' : '☾'}</span>
+      <span className={styles.icon} aria-hidden="true">
+        <PixelIcon name={visualPhase === 'day' || visualPhase === 'dawn' ? 'sun' : 'moon'} />
+      </span>
       <span className={styles.copy}>
         <span className={styles.label}>{label}</span>
         <strong>{formatTime(secondsRemaining)}</strong>

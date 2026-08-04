@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
-import { loadCurrentUser } from '../middlewares/currentUserMiddleware.js';
 import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
 import { VALID_UPGRADE_TYPES } from '../config/gameRules.js';
 import {
+  loadCurrentUser,
   getMyProfile,
   updateMyProfile,
   deleteMyAccount,

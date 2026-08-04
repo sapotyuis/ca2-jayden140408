@@ -8,25 +8,25 @@ export default function StatusPanel({ status, index }) {
   const nextSpec = status?.next_recommended_upgrade ? UPGRADE_SPECS[status.next_recommended_upgrade] : null;
   const materialsTarget = nextSpec ? nextSpec.material_cost : Math.max(status?.materials || 1, 1);
 
-  let hint = 'Every upgrade is installed — your raft is fully outfitted.';
+  let hint = 'All upgrades are installed. Your raft is fully upgraded.';
   if (status?.next_recommended_upgrade) {
     hint = status.can_upgrade ? (
       <>
-        Ready to install: <b>{status.next_recommended_upgrade}</b>. Head to Raft Upgrades below.
+        Ready to install: <b>{status.next_recommended_upgrade}</b>. Open the Raft Upgrades panel below.
       </>
     ) : (
       <>
-        Next up: <b>{status.next_recommended_upgrade}</b> — {nextSpec.material_cost - status.materials} more materials needed.
+        Next upgrade: <b>{status.next_recommended_upgrade}</b>. Need {nextSpec.material_cost - status.materials} more materials.
       </>
     );
   }
 
   return (
-    <Panel title="Raft Status" index={index}>
+    <Panel title="Raft status" index={index}>
       <div className={styles.statusStack}>
         <Meter label="Hunger" tone="hunger" value={status?.hunger ?? 0} max={100} valueText={`${status?.hunger ?? 0}/100`} />
         <Meter
-          label="Materials toward next upgrade"
+          label="Materials needed for next upgrade"
           tone="lantern"
           value={status?.materials ?? 0}
           max={materialsTarget}

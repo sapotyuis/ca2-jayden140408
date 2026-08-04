@@ -4,8 +4,13 @@
  * These handlers never read a user id from the URL or the request body. The survivor is
  * always `req.user`, loaded by loadCurrentUser from the verified JWT. That is what makes it
  * impossible for one player to collect debris on, upgrade, or delete another player's raft.
+ *
+ * loadCurrentUser lives here rather than in src/middlewares because it is controller
+ * middleware, not common middleware: it queries the users model for one specific resource
+ * (the current survivor) instead of providing a reusable, domain-agnostic capability the way
+ * the bcrypt, JWT, and validation middlewares do.
  */
-import { findUserByUsername, updateUser, removeUser, upgradeRaftAtomic, findUserUpgradeTypes, insertDebrisCollectionLog, findDebrisCollectionLogs, claimQuestRewardAtomic } from '../models/userModel.js';
+import { findUserById, findUserByUsername, updateUser, removeUser, upgradeRaftAtomic, findUserUpgradeTypes, insertDebrisCollectionLog, findDebrisCollectionLogs, claimQuestRewardAtomic } from '../models/userModel.js';
 import { ensureActiveDebris, collectDebrisByIdAtomic } from '../models/debrisModel.js';
 import { findAllUserItems, craftItemAtomic } from '../models/userItemModel.js';
 import { findItemTypeById } from '../models/itemTypeModel.js';
@@ -15,8 +20,37 @@ import { findUnexpectedEvents, findUnexpectedEventById, resolveUnexpectedEventAt
 import { findQuestBoardForUser, findQuestById } from '../models/questModel.js';
 import { findUserQuestByUserAndQuest } from '../models/userQuestModel.js';
 import { advanceQuestProgress } from '../utils/questProgress.js';
-import { UPGRADE_SPECS, VALID_UPGRADE_TYPES } from '../config/gameRules.js';
+import { UPGRADE_SPECS } from '../config/gameRules.js';
+import { getNextRecommendedUpgrade } from '../utils/upgradeProgress.js';
 import { AppError } from '../utils/_errors.js';
+
+/**
+ * Loads the survivor named by the verified JWT and attaches it to `req.user`.
+ *
+ * Runs immediately after verifyToken, which sets `res.locals.userId` from the token payload.
+ * Every handler below needs the current user's row, so the lookup lives here once instead of
+ * being repeated at the top of each one.
+ *
+ * A token can outlive the account it points at (e.g. the user deleted themselves, but the
+ * JWT has not expired yet). That is a dead session rather than a missing resource, so it is
+ * a 401 — telling the frontend to send the user back to login — not a 404.
+ */
+export const loadCurrentUser = async (req, res, next) => {
+  try {
+    const user = await findUserById(res.locals.userId);
+
+    if (!user) {
+      return res.status(401).json({
+        error: { code: 'UNAUTHORIZED', message: 'This account no longer exists. Please log in again.' },
+      });
+    }
+
+    req.user = user;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
 
 /** GET /api/me — the logged-in survivor's own profile. */
 export const getMyProfile = async (req, res) => {
@@ -103,9 +137,9 @@ export const getMyStatus = async (req, res, next) => {
     const user = req.user;
     const upgradeTypes = await findUserUpgradeTypes(user.user_id);
 
-    // Recommend the first upgrade in the standard progression order the user has not bought yet.
-    const nextUpgrade = VALID_UPGRADE_TYPES.find((u) => !upgradeTypes.includes(u)) || null;
-    const nextSpec = nextUpgrade ? UPGRADE_SPECS[nextUpgrade] : null;
+    // Defenses are recommended once; growth upgrades remain available forever.
+    const nextUpgrade = getNextRecommendedUpgrade(upgradeTypes);
+    const nextSpec = UPGRADE_SPECS[nextUpgrade];
 
     res.status(200).json({
       user: user.username,
@@ -114,7 +148,7 @@ export const getMyStatus = async (req, res, next) => {
       hunger: user.hunger,
       upgrades: upgradeTypes,
       next_recommended_upgrade: nextUpgrade,
-      can_upgrade: nextSpec ? user.materials >= nextSpec.material_cost : false,
+      can_upgrade: user.materials >= nextSpec.material_cost,
     });
   } catch (error) {
     next(error);

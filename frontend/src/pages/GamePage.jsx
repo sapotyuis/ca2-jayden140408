@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import OceanViewport from '../components/OceanViewport';
 import Button from '../components/Button';
 import StatChip from '../components/StatChip';
 import WorldClockBadge from '../components/WorldClockBadge';
@@ -15,24 +14,22 @@ import ProfilePanel from '../components/game/ProfilePanel';
 import styles from './GamePage.module.css';
 
 const STATIONS = [
-  { id: 'overview', icon: '◈', label: 'Deck', title: 'Raft overview', caption: 'Vitals and active objectives' },
-  { id: 'inventory', icon: '▣', label: 'Hold', title: 'Your inventory', caption: 'Everything recovered from the sea' },
-  { id: 'crafting', icon: '✦', label: 'Craft', title: 'Crafting bench', caption: 'Turn salvage into survival' },
-  { id: 'upgrades', icon: '⬡', label: 'Build', title: 'Raft upgrades', caption: 'Expand your floating home' },
-  { id: 'profile', icon: '◎', label: 'Log', title: 'Survivor log', caption: 'Account and raft records' },
+  { id: 'quests', icon: '◈', label: 'QUESTS', title: 'Quest hub', caption: 'Track objectives, rewards, and your next voyage' },
+  { id: 'inventory', icon: '▣', label: 'INVENTORY', title: 'Inventory', caption: 'View everything collected from the ocean' },
+  { id: 'crafting', icon: '✦', label: 'CRAFTING', title: 'Crafting bench', caption: 'Turn collected materials into useful items' },
+  { id: 'upgrades', icon: '⬡', label: 'UPGRADES', title: 'Raft upgrades', caption: 'Expand and protect your raft' },
+  { id: 'profile', icon: '◎', label: 'PROFILE', title: 'Survivor profile', caption: 'Manage your survivor account' },
 ];
 
 /**
- * The camp is a playable space first and a management screen second. The sea and raft stay
- * visible at all times; the existing feature panels open as a single focused station drawer
- * from the bottom deck rail, keeping the survival-game rhythm instead of presenting six equal
- * dashboard cards at once.
+ * The camp is the quest hub. It keeps the survivor's objectives and management tools visible,
+ * while the raft-and-ocean gameplay scene stays on the separate voyage route.
  */
 export default function GamePage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const { loading, status, itemsById, inventoryItems, craftables, quests, craft, upgrade, claimQuest } = useGameState();
-  const [activeStation, setActiveStation] = useState(null);
+  const [activeStation, setActiveStation] = useState('quests');
 
   const handleLogout = () => {
     logout();
@@ -41,27 +38,76 @@ export default function GamePage() {
 
   const active = STATIONS.find((station) => station.id === activeStation) || STATIONS[0];
 
-  const renderStation = () => {
-    if (activeStation === 'inventory') return <InventoryPanel items={inventoryItems} index={0} />;
-    if (activeStation === 'crafting') return <CraftingPanel craftables={craftables} onCraft={craft} index={0} />;
-    if (activeStation === 'upgrades') return <UpgradesPanel status={status} onUpgrade={upgrade} index={0} />;
-    if (activeStation === 'profile') return <ProfilePanel index={0} />;
+  const renderWorkspace = () => {
+    if (activeStation === 'quests') {
+      return (
+        <>
+          <section className={styles.hubHero}>
+            <div>
+              <span className={styles.hubKicker}>MISSION CONTROL / SURVIVAL OBJECTIVES</span>
+              <h1>QUEST HUB</h1>
+              <p>Track your objectives, claim rewards, and prepare your raft before setting sail.</p>
+            </div>
+            <div className={styles.hubLocation}>
+              <span>CURRENT LOCATION</span>
+              <strong>RAFT CAMP</strong>
+              <b>READY TO SAIL</b>
+            </div>
+          </section>
+
+          <div className={styles.questLayout}>
+            <section className={styles.questPrimary} aria-labelledby="quest-board-title">
+              <div className={styles.sectionHeading}>
+                <span>ACTIVE OBJECTIVES</span>
+                <strong id="quest-board-title">Quest board</strong>
+                <p>Complete objectives while you play and claim your rewards here.</p>
+              </div>
+              <QuestsPanel quests={quests} itemsById={itemsById} onClaim={claimQuest} index={0} />
+            </section>
+
+            <aside className={styles.hubSidebar} aria-label="Survival summary">
+              <StatusPanel status={status} index={1} />
+              <section className={styles.sailCard}>
+                <span className={styles.sailKicker}>NEXT ACTION</span>
+                <h2>Ready for the ocean?</h2>
+                <p>Press START VOYAGE when you want to control the raft, collect debris, and face ocean events.</p>
+                <div className={styles.sailFacts}>
+                  <span><b>Raft tiles</b>{status?.raft_size ?? 1}</span>
+                  <span><b>Installed upgrades</b>{status?.upgrades?.length || 0}</span>
+                </div>
+              </section>
+            </aside>
+          </div>
+        </>
+      );
+    }
+
+    let panel = null;
+    if (activeStation === 'inventory') panel = <InventoryPanel items={inventoryItems} index={0} />;
+    if (activeStation === 'crafting') panel = <CraftingPanel craftables={craftables} onCraft={craft} index={0} />;
+    if (activeStation === 'upgrades') panel = <UpgradesPanel status={status} onUpgrade={upgrade} index={0} />;
+    if (activeStation === 'profile') panel = <ProfilePanel index={0} />;
 
     return (
-      <div className={styles.overviewStack}>
-        <StatusPanel status={status} index={0} />
-        <QuestsPanel quests={quests} itemsById={itemsById} onClaim={claimQuest} index={1} />
-      </div>
+      <section className={styles.workspacePage} aria-labelledby="workspace-title">
+        <header className={styles.workspaceHeader}>
+          <div>
+            <span className={styles.workspaceKicker}>{active.label} WORKSPACE</span>
+            <h1 id="workspace-title">{active.title}</h1>
+            <p>{active.caption}</p>
+          </div>
+          <span className={styles.workspaceStatus}>CAMP CONSOLE</span>
+        </header>
+        <div className={styles.workspaceBody}>{panel}</div>
+      </section>
     );
   };
 
   return (
     <div className={styles.gameShell}>
-      <OceanViewport mode="camp" interactive={false} collectiblesEnabled fetchStatus />
-
       <header className={styles.hud}>
         <div className={styles.brandBlock}>
-          <span className={styles.brandKicker}>CASTAWAY CHRONICLES / SURVIVAL 01</span>
+          <span className={styles.brandKicker}>CASTAWAY CHRONICLES / QUEST HUB</span>
           <div className={styles.brandLine}>
             <strong className={styles.brandMark}>RAFT CAMP</strong>
             <span className={styles.brandDivider}>/</span>
@@ -69,19 +115,19 @@ export default function GamePage() {
           </div>
         </div>
 
-        <div className={styles.gauges} aria-label="Survival resources">
-          <StatChip icon="🪵" value={status?.materials ?? 0} label="Materials" />
-          <StatChip icon="🍖" value={status?.hunger ?? 0} label="Hunger" />
-          <StatChip icon="⛵" value={status?.raft_size ?? 1} label="Raft size" />
+        <div className={styles.gauges} aria-label="Your survival resources">
+          <StatChip icon="materials" value={status?.materials ?? 0} label="Materials" />
+          <StatChip icon="hunger" value={status?.hunger ?? 0} label="Hunger" />
+          <StatChip icon="raft" value={status?.raft_size ?? 1} label="Raft size" />
         </div>
 
         <div className={styles.actions}>
           <WorldClockBadge compact />
           <Button variant="lantern" onClick={() => navigate('/voyage')}>
-            SET SAIL
+            START VOYAGE
           </Button>
           <Button variant="ghost" onClick={handleLogout}>
-            EXIT
+            SIGN OUT
           </Button>
         </div>
       </header>
@@ -89,51 +135,14 @@ export default function GamePage() {
       {loading ? (
         <div className={styles.loading}>
           <span className={styles.loadingMark}>◎</span>
-          <span>Charting the raft…</span>
+          <span>Loading your quest hub…</span>
         </div>
       ) : (
-        <main className={styles.stage}>
-          <div className={styles.locationReadout}>
-            <span className={styles.readoutLabel}>LOCATION</span>
-            <strong>OPEN OCEAN / RAFT CAMP</strong>
-            <span className={styles.readoutSignal}>● LIVE</span>
-          </div>
+        <main className={styles.questHub}>
+          {renderWorkspace()}
 
-          <div className={styles.raftReadout}>
-            <span className={styles.readoutLabel}>CURRENT RAFT</span>
-            <strong>{status?.raft_size ?? 1} TILES AFLOAT</strong>
-            <span>{status?.upgrades?.length || 0} upgrades installed</span>
-          </div>
-
-          <div className={styles.centerMarker} aria-hidden="true">
-            <span />
-            <span />
-          </div>
-
-          <div className={styles.survivalPrompt}>
-            <span className={styles.promptKey}>CAMP CONSOLE</span>
-            <strong>Choose a station below</strong>
-            <span>Manage the raft without leaving the open water.</span>
-          </div>
-
-          {activeStation && (
-            <aside className={styles.stationDrawer} aria-label={`${active.label} station`}>
-              <div className={styles.drawerHeader}>
-                <div>
-                  <span className={styles.drawerKicker}>{active.label.toUpperCase()} STATION</span>
-                  <h1>{active.title}</h1>
-                  <p>{active.caption}</p>
-                </div>
-                <button className={styles.closeDrawer} type="button" onClick={() => setActiveStation(null)} aria-label="Close station panel">
-                  ×
-                </button>
-              </div>
-              <div className={styles.drawerBody}>{renderStation()}</div>
-            </aside>
-          )}
-
-          <nav className={styles.stationDock} aria-label="Raft stations">
-            <span className={styles.dockLabel}>RAFT STATIONS</span>
+          <nav className={styles.stationDock} aria-label="Raft management options">
+            <span className={styles.dockLabel}>MANAGE YOUR RAFT</span>
             <div className={styles.stationButtons}>
               {STATIONS.map((station) => (
                 <button

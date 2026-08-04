@@ -1,17 +1,38 @@
-export const DEBRIS_SPAWN_POSITIONS = [
-  [-10, 4],
-  [-4, -12],
-  [8, 7],
-  [14, -5],
-  [2, 15],
-  [-18, -10],
-  [20, 11],
-  [-16, 16],
-  [18, -17],
-  [0, -22],
-  [-22, 0],
-  [22, 0],
-];
+/**
+ * How far from the origin salvage may spawn.
+ *
+ * This must stay comfortably inside the renderer's WORLD_LIMIT (frontend/src/ocean/
+ * createPixelOceanScene.js). The raft collects with its deck, which sits ahead of the hull, so a
+ * piece spawned right on the edge of the sailable area could never be driven over. The renderer
+ * currently sails to +/-180, which leaves this radius roughly 20 units of slack.
+ */
+export const DEBRIS_FIELD_RADIUS = 160;
+
+/**
+ * Salvage is spread over concentric rings rather than a small cluster near the origin, so a
+ * voyage means actually sailing somewhere. Wider rings carry more positions to keep the density
+ * of the field roughly even instead of bunching everything in the middle.
+ */
+const buildSpawnField = (radius) => {
+  const positions = [];
+  const rings = [0.22, 0.48, 0.72, 0.95];
+
+  rings.forEach((spread, ringIndex) => {
+    const count = 6 + ringIndex * 4;
+    for (let step = 0; step < count; step += 1) {
+      // The per-ring offset stops the rings lining up into spokes.
+      const angle = (step / count) * Math.PI * 2 + ringIndex * 0.4;
+      positions.push([
+        Math.round(Math.cos(angle) * radius * spread),
+        Math.round(Math.sin(angle) * radius * spread),
+      ]);
+    }
+  });
+
+  return positions;
+};
+
+export const DEBRIS_SPAWN_POSITIONS = buildSpawnField(DEBRIS_FIELD_RADIUS);
 
 export const STARTER_DEBRIS_ITEMS = ['Wood Plank', 'Plastic', 'Rope', 'Grilled Fish', 'Coconut'];
 

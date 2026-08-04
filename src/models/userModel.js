@@ -1,4 +1,4 @@
-import { eq, like, and, desc } from 'drizzle-orm';
+import { eq, like, and, asc, desc } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { users, raft_upgrades, user_items, user_quests, debris_collection_logs } from '../db/schema.js';
 
@@ -22,6 +22,13 @@ export const findAllUsers = async (filters = {}) => {
   if (conditions.length > 0) return await db.select(publicUserFields).from(users).where(and(...conditions));
   return await db.select(publicUserFields).from(users);
 };
+
+/** Get the five highest-ranked public survivors without loading the full roster. */
+export const findLeaderboardUsers = async (limit = 5) => await db
+  .select(publicUserFields)
+  .from(users)
+  .orderBy(desc(users.raft_size), desc(users.materials), asc(users.username))
+  .limit(limit);
 
 /** Get a single user by user_id (varchar). Returns undefined if not found. Password is excluded. */
 export const findUserById = async (id) => {

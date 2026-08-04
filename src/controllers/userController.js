@@ -5,7 +5,7 @@
  * instead, so there is no route anywhere that lets one player write to another's raft.
  * These reads select publicUserFields in the model, so the password hash is never exposed.
  */
-import { findAllUsers, findUserById } from '../models/userModel.js';
+import { findAllUsers, findLeaderboardUsers, findUserById } from '../models/userModel.js';
 import { AppError } from '../utils/_errors.js';
 
 /** Parses a query param to a positive integer or throws VALIDATION_ERROR. */
@@ -38,6 +38,16 @@ export const getAllUsers = async (req, res, next) => {
     res.status(200).json(users);
   } catch (error) {
     // next(error) hands off to the centralised errorHandler registered in _errors.js.
+    next(error);
+  }
+};
+
+/** GET /api/users/leaderboard — return only the five highest-ranked public survivors. */
+export const getLeaderboard = async (req, res, next) => {
+  try {
+    const users = await findLeaderboardUsers(5);
+    res.status(200).json(users);
+  } catch (error) {
     next(error);
   }
 };
