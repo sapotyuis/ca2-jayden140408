@@ -6,6 +6,7 @@ describe('Vercel deployment configuration', () => {
       await readFile(new URL('../../vercel.json', import.meta.url), 'utf8'),
     );
 
+    expect(config.$schema).toBe('https://openapi.vercel.sh/vercel.json');
     expect(config.buildCommand).toBe('npm --prefix frontend run build');
     expect(config.installCommand).toBe('npm install && npm --prefix frontend install');
     expect(config.outputDirectory).toBe('public');
