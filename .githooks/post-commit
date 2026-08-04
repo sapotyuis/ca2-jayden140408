@@ -1,0 +1,20 @@
+#!/bin/sh
+
+branch=$(git symbolic-ref --quiet --short HEAD) || {
+    printf '%s\n' 'post-commit: detached HEAD; skipping dual push.' >&2
+    exit 0
+}
+
+status=0
+
+if ! git push origin "HEAD:$branch"; then
+    printf '%s\n' 'post-commit: push to origin failed.' >&2
+    status=1
+fi
+
+if ! git push personal "HEAD:$branch"; then
+    printf '%s\n' 'post-commit: push to personal failed.' >&2
+    status=1
+fi
+
+exit "$status"
