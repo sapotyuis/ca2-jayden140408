@@ -4,6 +4,7 @@ node_modules
 # Frontend build artefacts (Vite) — rebuilt with `cd frontend && npm run build`
 dist
 frontend/dist
+/public/
 
 # Environment variables — never commit secrets (JWT_SECRET_KEY).
 # Copy .env.example to .env and fill it in locally.

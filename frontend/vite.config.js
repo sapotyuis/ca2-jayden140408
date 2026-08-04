@@ -17,4 +17,5 @@ export default defineConfig({
   plugins: [react()],
   server: { port: 5173, proxy },
   preview: { port: 4173, proxy },
+  build: { outDir: '../public', emptyOutDir: true },
 });
