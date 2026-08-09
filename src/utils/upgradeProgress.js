@@ -9,6 +9,12 @@ export const countUpgradeTypes = (upgradeTypes = []) => {
   return counts;
 };
 
+/** Whether a requested upgrade is still purchasable for this survivor. */
+export const canPurchaseUpgrade = (upgradeType, upgradeTypes = []) => {
+  const spec = UPGRADE_SPECS[upgradeType];
+  return Boolean(spec && (spec.repeatable || !upgradeTypes.includes(upgradeType)));
+};
+
 /**
  * Recommend a missing one-time defense first, then keep the raft expandable forever.
  * Repeatable upgrades remain purchasable through the upgrade panel regardless of history.

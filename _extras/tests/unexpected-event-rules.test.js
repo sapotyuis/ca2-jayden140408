@@ -8,7 +8,6 @@ describe('unexpected event rules', () => {
         prevention_upgrade_type: 'Shelter',
         loss_item_type_id: 1,
         loss_item_quantity: 2,
-        hunger_delta: -20,
       },
       userUpgrades: ['Shelter'],
       inventory: [{ item_type_id: 1, quantity: 5 }],
@@ -19,7 +18,6 @@ describe('unexpected event rules', () => {
       prevented: true,
       protectionUpgradeType: 'Shelter',
       lostItemQuantity: 0,
-      hungerChange: 0,
       outcome: 'prevented',
     });
   });
@@ -31,7 +29,6 @@ describe('unexpected event rules', () => {
         prevention_upgrade_type: 'Shelter',
         loss_item_type_id: 1,
         loss_item_quantity: 2,
-        hunger_delta: -20,
       },
       userUpgrades: [],
       inventory: [{ item_type_id: 1, quantity: 1 }],
@@ -42,7 +39,6 @@ describe('unexpected event rules', () => {
       prevented: false,
       lostItemTypeId: 1,
       lostItemQuantity: 1,
-      hungerChange: -20,
       outcome: 'item_loss',
     });
   });
@@ -52,19 +48,17 @@ describe('unexpected event rules', () => {
       event: {
         event_name: 'Shark Attack',
         prevention_upgrade_type: 'Spear Rack',
-        loss_item_type_id: 4,
+        loss_item_type_id: 1,
         loss_item_quantity: 1,
-        hunger_delta: -10,
       },
       userUpgrades: [],
       inventory: [],
-      lossItemName: 'Grilled Fish',
+      lossItemName: 'Wood Plank',
     });
 
     expect(outcome).toMatchObject({
       prevented: false,
       lostItemQuantity: 0,
-      hungerChange: -10,
       outcome: 'no_item_lost',
     });
   });

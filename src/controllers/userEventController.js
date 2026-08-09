@@ -29,7 +29,7 @@ const ensureRewardItemExists = async (itemTypeId) => {
 export const getAllUserEvents = async (req, res, next) => {
   try {
     const filters = {};
-    if (req.query.user_id !== undefined) filters.user_id = String(req.query.user_id);
+    if (req.query.user_id !== undefined) filters.user_id = parsePositiveInt(req.query.user_id, 'user_id');
     if (req.query.event_id !== undefined) filters.event_id = parsePositiveInt(req.query.event_id, 'event_id');
 
     const rows = await findAllUserEvents(filters);
@@ -55,7 +55,9 @@ export const getUserEventById = async (req, res, next) => {
 /** POST /api/user-events — record an event for the authenticated survivor. */
 export const createUserEvent = async (req, res, next) => {
   try {
-    if (req.body.user_id !== req.user.user_id) {
+    // user_id is now an integer, and a JSON body may send it as "1" or 1 — compare numerically
+    // so a well-formed request is not rejected purely over its JSON type.
+    if (Number(req.body.user_id) !== req.user.user_id) {
       throw new AppError('VALIDATION_ERROR', 'user_id must match the authenticated user');
     }
 
@@ -68,7 +70,6 @@ export const createUserEvent = async (req, res, next) => {
       event_id: req.body.event_id,
       outcome: req.body.outcome,
       materials_change: req.body.materials_change ?? 0,
-      hunger_change: req.body.hunger_change ?? 0,
       reward_item_quantity: req.body.reward_item_quantity ?? 0,
     };
     if (req.body.reward_item_type_id !== undefined) data.reward_item_type_id = req.body.reward_item_type_id;
@@ -92,7 +93,6 @@ export const patchUserEvent = async (req, res, next) => {
     const data = {};
     if (req.body.outcome !== undefined) data.outcome = req.body.outcome;
     if (req.body.materials_change !== undefined) data.materials_change = req.body.materials_change;
-    if (req.body.hunger_change !== undefined) data.hunger_change = req.body.hunger_change;
     if (req.body.reward_item_type_id !== undefined) data.reward_item_type_id = req.body.reward_item_type_id;
     if (req.body.reward_item_quantity !== undefined) data.reward_item_quantity = req.body.reward_item_quantity;
     if (req.body.occurred_at !== undefined) data.occurred_at = req.body.occurred_at;

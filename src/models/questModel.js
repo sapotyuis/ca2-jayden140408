@@ -5,19 +5,19 @@ import { quests, user_quests } from '../db/schema.js';
 export { quests };
 
 /** Get all quests with optional type and active-state filters. */
-export const findAllQuests = async (filters = {}) => {
+export const findAllQuests = async (filters = {}, executor = db) => {
   const conditions = [];
 
   if (filters.quest_type !== undefined) conditions.push(eq(quests.quest_type, filters.quest_type));
   if (filters.is_active !== undefined) conditions.push(eq(quests.is_active, filters.is_active));
 
-  if (conditions.length > 0) return await db.select().from(quests).where(and(...conditions));
-  return await db.select().from(quests);
+  if (conditions.length > 0) return await executor.select().from(quests).where(and(...conditions));
+  return await executor.select().from(quests);
 };
 
 /** Get one quest by its integer primary key. */
-export const findQuestById = async (id) => {
-  const rows = await db.select().from(quests).where(eq(quests.quest_id, Number(id)));
+export const findQuestById = async (id, executor = db) => {
+  const rows = await executor.select().from(quests).where(eq(quests.quest_id, Number(id)));
   return rows[0];
 };
 
@@ -63,6 +63,6 @@ export const findQuestBoardForUser = async (userId) => {
       claimed_at: user_quests.claimed_at,
     })
     .from(quests)
-    .leftJoin(user_quests, and(eq(user_quests.quest_id, quests.quest_id), eq(user_quests.user_id, String(userId))))
+    .leftJoin(user_quests, and(eq(user_quests.quest_id, quests.quest_id), eq(user_quests.user_id, Number(userId))))
     .where(eq(quests.is_active, 1));
 };

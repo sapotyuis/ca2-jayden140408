@@ -5,7 +5,7 @@ import { crafting_recipes } from '../db/schema.js';
 export { crafting_recipes };
 
 /** Get all crafting recipes. Supports optional `result_item_type_id` and `ingredient_item_type_id` filters. */
-export const findAllCraftingRecipes = async (filters = {}) => {
+export const findAllCraftingRecipes = async (filters = {}, executor = db) => {
   const conditions = [];
 
   if (filters.result_item_type_id !== undefined) {
@@ -17,10 +17,10 @@ export const findAllCraftingRecipes = async (filters = {}) => {
   }
 
   if (conditions.length > 0) {
-    return await db.select().from(crafting_recipes).where(and(...conditions));
+    return await executor.select().from(crafting_recipes).where(and(...conditions));
   }
 
-  return await db.select().from(crafting_recipes);
+  return await executor.select().from(crafting_recipes);
 };
 
 /** Get a single crafting recipe by ID. Returns undefined if not found. */

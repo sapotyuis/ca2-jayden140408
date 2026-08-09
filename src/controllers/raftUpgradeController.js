@@ -20,7 +20,7 @@ export const getAllRaftUpgrades = async (req, res, next) => {
     const filters = {};
 
     if (req.query.user_id !== undefined) {
-      filters.user_id = String(req.query.user_id);
+      filters.user_id = parsePositiveInt(req.query.user_id, 'user_id');
     }
 
     if (req.query.upgrade_type !== undefined) {
@@ -61,7 +61,9 @@ export const createRaftUpgrade = async (req, res, next) => {
     }
 
     const data = {
-      user_id: req.body.user_id,
+      // Take the id from the row we just loaded, not from the body — it is already the
+      // integer the column expects, whatever JSON type the client sent.
+      user_id: user.user_id,
       upgrade_type: req.body.upgrade_type,
       material_cost: req.body.material_cost,
     };

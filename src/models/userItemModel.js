@@ -14,12 +14,11 @@ const itemDetail = {
   item_name: item_types.item_name,
   category: item_types.category,
   material_cost: item_types.material_cost,
-  hunger_restore: item_types.hunger_restore,
   raft_points: item_types.raft_points,
 };
 
 /** Get all user items with item details. Supports optional `user_id` and `category` filters. */
-export const findAllUserItems = async (filters = {}) => {
+export const findAllUserItems = async (filters = {}, executor = db) => {
   const conditions = [];
 
   if (filters.user_id !== undefined) {
@@ -30,7 +29,7 @@ export const findAllUserItems = async (filters = {}) => {
     conditions.push(eq(item_types.category, filters.category));
   }
 
-  const query = db
+  const query = executor
     .select(itemDetail)
     .from(user_items)
     .innerJoin(item_types, eq(user_items.item_type_id, item_types.item_type_id));
@@ -75,9 +74,8 @@ export const removeUserItem = async (id) => {
  * Deductions work across multiple rows for the same item_type (FIFO).
  * All writes succeed or all roll back.
  */
-export const craftItemAtomic = async (userId, deductions, resultItemTypeId) => {
-  // Wrap everything in a transaction — if any step fails, all changes are undone
-  return await db.transaction(async (tx) => {
+export const craftItemAtomic = async (userId, deductions, resultItemTypeId, executor = db) => {
+  const operation = async (tx) => {
 
     // Loop through each ingredient that needs to be deducted (e.g. Wood Plank ×2)
     for (const { rows, required } of deductions) {
@@ -109,5 +107,7 @@ export const craftItemAtomic = async (userId, deductions, resultItemTypeId) => {
       .returning();
 
     return crafted; // return the newly crafted item row
-  });
+  };
+
+  return executor === db ? db.transaction(operation) : operation(executor);
 };

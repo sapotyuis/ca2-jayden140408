@@ -80,7 +80,7 @@ describe('whitepaper JWT middleware', () => {
     expect(sendToken).toHaveLength(3);
     expect(verifyToken).toHaveLength(3);
 
-    const generateResponse = createResponse({ userId: 'rafter_SurvivorJay' });
+    const generateResponse = createResponse({ userId: 1 });
     const generateResult = await runMiddleware(generateToken, {}, generateResponse);
     expect(generateResult.type).toBe('next');
     expect(generateResponse.locals.token).toBeTruthy();
@@ -100,7 +100,9 @@ describe('whitepaper JWT middleware', () => {
       verifyResponse
     );
     expect(verifyResult.type).toBe('next');
-    expect(verifyResponse.locals.userId).toBe('rafter_SurvivorJay');
+    // toBe is strict, so this also pins that the JWT round-trip preserves the integer type
+    // rather than handing back "1" — loadCurrentUser and the ownership checks rely on it.
+    expect(verifyResponse.locals.userId).toBe(1);
     expect(verifyResponse.locals.tokenTimestamp).toBeTruthy();
   });
 

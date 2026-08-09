@@ -1,0 +1,232 @@
+/* Shared internals for the dashboard panels. Cells read as inset "slots" carved into the wooden
+   panel — a recessed surface with a chunky edge — and everything is themed off the phased
+   semantic tokens so the camp lightens into day and darkens into night with the world. */
+
+.empty {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--text-dim);
+  padding: 0.5rem 0;
+}
+
+/* ---- status ---- */
+.statusStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.nextHint {
+  margin-top: 0.3rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--r-sm);
+  background: var(--surface-inset);
+  border: 2px dashed var(--edge-strong);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.nextHint b {
+  color: var(--accent-deep);
+}
+
+/* ---- inventory ---- */
+.invGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.6rem;
+}
+.invTile {
+  position: relative;
+  padding: 0.7rem 0.78rem;
+  background: var(--surface-inset);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-sm);
+  border-left-width: 5px;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.16s var(--ease-out),
+    filter 0.16s ease;
+}
+.invTile:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.08);
+}
+.invName {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-strong);
+}
+.invMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 0.4rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.invQty {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--accent-deep);
+  letter-spacing: 0;
+}
+.rarityLabel {
+  font-weight: 800;
+}
+
+/* ---- lists (recipes / upgrades / quests) ---- */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0.9rem;
+  background: var(--surface-inset);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: filter 0.16s ease;
+}
+.row:hover {
+  filter: brightness(1.06);
+}
+.rowName {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text-strong);
+}
+.rowMeta {
+  margin-top: 0.28rem;
+  font-size: 0.76rem;
+  color: var(--text-dim);
+}
+.short {
+  color: var(--danger);
+  font-weight: 800;
+}
+
+/* ---- quests ---- */
+.questCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.85rem 0.95rem;
+  background: var(--surface-inset);
+  border: 2px solid var(--edge);
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+.questTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+.questTitle {
+  font-weight: 800;
+  font-size: 0.98rem;
+  color: var(--text-strong);
+}
+.questDesc {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+.questRequirement {
+  margin-top: -0.2rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--accent-deep);
+}
+.questFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.15rem;
+}
+.questReward {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+}
+.questReward b {
+  color: var(--accent-deep);
+}
+
+/* ---- profile ---- */
+.profileForm {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.profileField {
+  flex: 1 1 180px;
+}
+.profileLabel {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 0.45rem;
+}
+.profileInput {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  font-family: var(--sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  background: var(--surface-inset);
+  border: 2px solid var(--edge-strong);
+  border-radius: var(--r-sm);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.profileInput::placeholder {
+  color: var(--text-dim);
+}
+.profileInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2), 0 0 0 3px rgba(242, 163, 60, 0.25);
+}
+.dangerZone {
+  margin-top: 1.3rem;
+  padding-top: 1.1rem;
+  border-top: 2px dashed rgba(217, 88, 74, 0.4);
+}
+.dangerNote {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--danger);
+  margin-bottom: 0.75rem;
+}
+
+/* ---- loading skeleton ---- */
+.skeleton {
+  height: 3.5rem;
+  border-radius: var(--r-sm);
+  background: linear-gradient(90deg, var(--surface-inset), rgba(236, 223, 190, 0.12), var(--surface-inset));
+  background-size: 200% 100%;
+  animation: skeleton-sheen 1.3s ease-in-out infinite;
+}
+@keyframes skeleton-sheen {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}

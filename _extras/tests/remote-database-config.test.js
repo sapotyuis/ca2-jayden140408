@@ -23,11 +23,32 @@ describe('remote libSQL database configuration', () => {
     expect(source).toMatch(/\.\.\.\(isRemoteDatabase && process\.env\.DATABASE_AUTH_TOKEN\s*\?\s*\{ authToken: process\.env\.DATABASE_AUTH_TOKEN \}\s*:\s*\{\}\)/);
   });
 
-  it('only resolves and deletes local file database URLs during seeding', async () => {
+  it('resets local file databases in place so running servers keep the same database handle', async () => {
     const source = await readSource('src/db/seed.js');
 
     expect(source).toMatch(/const isFileDatabase = dbUrl\.startsWith\('file:'\);/);
-    expect(source).toMatch(/if \(isFileDatabase\) \{\s*const dbPath = dbUrl\.slice\('file:'\.length\);\s*const absoluteDbPath = path\.resolve\(projectRoot, dbPath\);\s*if \(fs\.existsSync\(absoluteDbPath\)\)/s);
+    expect(source).toContain('clearLocalDatabase');
+    expect(source).not.toContain('fs.unlinkSync');
+    expect(source).toContain("'user_events'");
+  });
+
+  it('maps generated primary keys instead of assuming users and catalogue rows start at one', async () => {
+    const source = await readSource('src/db/seed.js');
+
+    expect(source).toContain('returning({ user_id: users.user_id, username: users.username })');
+    expect(source).toContain('returning({ item_type_id: item_types.item_type_id, item_name: item_types.item_name })');
+    expect(source).toContain('userIdByUsername');
+    expect(source).toContain('itemTypeIdByName');
+    expect(source).not.toContain('const [JAY, OCEAN, RAFTER] = [1, 2, 3];');
+    expect(source).not.toMatch(/user_id:\s*(JAY|OCEAN|RAFTER)/);
+  });
+
+  it('rolls back clearing and seeding together when a seed insert fails', async () => {
+    const source = await readSource('src/db/seed.js');
+
+    expect(source).toContain('await db.transaction(async (tx) => {');
+    expect(source).toContain('await clearLocalDatabase(tx);');
+    expect(source).toContain('await seedData(tx);');
   });
 
   it('documents the optional database token without exposing a secret', async () => {

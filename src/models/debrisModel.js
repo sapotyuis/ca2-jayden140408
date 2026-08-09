@@ -20,30 +20,30 @@ const debrisDetails = {
 };
 
 /** Returns only unclaimed debris owned by the current survivor. */
-export const findActiveDebrisForUser = async (userId) => {
-  return await db
+export const findActiveDebrisForUser = async (userId, executor = db) => {
+  return await executor
     .select(debrisDetails)
     .from(debris)
     .innerJoin(item_types, eq(debris.item_type_id, item_types.item_type_id))
-    .where(and(eq(debris.user_id, String(userId)), isNull(debris.claimed_at)))
+    .where(and(eq(debris.user_id, Number(userId)), isNull(debris.claimed_at)))
     .orderBy(desc(debris.spawned_at));
 };
 
 /** Ensures a survivor has a small server-owned field of collectible debris. */
-export const ensureActiveDebris = async (userId) => {
-  const active = await findActiveDebrisForUser(userId);
+export const ensureActiveDebris = async (userId, executor = db) => {
+  const active = await findActiveDebrisForUser(userId, executor);
   if (active.length >= TARGET_ACTIVE_DEBRIS) return active;
 
-  const catalog = await db
+  const catalog = await executor
     .select({ item_type_id: item_types.item_type_id, item_name: item_types.item_name, category: item_types.category })
     .from(item_types);
   if (catalog.length === 0) return active;
 
   const byName = new Map(catalog.map((item) => [item.item_name, item]));
-  const eligible = catalog.filter((item) => ['material', 'food', 'equipment'].includes(item.category));
+  const eligible = catalog.filter((item) => ['material', 'equipment'].includes(item.category));
   const spawnCount = TARGET_ACTIVE_DEBRIS - active.length;
   const now = new Date().toISOString();
-  const recentClaims = await db
+  const recentClaims = await executor
     .select({
       x_position: debris.x_position,
       z_position: debris.z_position,
@@ -51,7 +51,7 @@ export const ensureActiveDebris = async (userId) => {
     })
     .from(debris)
     .innerJoin(item_types, eq(debris.item_type_id, item_types.item_type_id))
-    .where(and(eq(debris.user_id, String(userId)), isNotNull(debris.claimed_at)))
+    .where(and(eq(debris.user_id, Number(userId)), isNotNull(debris.claimed_at)))
     .orderBy(desc(debris.claimed_at))
     .limit(1);
   const occupiedPositions = active.map((row) => [Number(row.x_position), Number(row.z_position)]);
@@ -69,9 +69,9 @@ export const ensureActiveDebris = async (userId) => {
       recentlyClaimedPositions,
       random: Math.random,
     });
-    await db.insert(debris).values({
+    await executor.insert(debris).values({
       debris_id: randomUUID(),
-      user_id: String(userId),
+      user_id: Number(userId),
       item_type_id: item.item_type_id,
       quantity: item.category === 'equipment' ? 1 : 1 + Math.floor(Math.random() * 2),
       x_position: x,
@@ -82,18 +82,18 @@ export const ensureActiveDebris = async (userId) => {
     previousItemName = item.item_name;
   }
 
-  return await findActiveDebrisForUser(userId);
+  return await findActiveDebrisForUser(userId, executor);
 };
 
 /** Claims one server-owned debris row and grants its item exactly once. */
-export const collectDebrisByIdAtomic = async (userId, debrisId, attemptedAt = new Date().toISOString()) => {
-  return await db.transaction(async (tx) => {
+export const collectDebrisByIdAtomic = async (userId, debrisId, attemptedAt = new Date().toISOString(), executor = db) => {
+  const operation = async (tx) => {
     const [claimed] = await tx
       .update(debris)
       .set({ claimed_at: attemptedAt })
       .where(and(
         eq(debris.debris_id, String(debrisId)),
-        eq(debris.user_id, String(userId)),
+        eq(debris.user_id, Number(userId)),
         isNull(debris.claimed_at),
       ))
       .returning();
@@ -114,34 +114,32 @@ export const collectDebrisByIdAtomic = async (userId, debrisId, attemptedAt = ne
         user_id: users.user_id,
         username: users.username,
         materials: users.materials,
-        hunger: users.hunger,
         raft_size: users.raft_size,
       })
       .from(users)
-      .where(eq(users.user_id, String(userId)));
+      .where(eq(users.user_id, Number(userId)));
 
     const collectedMaterials = item.category === 'material' ? claimed.quantity : 0;
     const [updatedUser] = await tx
       .update(users)
       .set({ materials: user.materials + collectedMaterials })
-      .where(eq(users.user_id, String(userId)))
+      .where(eq(users.user_id, Number(userId)))
       .returning({
         user_id: users.user_id,
         username: users.username,
         materials: users.materials,
-        hunger: users.hunger,
         raft_size: users.raft_size,
       });
 
     await tx.insert(user_items).values({
-      user_id: String(userId),
+      user_id: Number(userId),
       item_type_id: claimed.item_type_id,
       quantity: claimed.quantity,
       acquired_at: attemptedAt,
     });
 
     await tx.insert(debris_collection_logs).values({
-      user_id: String(userId),
+      user_id: Number(userId),
       debris_id: String(debrisId),
       result: 'accepted',
       reason: '',
@@ -156,5 +154,7 @@ export const collectDebrisByIdAtomic = async (userId, debrisId, attemptedAt = ne
       collected: collectedMaterials,
       raft_size: updatedUser.raft_size,
     };
-  });
+  };
+
+  return executor === db ? db.transaction(operation) : operation(executor);
 };

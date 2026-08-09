@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const clockCss = readFileSync(new URL('../../frontend/src/components/WorldClockBadge.module.css', import.meta.url), 'utf8');
-const gamePageCss = readFileSync(new URL('../../frontend/src/pages/GamePage.module.css', import.meta.url), 'utf8');
+const clockCss = readFileSync(new URL('../../frontend/css/WorldClockBadge.module.css', import.meta.url), 'utf8');
+const gamePageCss = readFileSync(new URL('../../frontend/css/GamePage.module.css', import.meta.url), 'utf8');
 
 describe('world clock layout', () => {
   it('keeps compact clock text inside its bordered badge', () => {

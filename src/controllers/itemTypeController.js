@@ -57,7 +57,6 @@ export const createItemType = async (req, res, next) => {
       item_name: req.body.item_name,
       category: req.body.category,
       material_cost: req.body.material_cost,
-      hunger_restore: req.body.hunger_restore,
       raft_points: req.body.raft_points,
     };
 
@@ -78,7 +77,6 @@ export const patchItemType = async (req, res, next) => {
     if (req.body.item_name !== undefined) data.item_name = req.body.item_name;
     if (req.body.category !== undefined) data.category = req.body.category;
     if (req.body.material_cost !== undefined) data.material_cost = req.body.material_cost;
-    if (req.body.hunger_restore !== undefined) data.hunger_restore = req.body.hunger_restore;
     if (req.body.raft_points !== undefined) data.raft_points = req.body.raft_points;
 
     // Reject the request early if nothing was sent — avoids firing a no-op UPDATE against the DB

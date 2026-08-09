@@ -13,7 +13,7 @@ raftUpgradeRouter.post(
   '/',
   verifyToken,
   [
-    body('user_id').notEmpty().withMessage('user_id is required'),
+    body('user_id').isInt({ min: 1 }).withMessage('user_id must be a positive integer'),
     body('upgrade_type').notEmpty().withMessage('upgrade_type is required'),
     body('material_cost').isInt({ min: 0 }).withMessage('material_cost must be a non-negative integer'),
   ],

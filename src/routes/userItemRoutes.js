@@ -13,7 +13,7 @@ userItemRouter.post(
   '/',
   verifyToken,
   [
-    body('user_id').notEmpty().withMessage('user_id is required'),
+    body('user_id').isInt({ min: 1 }).withMessage('user_id must be a positive integer'),
     body('item_type_id').isInt({ min: 1 }).withMessage('item_type_id must be a positive integer'),
     body('quantity').optional().isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
     body('acquired_at').optional().isString().notEmpty().withMessage('acquired_at must be a non-empty string'),

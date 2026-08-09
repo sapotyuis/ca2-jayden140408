@@ -8,7 +8,7 @@ import {
   getDebrisRenderKind,
   getWorldMotionClass,
   worldToCss,
-} from '../../frontend/src/ocean/domOceanModel.js';
+} from '../../frontend/js/ocean/domOceanModel.js';
 
 describe('DOM ocean world model', () => {
   it('maps the camera centre to the centre of the DOM viewport', () => {
@@ -28,7 +28,6 @@ describe('DOM ocean world model', () => {
 
   it('gives real debris distinct silhouettes without inventing item types', () => {
     expect(getDebrisRenderKind('Wood Plank')).toBe('wood');
-    expect(getDebrisRenderKind('Grilled Fish')).toBe('fish');
     expect(getDebrisRenderKind('Plastic')).toBe('bottle');
     expect(getDebrisRenderKind('Ancient Compass')).toBe('crate');
   });
@@ -72,7 +71,7 @@ describe('DOM ocean world model', () => {
     expect(getReferenceRaftProps({
       raftSize: 3,
       upgrades: ['Sail', 'Net Launcher', 'Spear Rack'],
-      debris: [{ itemName: 'Fish' }],
+      debris: [{ itemName: 'Collection Hook' }],
     })).toEqual({
       showBucket: true,
       showPlanter: true,

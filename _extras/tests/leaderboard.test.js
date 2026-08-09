@@ -1,4 +1,4 @@
-import { rankSurvivors } from '../../frontend/src/lib/leaderboard.js';
+import { rankSurvivors } from '../../frontend/js/lib/leaderboard.js';
 
 describe('rankSurvivors', () => {
   it('ranks by raft size, then materials, then username', () => {

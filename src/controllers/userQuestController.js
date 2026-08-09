@@ -20,7 +20,7 @@ const requireOwner = (record, userId) => {
 export const getAllUserQuests = async (req, res, next) => {
   try {
     const filters = {};
-    if (req.query.user_id !== undefined) filters.user_id = String(req.query.user_id);
+    if (req.query.user_id !== undefined) filters.user_id = parsePositiveInt(req.query.user_id, 'user_id');
     if (req.query.quest_id !== undefined) filters.quest_id = parsePositiveInt(req.query.quest_id, 'quest_id');
     if (req.query.status !== undefined) filters.status = req.query.status;
 
@@ -47,7 +47,9 @@ export const getUserQuestById = async (req, res, next) => {
 /** POST /api/user-quests — assign a quest to the authenticated survivor. */
 export const createUserQuest = async (req, res, next) => {
   try {
-    if (req.body.user_id !== req.user.user_id) {
+    // user_id is now an integer, and a JSON body may send it as "1" or 1 — compare numerically
+    // so a well-formed request is not rejected purely over its JSON type.
+    if (Number(req.body.user_id) !== req.user.user_id) {
       throw new AppError('VALIDATION_ERROR', 'user_id must match the authenticated user');
     }
 

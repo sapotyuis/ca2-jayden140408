@@ -14,7 +14,6 @@ const publicUserFields = {
   user_id: users.user_id,
   username: users.username,
   materials: users.materials,
-  hunger: users.hunger,
   raft_size: users.raft_size,
   lastLogin: users.lastLogin,
 };
@@ -28,8 +27,8 @@ export const findUnexpectedEvents = async () => {
 };
 
 /** Get one active unexpected event by ID; ordinary ocean events cannot be resolved here. */
-export const findUnexpectedEventById = async (eventId) => {
-  const rows = await db
+export const findUnexpectedEventById = async (eventId, executor = db) => {
+  const rows = await executor
     .select()
     .from(ocean_events)
     .where(and(
@@ -44,12 +43,12 @@ export const findUnexpectedEventById = async (eventId) => {
  * Resolve one event atomically. The event ID is supplied by the client, but every consequence
  * is read from the server's event row and applied inside this transaction.
  */
-export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Date().toISOString() }) => {
-  return await db.transaction(async (tx) => {
+export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Date().toISOString(), executor = db }) => {
+  const operation = async (tx) => {
     const [user] = await tx
       .select(publicUserFields)
       .from(users)
-      .where(eq(users.user_id, String(userId)));
+      .where(eq(users.user_id, Number(userId)));
 
     if (!user) return null;
 
@@ -57,7 +56,7 @@ export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Da
       .select({ occurred_at: user_events.occurred_at })
       .from(user_events)
       .where(and(
-        eq(user_events.user_id, String(userId)),
+        eq(user_events.user_id, Number(userId)),
         eq(user_events.event_id, event.event_id),
       ))
       .orderBy(desc(user_events.occurred_at))
@@ -74,7 +73,7 @@ export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Da
     const upgradeRows = await tx
       .select({ upgrade_type: raft_upgrades.upgrade_type })
       .from(raft_upgrades)
-      .where(eq(raft_upgrades.user_id, String(userId)));
+      .where(eq(raft_upgrades.user_id, Number(userId)));
     const userUpgrades = upgradeRows.map((row) => row.upgrade_type);
 
     const inventoryRows = event.loss_item_type_id
@@ -82,7 +81,7 @@ export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Da
         .select()
         .from(user_items)
         .where(and(
-          eq(user_items.user_id, String(userId)),
+          eq(user_items.user_id, Number(userId)),
           eq(user_items.item_type_id, event.loss_item_type_id),
         ))
         .orderBy(asc(user_items.acquired_at), asc(user_items.user_item_id))
@@ -113,7 +112,7 @@ export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Da
       if (remainingQuantity <= 0) {
         await tx.delete(user_items).where(and(
           eq(user_items.user_item_id, row.user_item_id),
-          eq(user_items.user_id, String(userId)),
+          eq(user_items.user_id, Number(userId)),
         ));
       } else {
         await tx
@@ -121,26 +120,20 @@ export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Da
           .set({ quantity: remainingQuantity })
           .where(and(
             eq(user_items.user_item_id, row.user_item_id),
-            eq(user_items.user_id, String(userId)),
+            eq(user_items.user_id, Number(userId)),
           ));
       }
     }
 
-    const nextHunger = Math.min(100, Math.max(0, user.hunger + outcome.hungerChange));
-    const [updatedUser] = await tx
-      .update(users)
-      .set({ hunger: nextHunger })
-      .where(eq(users.user_id, String(userId)))
-      .returning(publicUserFields);
+    const updatedUser = user;
 
     const [eventHistory] = await tx
       .insert(user_events)
       .values({
-        user_id: String(userId),
+        user_id: Number(userId),
         event_id: event.event_id,
         outcome: outcome.message,
         materials_change: 0,
-        hunger_change: outcome.hungerChange,
         reward_item_quantity: 0,
         prevented: outcome.prevented ? 1 : 0,
         lost_item_type_id: outcome.lostItemTypeId,
@@ -158,5 +151,7 @@ export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Da
       lostItemName: lossItem?.item_name || null,
       cooldownSecondsRemaining: 0,
     };
-  });
+  };
+
+  return executor === db ? db.transaction(operation) : operation(executor);
 };

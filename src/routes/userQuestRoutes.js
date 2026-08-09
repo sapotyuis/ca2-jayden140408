@@ -15,7 +15,7 @@ userQuestRouter.post(
   verifyToken,
   loadCurrentUser,
   [
-    body('user_id').notEmpty().withMessage('user_id is required'),
+    body('user_id').isInt({ min: 1 }).withMessage('user_id must be a positive integer'),
     body('quest_id').isInt({ min: 1 }).withMessage('quest_id must be a positive integer'),
     body('progress').optional().isInt({ min: 0 }).withMessage('progress must be non-negative'),
     body('status').optional().isIn(['available', 'active', 'completed', 'claimed']).withMessage('status is invalid'),

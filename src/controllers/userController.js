@@ -8,7 +8,7 @@
 import { findAllUsers, findLeaderboardUsers, findUserById } from '../models/userModel.js';
 import { AppError } from '../utils/_errors.js';
 
-/** Parses a query param to a positive integer or throws VALIDATION_ERROR. */
+/** Parses a route or query param to a positive integer or throws VALIDATION_ERROR. */
 const parsePositiveInt = (value, fieldName) => {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0) {
@@ -55,10 +55,9 @@ export const getLeaderboard = async (req, res, next) => {
 /** GET /api/users/:user_id — a single survivor's public profile. */
 export const getUserById = async (req, res, next) => {
   try {
-    const userId = String(req.params.user_id || '').trim();
-    if (userId === '') {
-      throw new AppError('VALIDATION_ERROR', 'user_id must be a non-empty string');
-    }
+    // user_id is an integer PK, so a non-numeric segment is a malformed request (400),
+    // not a survivor who happens not to exist (404).
+    const userId = parsePositiveInt(req.params.user_id, 'user_id');
 
     const user = await findUserById(userId);
     if (!user) {

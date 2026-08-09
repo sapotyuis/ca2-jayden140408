@@ -15,7 +15,7 @@ questRouter.post(
   [
     body('title').notEmpty().withMessage('title is required'),
     body('description').notEmpty().withMessage('description is required'),
-    body('quest_type').isIn(['collect_debris', 'craft_food', 'survive_event']).withMessage('quest_type is invalid'),
+    body('quest_type').isIn(['collect_debris', 'survive_event']).withMessage('quest_type is invalid'),
     body('target_value').optional().isInt({ min: 1 }).withMessage('target_value must be a positive integer'),
     body('reward_materials').optional().isInt({ min: 0 }).withMessage('reward_materials must be non-negative'),
     body('reward_item_type_id').optional().isInt({ min: 1 }).withMessage('reward_item_type_id must be a positive integer'),
@@ -33,7 +33,7 @@ questRouter.patch(
   [
     body('title').optional().notEmpty().withMessage('title must be non-empty'),
     body('description').optional().notEmpty().withMessage('description must be non-empty'),
-    body('quest_type').optional().isIn(['collect_debris', 'craft_food', 'survive_event']).withMessage('quest_type is invalid'),
+    body('quest_type').optional().isIn(['collect_debris', 'survive_event']).withMessage('quest_type is invalid'),
     body('target_value').optional().isInt({ min: 1 }).withMessage('target_value must be a positive integer'),
     body('reward_materials').optional().isInt({ min: 0 }).withMessage('reward_materials must be non-negative'),
     body('reward_item_type_id').optional().isInt({ min: 1 }).withMessage('reward_item_type_id must be a positive integer'),

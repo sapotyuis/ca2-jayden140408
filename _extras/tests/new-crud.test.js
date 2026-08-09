@@ -15,8 +15,9 @@ app.use('/api/ocean-events', oceanEventRouter);
 app.use('/api/user-events', userEventRouter);
 app.use(errorHandler);
 
-const survivorId = 'rafter_SurvivorJay';
-const otherSurvivorId = 'rafter_Ocean';
+// user_id is an autoincrement integer; the seed inserts SurvivorJay first and Ocean second.
+const survivorId = 1;
+const otherSurvivorId = 2;
 
 const createToken = (userId) => new Promise((resolve, reject) => {
   const response = {
@@ -97,7 +98,6 @@ describe('Ocean event CRUD', () => {
         risk_percent: 15,
         min_materials: 1,
         max_materials: 4,
-        hunger_delta: -2,
       });
     expect(created.status).toBe(201);
 
@@ -120,7 +120,7 @@ describe('Ocean event CRUD', () => {
 
 describe('User quest CRUD', () => {
   it('supports list, detail, create, patch, and delete for the authenticated owner', async () => {
-    const list = await request(app).get('/api/user-quests?user_id=rafter_SurvivorJay');
+    const list = await request(app).get(`/api/user-quests?user_id=${survivorId}`);
     expect(list.status).toBe(200);
 
     // quest_id 1 is skipped here — the seed data already gives survivorId a progress row for
@@ -157,7 +157,6 @@ describe('User event CRUD', () => {
         event_id: 1,
         outcome: 'Found a test bottle.',
         materials_change: 2,
-        hunger_change: -1,
         reward_item_type_id: 9,
         reward_item_quantity: 1,
         occurred_at: '2026-01-15T09:00:00.000Z',

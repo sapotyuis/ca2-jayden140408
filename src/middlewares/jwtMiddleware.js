@@ -33,6 +33,7 @@ export const generateToken = (req, res, next) => {
 };
 
 export const sendToken = (req, res, next) => {
+    console.log('[AUTH] login success', { user_id: res.locals.userId });
     res.status(200).json({
         message: res.locals.message,
         token: res.locals.token,

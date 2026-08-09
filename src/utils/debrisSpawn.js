@@ -1,7 +1,7 @@
 /**
  * How far from the origin salvage may spawn.
  *
- * This must stay comfortably inside the renderer's WORLD_LIMIT (frontend/src/ocean/
+ * This must stay comfortably inside the renderer's WORLD_LIMIT (frontend/js/ocean/
  * createPixelOceanScene.js). The raft collects with its deck, which sits ahead of the hull, so a
  * piece spawned right on the edge of the sailable area could never be driven over. The renderer
  * currently sails to +/-180, which leaves this radius roughly 20 units of slack.
@@ -34,7 +34,7 @@ const buildSpawnField = (radius) => {
 
 export const DEBRIS_SPAWN_POSITIONS = buildSpawnField(DEBRIS_FIELD_RADIUS);
 
-export const STARTER_DEBRIS_ITEMS = ['Wood Plank', 'Plastic', 'Rope', 'Grilled Fish', 'Coconut'];
+export const STARTER_DEBRIS_ITEMS = ['Wood Plank', 'Plastic', 'Rope', 'Paddle', 'Collection Hook'];
 
 const positionKey = ([x, z]) => `${x}:${z}`;
 

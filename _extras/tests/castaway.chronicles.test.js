@@ -43,12 +43,12 @@ describe('GET /api/users', () => {
 
 describe('GET /api/users/:user_id', () => {
   it('should return 200 with a user object for a valid id', async () => {
-    const res = await request(app).get('/api/users/rafter_SurvivorJay');
+    // user_id 1 is SurvivorJay — the first row the seed inserts.
+    const res = await request(app).get('/api/users/1');
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('user_id');
     expect(res.body).toHaveProperty('username');
     expect(res.body).toHaveProperty('materials');
-    expect(res.body).toHaveProperty('hunger');
     expect(res.body).toHaveProperty('raft_size');
   });
 
@@ -69,7 +69,6 @@ describe('POST /api/users', () => {
     expect(res.body).toHaveProperty('user_id');
     expect(res.body.username).toBe('NewSurvivor');
     expect(res.body.materials).toBe(0);
-    expect(res.body.hunger).toBe(100);
     expect(res.body.raft_size).toBe(1);
   });
 

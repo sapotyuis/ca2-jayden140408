@@ -17,7 +17,6 @@ export const calculateUnexpectedEventOutcome = ({
     .filter((item) => item.item_type_id === lossItemTypeId)
     .reduce((total, item) => total + Math.max(0, Number(item.quantity) || 0), 0);
   const lostItemQuantity = prevented ? 0 : Math.min(requestedLossQuantity, availableQuantity);
-  const hungerChange = prevented ? 0 : Number(event.hunger_delta) || 0;
   const outcome = prevented ? 'prevented' : lostItemQuantity > 0 ? 'item_loss' : 'no_item_lost';
   const message = prevented
     ? `${event.event_name} was stopped by your ${protectionUpgradeType}.`
@@ -30,7 +29,6 @@ export const calculateUnexpectedEventOutcome = ({
     protectionUpgradeType,
     lostItemTypeId: lostItemQuantity > 0 ? lossItemTypeId : null,
     lostItemQuantity,
-    hungerChange,
     outcome,
     message,
   };

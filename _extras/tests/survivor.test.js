@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SURVIVOR_HEIGHT, SURVIVOR_STATES, SURVIVOR_WIDTH, getSurvivorFrame, resolveSurvivorState } from '../../frontend/src/ocean/survivor.js';
+import { SURVIVOR_HEIGHT, SURVIVOR_STATES, SURVIVOR_WIDTH, getSurvivorFrame, resolveSurvivorState } from '../../frontend/js/ocean/survivor.js';
 
 describe('survivor state machine', () => {
   it('only ever returns a declared state', () => {

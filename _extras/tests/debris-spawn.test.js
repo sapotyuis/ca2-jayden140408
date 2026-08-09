@@ -40,8 +40,8 @@ describe('server debris spawning', () => {
   });
 
   it('cycles to the next starter item after a collection', () => {
-    expect(chooseStarterItemName({ recentlyClaimedItemName: 'Coconut' })).toBe('Wood Plank');
+    expect(chooseStarterItemName({ recentlyClaimedItemName: 'Collection Hook' })).toBe('Wood Plank');
     expect(chooseStarterItemName({ recentlyClaimedItemName: 'Wood Plank' })).toBe('Plastic');
-    expect(chooseStarterItemName({ activeCount: 4 })).toBe('Coconut');
+    expect(chooseStarterItemName({ activeCount: 4 })).toBe('Collection Hook');
   });
 });

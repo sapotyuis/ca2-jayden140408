@@ -5,7 +5,7 @@ import {
   getWorldClockKey,
   getOrCreateWorldStart,
   getWorldTime,
-} from '../../frontend/src/lib/worldClock.js';
+} from '../../frontend/js/lib/worldClock.js';
 
 describe('world clock', () => {
   it('starts in night and counts down three minutes', () => {
@@ -62,7 +62,7 @@ describe('world clock', () => {
   });
 
   it('returns a user-scoped storage key', () => {
-    expect(getWorldClockKey('rafter_SurvivorJay')).toBe('cc_world_clock_rafter_SurvivorJay');
+    expect(getWorldClockKey(1)).toBe('cc_world_clock_1');
   });
 
   it('falls back to a fresh night when timestamps are invalid', () => {
@@ -80,7 +80,7 @@ describe('world clock', () => {
       getItem: (key) => values.get(key) ?? null,
       setItem: (key, value) => values.set(key, value),
     };
-    const key = getWorldClockKey('rafter_SurvivorJay');
+    const key = getWorldClockKey(1);
 
     expect(getOrCreateWorldStart(storage, key, 1234)).toBe(1234);
     expect(getOrCreateWorldStart(storage, key, 9999)).toBe(1234);

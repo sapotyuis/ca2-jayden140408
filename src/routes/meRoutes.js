@@ -14,13 +14,22 @@ import {
   getMyCollectionLogs,
   getMyDebris,
   getMyUnexpectedEvents,
-  resolveMyUnexpectedEvent,
-  collectDebris,
-  performRaftUpgrade,
-  craftItem,
   getMyQuests,
-  claimMyQuestReward,
 } from '../controllers/meController.js';
+import {
+  collectDebrisPipeline,
+  craftItemPipeline,
+  raftUpgradePipeline,
+  unexpectedEventPipeline,
+  questRewardPipeline,
+} from '../controllers/gameplayStepsController.js';
+import {
+  sendCollectedDebris,
+  sendCraftedItem,
+  sendRaftUpgrade,
+  sendUnexpectedEvent,
+  sendQuestReward,
+} from '../controllers/meActionResponseController.js';
 
 export const meRouter = Router();
 
@@ -41,7 +50,6 @@ meRouter.patch(
   '/',
   [
     body('username').optional().notEmpty().withMessage('Username cannot be empty'),
-    body('hunger').optional().isInt({ min: 0, max: 100 }).withMessage('Hunger must be between 0 and 100'),
   ],
   handleValidationErrors,
   updateMyProfile
@@ -59,22 +67,24 @@ meRouter.get('/debris', getMyDebris);
 meRouter.get('/unexpected-events', getMyUnexpectedEvents);
 
 // Game actions
-meRouter.post('/debris/:debris_id/collect', collectDebris);
+meRouter.post('/debris/:debris_id/collect', collectDebrisPipeline, sendCollectedDebris);
 // Compatibility path: it now requires a server-issued debris_id in the body and cannot grant random loot.
-meRouter.post('/collect-debris', collectDebris);
+meRouter.post('/collect-debris', collectDebrisPipeline, sendCollectedDebris);
 
 meRouter.post(
   '/unexpected-events/resolve',
   [body('event_id').isInt({ min: 1 }).withMessage('event_id must be a positive integer')],
   handleValidationErrors,
-  resolveMyUnexpectedEvent
+  unexpectedEventPipeline,
+  sendUnexpectedEvent
 );
 
 meRouter.post(
   '/craft',
   [body('result_item_type_id').isInt({ min: 1 }).withMessage('result_item_type_id must be a positive integer')],
   handleValidationErrors,
-  craftItem
+  craftItemPipeline,
+  sendCraftedItem
 );
 
 meRouter.post(
@@ -87,7 +97,8 @@ meRouter.post(
       .withMessage(`upgrade_type must be one of: ${VALID_UPGRADE_TYPES.join(', ')}`),
   ],
   handleValidationErrors,
-  performRaftUpgrade
+  raftUpgradePipeline,
+  sendRaftUpgrade
 );
 
-meRouter.post('/quests/:quest_id/claim', claimMyQuestReward);
+meRouter.post('/quests/:quest_id/claim', questRewardPipeline, sendQuestReward);

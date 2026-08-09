@@ -15,9 +15,8 @@ itemTypeRouter.post(
   verifyToken,
   [
     body('item_name').notEmpty().withMessage('item_name is required'),
-    body('category').isIn(['material', 'food', 'equipment']).withMessage('category must be material, food, or equipment'),
+    body('category').isIn(['material', 'equipment']).withMessage('category must be material or equipment'),
     body('material_cost').isInt({ min: 0 }).withMessage('material_cost must be a non-negative integer'),
-    body('hunger_restore').isInt({ min: 0 }).withMessage('hunger_restore must be a non-negative integer'),
     body('raft_points').isInt({ min: 0 }).withMessage('raft_points must be a non-negative integer'),
   ],
   handleValidationErrors,
@@ -30,9 +29,8 @@ itemTypeRouter.patch(
   verifyToken,
   [
     body('item_name').optional().notEmpty().withMessage('item_name must be a non-empty string'),
-    body('category').optional().isIn(['material', 'food', 'equipment']).withMessage('category must be material, food, or equipment'),
+    body('category').optional().isIn(['material', 'equipment']).withMessage('category must be material or equipment'),
     body('material_cost').optional().isInt({ min: 0 }).withMessage('material_cost must be a non-negative integer'),
-    body('hunger_restore').optional().isInt({ min: 0 }).withMessage('hunger_restore must be a non-negative integer'),
     body('raft_points').optional().isInt({ min: 0 }).withMessage('raft_points must be a non-negative integer'),
   ],
   handleValidationErrors,

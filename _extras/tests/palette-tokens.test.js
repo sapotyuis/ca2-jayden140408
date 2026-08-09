@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { CSS_PALETTE_TOKENS, PHASE_PALETTES, RAMPS, applyAtmosphere, mixHex, resolvePhase } from '../../frontend/src/ocean/palette.js';
+import { CSS_PALETTE_TOKENS, PHASE_PALETTES, RAMPS, applyAtmosphere, mixHex, resolvePhase } from '../../frontend/js/ocean/palette.js';
 
-const tokensCss = readFileSync(fileURLToPath(new URL('../../frontend/src/styles/tokens.css', import.meta.url)), 'utf8');
+const tokensCss = readFileSync(fileURLToPath(new URL('../../frontend/css/tokens.css', import.meta.url)), 'utf8');
 
 /** Pulls `--name: #value;` declarations out of the stylesheet. Only literal hexes — the semantic
  *  layer is all `var(...)` references and is deliberately not part of the mirror. */

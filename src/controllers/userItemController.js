@@ -21,7 +21,7 @@ export const getAllUserItems = async (req, res, next) => {
     const filters = {};
 
     if (req.query.user_id !== undefined) {
-      filters.user_id = String(req.query.user_id);
+      filters.user_id = parsePositiveInt(req.query.user_id, 'user_id');
     }
 
     if (req.query.category !== undefined) {
@@ -67,7 +67,9 @@ export const createUserItem = async (req, res, next) => {
     }
 
     const data = {
-      user_id: req.body.user_id,
+      // Take the id from the row we just loaded, not from the body — it is already the
+      // integer the column expects, whatever JSON type the client sent.
+      user_id: user.user_id,
       item_type_id: req.body.item_type_id,
       quantity: req.body.quantity ?? 1,                            // ?? sets a default only when the value is null/undefined (unlike || which also triggers on 0)
       acquired_at: req.body.acquired_at ?? new Date().toISOString(), // default to current timestamp if not provided

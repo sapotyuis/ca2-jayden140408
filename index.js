@@ -17,13 +17,14 @@ import { oceanEventRouter } from './src/routes/oceanEventRoutes.js';
 import { userEventRouter } from './src/routes/userEventRoutes.js';
 import { setupSwagger } from './_extras/api-docs/swagger.js';
 import { errorHandler } from './src/utils/_errors.js';
+import { requestErrorLogger, requestIdMiddleware, requestLogger } from './src/middlewares/requestIdMiddleware.js';
 
 const app = express();
 const entryPoint = fileURLToPath(import.meta.url);
 const isVercel = Boolean(process.env.VERCEL);
 const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === entryPoint;
 
-// The React frontend is a separate Vite project in ./frontend. In development it runs on its
+// The vanilla JavaScript frontend is a separate Vite project in ./frontend. In development it runs on its
 // own dev server and proxies /api here (see frontend/vite.config.js). If someone has built it
 // (`cd frontend && npm run build`), we also serve that production bundle from this origin so the
 // whole game is reachable from one server — handy for a quick demo without two terminals.
@@ -36,9 +37,11 @@ const hasBuiltFrontend = !isVercel && fs.existsSync(path.join(staticPath, 'index
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(requestIdMiddleware);
 if (hasBuiltFrontend) {
   app.use(express.static(staticPath));
 }
+app.use(requestLogger);
 
 // Routes
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
@@ -65,7 +68,7 @@ if (!isVercel) {
   await setupSwagger(app);
 }
 
-// SPA fallback: when a production build is being served, any non-API GET returns the React
+// SPA fallback: when a production build is being served, any non-API GET returns the vanilla
 // app's index.html so client-side routes (/camp, /voyage) resolve on a hard refresh instead of
 // 404ing. API and docs paths are left alone so they keep their real responses.
 if (hasBuiltFrontend) {
@@ -76,6 +79,7 @@ if (hasBuiltFrontend) {
 }
 
 // Global error handler (must be last)
+app.use(requestErrorLogger);
 app.use(errorHandler);
 
 if (isDirectExecution && !isVercel) {

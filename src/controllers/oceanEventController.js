@@ -89,7 +89,6 @@ export const createOceanEvent = async (req, res, next) => {
       risk_percent: req.body.risk_percent ?? 0,
       min_materials: minimum,
       max_materials: maximum,
-      hunger_delta: req.body.hunger_delta ?? 0,
       reward_item_quantity: req.body.reward_item_quantity ?? 0,
       loss_item_quantity: lossQuantity,
       cooldown_seconds: req.body.cooldown_seconds ?? 60,
@@ -126,7 +125,6 @@ export const patchOceanEvent = async (req, res, next) => {
     if (req.body.risk_percent !== undefined) data.risk_percent = req.body.risk_percent;
     if (req.body.min_materials !== undefined) data.min_materials = req.body.min_materials;
     if (req.body.max_materials !== undefined) data.max_materials = req.body.max_materials;
-    if (req.body.hunger_delta !== undefined) data.hunger_delta = req.body.hunger_delta;
     if (req.body.reward_item_quantity !== undefined) data.reward_item_quantity = req.body.reward_item_quantity;
     if (req.body.prevention_upgrade_type !== undefined) data.prevention_upgrade_type = req.body.prevention_upgrade_type;
     if (req.body.loss_item_type_id !== undefined) {

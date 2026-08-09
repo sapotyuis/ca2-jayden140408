@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BAYER_4X4, DITHER_LEVELS, DITHER_SIZE, SEAM_LEVELS, clampLevel, ellipseRimSpans, ellipseSpans, isDitherCellSet, planDitherRamp, ratioToLevel } from '../../frontend/src/ocean/dither.js';
+import { BAYER_4X4, DITHER_LEVELS, DITHER_SIZE, SEAM_LEVELS, clampLevel, ellipseRimSpans, ellipseSpans, isDitherCellSet, planDitherRamp, ratioToLevel } from '../../frontend/js/ocean/dither.js';
 
 const coverageAtLevel = (level) => {
   let set = 0;

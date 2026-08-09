@@ -1,11 +1,10 @@
 import { sqliteTable, text, integer, real, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('users', {
-  user_id: text('user_id').primaryKey(),
+  user_id: integer('user_id').primaryKey({autoIncrement: true}),
   username: text('username').notNull().unique(),
   password: text('password').notNull(),
   materials: integer('materials').notNull().default(0),
-  hunger: integer('hunger').notNull().default(100),
   raft_size: integer('raft_size').notNull().default(1),
   energy: integer('energy').notNull().default(100),
   experience: integer('experience').notNull().default(0),
@@ -19,7 +18,6 @@ export const item_types = sqliteTable('item_types', {
   item_name: text('item_name').notNull(),
   category: text('category').notNull(),
   material_cost: integer('material_cost').notNull(),
-  hunger_restore: integer('hunger_restore').notNull(),
   raft_points: integer('raft_points').notNull(),
   description: text('description').notNull().default(''),
   rarity: text('rarity').notNull().default('common'),
@@ -27,7 +25,7 @@ export const item_types = sqliteTable('item_types', {
 
 export const user_items = sqliteTable('user_items', {
   user_item_id: integer('user_item_id').primaryKey({autoIncrement: true}),
-  user_id: text('user_id').notNull().references(() => users.user_id, { onUpdate: 'cascade' }),
+  user_id: integer('user_id').notNull().references(() => users.user_id),
   item_type_id: integer('item_type_id').notNull().references(() => item_types.item_type_id),
   quantity: integer('quantity').notNull().default(1),
   acquired_at: text('acquired_at').notNull(),
@@ -36,7 +34,7 @@ export const user_items = sqliteTable('user_items', {
 /** Server-owned floating debris. A non-null claimed_at makes a row collectible only once. */
 export const debris = sqliteTable('debris', {
   debris_id: text('debris_id').primaryKey(),
-  user_id: text('user_id').notNull().references(() => users.user_id, { onUpdate: 'cascade' }),
+  user_id: integer('user_id').notNull().references(() => users.user_id),
   item_type_id: integer('item_type_id').notNull().references(() => item_types.item_type_id),
   quantity: integer('quantity').notNull().default(1),
   x_position: real('x_position').notNull(),
@@ -48,7 +46,7 @@ export const debris = sqliteTable('debris', {
 /** Server-side audit trail for every debris collection attempt. */
 export const debris_collection_logs = sqliteTable('debris_collection_logs', {
   collection_log_id: integer('collection_log_id').primaryKey({autoIncrement: true}),
-  user_id: text('user_id').notNull().references(() => users.user_id, { onUpdate: 'cascade' }),
+  user_id: integer('user_id').notNull().references(() => users.user_id),
   debris_id: text('debris_id'),
   result: text('result').notNull(),
   reason: text('reason').notNull().default(''),
@@ -66,7 +64,7 @@ export const crafting_recipes = sqliteTable('crafting_recipes', {
 
 export const raft_upgrades = sqliteTable('raft_upgrades', {
   upgrade_id: integer('upgrade_id').primaryKey({autoIncrement: true}),
-  user_id: text('user_id').notNull().references(() => users.user_id, { onUpdate: 'cascade' }),
+  user_id: integer('user_id').notNull().references(() => users.user_id),
   upgrade_type: text('upgrade_type').notNull(),
   material_cost: integer('material_cost').notNull(),
   applied_at: text('applied_at').notNull().$defaultFn(() => new Date().toISOString()),
@@ -89,7 +87,7 @@ export const quests = sqliteTable('quests', {
 /** Per-survivor quest progress and claim state. */
 export const user_quests = sqliteTable('user_quests', {
   user_quest_id: integer('user_quest_id').primaryKey({autoIncrement: true}),
-  user_id: text('user_id').notNull().references(() => users.user_id, { onUpdate: 'cascade' }),
+  user_id: integer('user_id').notNull().references(() => users.user_id),
   quest_id: integer('quest_id').notNull().references(() => quests.quest_id),
   progress: integer('progress').notNull().default(0),
   status: text('status').notNull().default('available'),
@@ -113,7 +111,6 @@ export const ocean_events = sqliteTable('ocean_events', {
   risk_percent: integer('risk_percent').notNull().default(0),
   min_materials: integer('min_materials').notNull().default(0),
   max_materials: integer('max_materials').notNull().default(0),
-  hunger_delta: integer('hunger_delta').notNull().default(0),
   reward_item_type_id: integer('reward_item_type_id').references(() => item_types.item_type_id),
   reward_item_quantity: integer('reward_item_quantity').notNull().default(0),
   prevention_upgrade_type: text('prevention_upgrade_type'),
@@ -126,11 +123,10 @@ export const ocean_events = sqliteTable('ocean_events', {
 /** History of the random ocean events a survivor has encountered. */
 export const user_events = sqliteTable('user_events', {
   user_event_id: integer('user_event_id').primaryKey({autoIncrement: true}),
-  user_id: text('user_id').notNull().references(() => users.user_id, { onUpdate: 'cascade' }),
+  user_id: integer('user_id').notNull().references(() => users.user_id),
   event_id: integer('event_id').notNull().references(() => ocean_events.event_id),
   outcome: text('outcome').notNull(),
   materials_change: integer('materials_change').notNull().default(0),
-  hunger_change: integer('hunger_change').notNull().default(0),
   reward_item_type_id: integer('reward_item_type_id').references(() => item_types.item_type_id),
   reward_item_quantity: integer('reward_item_quantity').notNull().default(0),
   prevented: integer('prevented').notNull().default(0),
