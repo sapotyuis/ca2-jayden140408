@@ -106,6 +106,25 @@ describe('whitepaper JWT middleware', () => {
     expect(verifyResponse.locals.tokenTimestamp).toBeTruthy();
   });
 
+  it('normalizes a string user id back to a number during verification', async () => {
+    // Sign a legacy-shaped payload directly so this specifically tests verifyToken's conversion.
+    const token = jwt.sign(
+      { userId: '1', timestamp: new Date() },
+      process.env.JWT_SECRET_KEY,
+      { algorithm: process.env.JWT_ALGORITHM, expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+
+    const verifyResponse = createResponse();
+    const verifyResult = await runMiddleware(
+      verifyToken,
+      { headers: { authorization: `Bearer ${token}` } },
+      verifyResponse
+    );
+
+    expect(verifyResult.type).toBe('next');
+    expect(verifyResponse.locals.userId).toBe(1);
+  });
+
   it('uses the whitepaper responses for missing and invalid tokens', async () => {
     const missingResponse = createResponse();
     const missingResult = await runMiddleware(verifyToken, { headers: {} }, missingResponse);

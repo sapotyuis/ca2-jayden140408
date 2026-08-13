@@ -9,7 +9,7 @@ const tokenAlgorithm = process.env.JWT_ALGORITHM;
 
 export const generateToken = (req, res, next) => {
     const payload = {
-        userId: res.locals.userId,
+        userId: Number(res.locals.userId),
         timestamp: new Date(),
     };
 
@@ -61,7 +61,12 @@ export const verifyToken = (req, res, next) => {
             return res.status(401).json({ error: 'Invalid token' });
         }
 
-        res.locals.userId = decoded.userId;
+        const userId = Number(decoded.userId);
+        if (!Number.isInteger(userId) || userId < 1) {
+            return res.status(401).json({ error: 'Invalid token' });
+        }
+
+        res.locals.userId = userId;
         res.locals.tokenTimestamp = decoded.timestamp;
         next();
     };

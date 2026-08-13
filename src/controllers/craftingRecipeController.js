@@ -51,20 +51,35 @@ export const getCraftingRecipeById = async (req, res, next) => {
   }
 };
 
-/** Create a new crafting recipe. Validation rules are on the route; results checked here. */
-export const createCraftingRecipe = async (req, res, next) => {
+/** Verify the result item type before creating a recipe. */
+export const validateRecipeResultItem = async (req, res, next) => {
   try {
-    // Check FKs exist before inserting — skipping this causes the DB to throw a raw constraint error (500)
     const resultItemType = await findItemTypeById(req.body.result_item_type_id);
     if (!resultItemType) {
       throw new AppError('NOT_FOUND', `Item type with id ${req.body.result_item_type_id} not found`);
     }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
 
+/** Verify the ingredient item type before creating a recipe. */
+export const validateRecipeIngredientItem = async (req, res, next) => {
+  try {
     const ingredientItemType = await findItemTypeById(req.body.ingredient_item_type_id);
     if (!ingredientItemType) {
       throw new AppError('NOT_FOUND', `Item type with id ${req.body.ingredient_item_type_id} not found`);
     }
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
 
+/** Create a recipe. This step calls only the recipe insert model. */
+export const createCraftingRecipe = async (req, res, next) => {
+  try {
     const data = {
       result_item_type_id: req.body.result_item_type_id,
       ingredient_item_type_id: req.body.ingredient_item_type_id,

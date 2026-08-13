@@ -1,0 +1,476 @@
+.leaderboard-page-shell {
+  min-height: 100vh;
+  min-height: 100svh;
+  color: var(--parchment);
+}
+
+.leaderboard-page-world {
+  opacity: 0.94;
+}
+
+.leaderboard-page-page {
+  position: relative;
+  z-index: 1;
+  width: min(1140px, 100%);
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: 0 auto;
+  padding: clamp(1.15rem, 3vw, 2.5rem) clamp(1rem, 4vw, 3.75rem) 2rem;
+}
+
+.leaderboard-page-header,
+.leaderboard-page-hero,
+.leaderboard-page-sectionHeading,
+.leaderboard-page-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.leaderboard-page-header {
+  padding-bottom: 1.1rem;
+  border-bottom: 1px solid rgba(216, 176, 106, 0.28);
+}
+
+.leaderboard-page-kicker,
+.leaderboard-page-sectionKicker,
+.leaderboard-page-sortNote,
+.leaderboard-page-rosterCount,
+.leaderboard-page-footer,
+.leaderboard-page-ruleCard span,
+.leaderboard-page-podiumRank,
+.leaderboard-page-table th,
+.leaderboard-page-unit {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.leaderboard-page-kicker {
+  display: block;
+  color: rgba(236, 223, 190, 0.86);
+}
+
+.leaderboard-page-brand {
+  margin-top: 0.35rem;
+  color: var(--parchment);
+  font-family: var(--serif);
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.leaderboard-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.leaderboard-page-backLink,
+.leaderboard-page-retry {
+  color: #3a1f05;
+  background: linear-gradient(180deg, var(--accent-bright), var(--accent));
+  border: 0;
+  border-radius: var(--r-sm);
+  box-shadow: 0 4px 0 var(--accent-deep), 0 8px 16px rgba(201, 118, 31, 0.28);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.65rem 0.9rem;
+  text-transform: uppercase;
+  transition: filter 0.18s ease, transform 0.1s var(--ease-out);
+}
+
+.leaderboard-page-backLink:hover,
+.leaderboard-page-retry:hover {
+  filter: brightness(1.07);
+}
+
+.leaderboard-page-backLink:active,
+.leaderboard-page-retry:active {
+  transform: translateY(3px);
+}
+
+.leaderboard-page-backLink:focus-visible,
+.leaderboard-page-retry:focus-visible {
+  outline: 3px solid var(--accent-bright);
+  outline-offset: 3px;
+}
+
+.leaderboard-page-hero {
+  align-items: flex-end;
+  padding: clamp(2.2rem, 7vw, 5rem) 0 clamp(1.6rem, 4vw, 3rem);
+}
+
+.leaderboard-page-sectionKicker {
+  display: block;
+  margin-bottom: 0.7rem;
+  color: var(--lantern);
+}
+
+.leaderboard-page-hero h1 {
+  max-width: 680px;
+  color: var(--parchment);
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 6vw, 5.2rem);
+  font-weight: 600;
+  line-height: 0.92;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.42);
+}
+
+.leaderboard-page-hero p {
+  max-width: 44rem;
+  margin-top: 1rem;
+  color: rgba(236, 223, 190, 0.76);
+  font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+}
+
+.leaderboard-page-ruleCard {
+  min-width: 170px;
+  padding: 0.85rem 1rem;
+  background: rgba(8, 18, 29, 0.52);
+  border-left: 2px solid var(--accent);
+  color: rgba(236, 223, 190, 0.76);
+}
+
+.leaderboard-page-ruleCard span,
+.leaderboard-page-ruleCard strong,
+.leaderboard-page-ruleCard small {
+  display: block;
+}
+
+.leaderboard-page-ruleCard strong {
+  margin-top: 0.35rem;
+  color: var(--parchment);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+.leaderboard-page-ruleCard small {
+  margin-top: 0.25rem;
+  font-size: 0.68rem;
+}
+
+.leaderboard-page-stateCard,
+.leaderboard-page-podiumSection,
+.leaderboard-page-tableSection {
+  background: linear-gradient(135deg, rgba(10, 25, 39, 0.9), rgba(18, 38, 55, 0.76));
+  border: 1px solid rgba(242, 181, 86, 0.25);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.leaderboard-page-stateCard {
+  display: grid;
+  justify-items: center;
+  gap: 0.8rem;
+  padding: 4rem 1.5rem;
+  text-align: center;
+}
+
+.leaderboard-page-stateCard h2 {
+  color: var(--parchment);
+  font-family: var(--serif);
+  font-size: 1.8rem;
+}
+
+.leaderboard-page-stateCard p {
+  max-width: 32rem;
+  color: rgba(236, 223, 190, 0.76);
+  font-size: 0.88rem;
+}
+
+.leaderboard-page-stateIcon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  color: var(--lantern);
+  border: 1px solid rgba(242, 181, 86, 0.55);
+  border-radius: 50%;
+  font-family: var(--serif);
+  font-size: 1.4rem;
+}
+
+.leaderboard-page-spinner {
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 3px solid rgba(242, 181, 86, 0.2);
+  border-top-color: var(--lantern);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+.leaderboard-page-retry {
+  margin-top: 0.35rem;
+  cursor: pointer;
+}
+
+.leaderboard-page-podiumSection,
+.leaderboard-page-tableSection {
+  padding: clamp(1.15rem, 3vw, 2rem);
+}
+
+.leaderboard-page-tableSection {
+  margin-top: 1.25rem;
+}
+
+.leaderboard-page-sectionHeading {
+  margin-bottom: 1.25rem;
+}
+
+.leaderboard-page-sectionHeading h2 {
+  color: var(--parchment);
+  font-family: var(--serif);
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.38);
+}
+
+.leaderboard-page-rosterCount,
+.leaderboard-page-sortNote {
+  color: rgba(236, 223, 190, 0.78);
+  white-space: nowrap;
+}
+
+.leaderboard-page-podium {
+  display: grid;
+  grid-template-areas: 'second first third';
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.85rem;
+}
+
+.leaderboard-page-podiumCard {
+  position: relative;
+  display: flex;
+  min-height: 150px;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem;
+  overflow: hidden;
+  background: rgba(6, 16, 26, 0.66);
+  border: 1px solid rgba(236, 223, 190, 0.14);
+  border-radius: var(--r-sm);
+}
+
+.leaderboard-page-podiumCard::after {
+  position: absolute;
+  right: -2rem;
+  bottom: -2rem;
+  width: 8rem;
+  height: 8rem;
+  border: 1px solid rgba(242, 181, 86, 0.12);
+  border-radius: 50%;
+  content: '';
+}
+
+.leaderboard-page-place1 { grid-area: first; min-height: 184px; border-color: rgba(242, 181, 86, 0.7); box-shadow: 0 0 28px rgba(242, 163, 60, 0.12); }
+.leaderboard-page-place2 { grid-area: second; }
+.leaderboard-page-place3 { grid-area: third; }
+
+.leaderboard-page-medal {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  place-items: center;
+  color: #3a1f05;
+  background: var(--rope);
+  border-radius: 50%;
+  box-shadow: 0 3px 0 var(--rope-dark);
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.leaderboard-page-place1 .leaderboard-page-medal { background: var(--lantern-bright); box-shadow: 0 3px 0 var(--accent-deep), 0 0 18px rgba(242, 163, 60, 0.4); }
+.leaderboard-page-place3 .leaderboard-page-medal { background: #ae744f; box-shadow: 0 3px 0 #70402d; }
+
+.leaderboard-page-podiumCopy {
+  position: relative;
+  z-index: 1;
+}
+
+.leaderboard-page-podiumRank {
+  color: rgba(236, 223, 190, 0.78);
+}
+
+.leaderboard-page-podiumCopy h3 {
+  margin-top: 0.3rem;
+  overflow: hidden;
+  color: var(--parchment);
+  font-size: clamp(0.95rem, 2vw, 1.25rem);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-page-podiumCopy p {
+  margin-top: 0.45rem;
+  color: rgba(236, 223, 190, 0.76);
+  font-size: 0.75rem;
+}
+
+.leaderboard-page-podiumCopy p strong,
+.leaderboard-page-podiumMaterials {
+  color: var(--lantern);
+}
+
+.leaderboard-page-podiumMaterials {
+  position: relative;
+  z-index: 1;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.leaderboard-page-podiumMaterials small {
+  color: rgba(236, 223, 190, 0.76);
+  font-family: var(--sans);
+  font-size: 0.52rem;
+  letter-spacing: 0.12em;
+}
+
+.leaderboard-page-tableWrap {
+  overflow-x: auto;
+  border: 1px solid rgba(236, 223, 190, 0.12);
+  border-radius: var(--r-sm);
+}
+
+.leaderboard-page-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.leaderboard-page-table thead {
+  background: rgba(3, 9, 15, 0.5);
+}
+
+.leaderboard-page-table th,
+.leaderboard-page-table td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(236, 223, 190, 0.09);
+}
+
+.leaderboard-page-table thead th {
+  color: rgba(236, 223, 190, 0.82);
+  font-size: 0.55rem;
+}
+
+.leaderboard-page-table tbody tr:last-child td,
+.leaderboard-page-table tbody tr:last-child th {
+  border-bottom: 0;
+}
+
+.leaderboard-page-table tbody tr {
+  color: rgba(236, 223, 190, 0.78);
+  transition: background-color 0.18s ease;
+}
+
+.leaderboard-page-table tbody tr:hover {
+  background: rgba(242, 181, 86, 0.07);
+}
+
+.leaderboard-page-table tbody th {
+  color: var(--parchment);
+  font-size: 0.86rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.leaderboard-page-table td {
+  font-size: 0.86rem;
+}
+
+.leaderboard-page-table td strong {
+  color: var(--lantern);
+}
+
+.leaderboard-page-rankNumber {
+  color: var(--lantern);
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.leaderboard-page-unit {
+  color: rgba(236, 223, 190, 0.72);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+}
+
+.leaderboard-page-footer {
+  padding: 1.25rem 0 0;
+  color: rgba(236, 223, 190, 0.78);
+}
+
+.leaderboard-page-footer a {
+  color: var(--lantern);
+  text-decoration: underline;
+  text-decoration-color: rgba(242, 181, 86, 0.35);
+  text-underline-offset: 3px;
+}
+
+.leaderboard-page-footer a:hover {
+  color: var(--lantern-bright);
+}
+
+.leaderboard-page-srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 720px) {
+  .leaderboard-page-header,
+  .leaderboard-page-hero,
+  .leaderboard-page-sectionHeading,
+  .leaderboard-page-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .leaderboard-page-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .leaderboard-page-hero {
+    gap: 1.5rem;
+  }
+
+  .leaderboard-page-ruleCard {
+    width: 100%;
+  }
+
+  .leaderboard-page-podium {
+    grid-template-areas: 'first' 'second' 'third';
+    grid-template-columns: 1fr;
+  }
+
+  .leaderboard-page-podiumCard,
+  .leaderboard-page-place1 {
+    min-height: 0;
+  }
+
+  .leaderboard-page-place2 { grid-area: second; }
+  .leaderboard-page-place3 { grid-area: third; }
+
+  .leaderboard-page-rosterCount,
+  .leaderboard-page-sortNote {
+    margin-top: 0.25rem;
+  }
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BASE_HEIGHT, BASE_WIDTH, MAX_SCALE, pickIntegerScale, resolveViewport } from '../../frontend/js/ocean/pixelScale.js';
+import { BASE_HEIGHT, BASE_WIDTH, MAX_SCALE, pickIntegerScale, resolveViewport } from '../../public/js/ocean/pixelScale.js';
 
 /** Every desktop resolution the brief asks the game to support. */
 const TARGETS = [

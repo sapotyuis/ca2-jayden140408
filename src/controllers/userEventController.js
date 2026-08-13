@@ -17,19 +17,50 @@ const requireOwner = (record, userId) => {
   if (!record || record.user_id !== userId) throw new AppError('NOT_FOUND', 'User event not found');
 };
 
-/** Checks that an optional event reward item exists. */
-const ensureRewardItemExists = async (itemTypeId) => {
-  if (itemTypeId === undefined) return;
-
-  const itemType = await findItemTypeById(itemTypeId);
-  if (!itemType) throw new AppError('NOT_FOUND', `Item type with id ${itemTypeId} not found`);
+/** Verify that the referenced catalogue event exists. */
+export const validateUserEventSource = async (req, res, next) => {
+  try {
+    const event = await findOceanEventById(req.body.event_id);
+    if (!event) throw new AppError('NOT_FOUND', `Ocean event with id ${req.body.event_id} not found`);
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
-/** GET /api/user-events — list event history with optional filters. */
+/** Check that an optional event reward item exists. */
+export const validateUserEventRewardItem = async (req, res, next) => {
+  try {
+    if (req.body.reward_item_type_id === undefined) return next();
+
+    const itemType = await findItemTypeById(req.body.reward_item_type_id);
+    if (!itemType) throw new AppError('NOT_FOUND', `Item type with id ${req.body.reward_item_type_id} not found`);
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Load and authorize an event-history record for owner-scoped reads and writes. */
+export const loadUserEventForOwner = async (req, res, next) => {
+  try {
+    const userEventId = parsePositiveInt(req.params.user_event_id, 'user_event_id');
+    const existing = await findUserEventById(userEventId);
+    requireOwner(existing, req.user.user_id);
+    res.locals.userEventId = userEventId;
+    res.locals.userEvent = existing;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const loadUserEventForMutation = loadUserEventForOwner;
+
+/** GET /api/user-events — list the owner's event history with an optional event filter. */
 export const getAllUserEvents = async (req, res, next) => {
   try {
-    const filters = {};
-    if (req.query.user_id !== undefined) filters.user_id = parsePositiveInt(req.query.user_id, 'user_id');
+    const filters = { user_id: req.user.user_id };
     if (req.query.event_id !== undefined) filters.event_id = parsePositiveInt(req.query.event_id, 'event_id');
 
     const rows = await findAllUserEvents(filters);
@@ -42,11 +73,7 @@ export const getAllUserEvents = async (req, res, next) => {
 /** GET /api/user-events/:user_event_id — get one event history record. */
 export const getUserEventById = async (req, res, next) => {
   try {
-    const userEventId = parsePositiveInt(req.params.user_event_id, 'user_event_id');
-    const row = await findUserEventById(userEventId);
-    if (!row) throw new AppError('NOT_FOUND', 'User event not found');
-
-    res.status(200).json(row);
+    res.status(200).json(res.locals.userEvent);
   } catch (error) {
     next(error);
   }
@@ -60,10 +87,6 @@ export const createUserEvent = async (req, res, next) => {
     if (Number(req.body.user_id) !== req.user.user_id) {
       throw new AppError('VALIDATION_ERROR', 'user_id must match the authenticated user');
     }
-
-    const event = await findOceanEventById(req.body.event_id);
-    if (!event) throw new AppError('NOT_FOUND', `Ocean event with id ${req.body.event_id} not found`);
-    await ensureRewardItemExists(req.body.reward_item_type_id);
 
     const data = {
       user_id: req.user.user_id,
@@ -85,10 +108,7 @@ export const createUserEvent = async (req, res, next) => {
 /** PATCH /api/user-events/:user_event_id — update the owner's event history. */
 export const patchUserEvent = async (req, res, next) => {
   try {
-    const userEventId = parsePositiveInt(req.params.user_event_id, 'user_event_id');
-    const existing = await findUserEventById(userEventId);
-    requireOwner(existing, req.user.user_id);
-    if (req.body.reward_item_type_id !== undefined) await ensureRewardItemExists(req.body.reward_item_type_id);
+    const userEventId = res.locals.userEventId;
 
     const data = {};
     if (req.body.outcome !== undefined) data.outcome = req.body.outcome;
@@ -109,9 +129,7 @@ export const patchUserEvent = async (req, res, next) => {
 /** DELETE /api/user-events/:user_event_id — delete the owner's event history record. */
 export const deleteUserEvent = async (req, res, next) => {
   try {
-    const userEventId = parsePositiveInt(req.params.user_event_id, 'user_event_id');
-    const existing = await findUserEventById(userEventId);
-    requireOwner(existing, req.user.user_id);
+    const userEventId = res.locals.userEventId;
 
     await removeUserEvent(userEventId);
     res.status(204).end();

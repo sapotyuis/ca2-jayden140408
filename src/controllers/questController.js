@@ -12,11 +12,16 @@ const parsePositiveInt = (value, fieldName) => {
 };
 
 /** Checks that an optional reward item exists before a quest is written. */
-const ensureRewardItemExists = async (itemTypeId) => {
-  if (itemTypeId === undefined) return;
+export const validateQuestRewardItem = async (req, res, next) => {
+  try {
+    if (req.body.reward_item_type_id === undefined) return next();
 
-  const itemType = await findItemTypeById(itemTypeId);
-  if (!itemType) throw new AppError('NOT_FOUND', `Item type with id ${itemTypeId} not found`);
+    const itemType = await findItemTypeById(req.body.reward_item_type_id);
+    if (!itemType) throw new AppError('NOT_FOUND', `Item type with id ${req.body.reward_item_type_id} not found`);
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 /** GET /api/quests — list quests, optionally filtered by quest type. */
@@ -48,8 +53,6 @@ export const getQuestById = async (req, res, next) => {
 /** POST /api/quests — create a quest after route validation and reward FK validation. */
 export const createQuest = async (req, res, next) => {
   try {
-    await ensureRewardItemExists(req.body.reward_item_type_id);
-
     const data = {
       title: req.body.title,
       description: req.body.description,
@@ -76,7 +79,6 @@ export const patchQuest = async (req, res, next) => {
     const data = {};
 
     if (req.body.reward_item_type_id !== undefined) {
-      await ensureRewardItemExists(req.body.reward_item_type_id);
       data.reward_item_type_id = req.body.reward_item_type_id;
     }
     if (req.body.title !== undefined) data.title = req.body.title;

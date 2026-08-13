@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clampWorldPosition, findNearestWorldItem, findWorldItemAtPixel, pixelToWorldTarget, pushPixelPointOutsideBounds, stepPixelMotion, worldToPixel } from '../../frontend/js/ocean/pixelWorld.js';
+import { clampWorldPosition, findNearestWorldItem, findWorldItemAtPixel, pixelToWorldTarget, pushPixelPointOutsideBounds, stepPixelMotion, worldToPixel } from '../../public/js/ocean/pixelWorld.js';
 
 describe('pixel voyage world helpers', () => {
   it('keeps the raft inside the playable pixel-water bounds', () => {

@@ -1,6 +1,5 @@
 // Validation rules are defined on the route using body() + handleValidationErrors middleware
 import { findAllRaftUpgrades, findRaftUpgradeById, insertRaftUpgrade, updateRaftUpgrade, removeRaftUpgrade } from '../models/raftUpgradeModel.js';
-import { findUserById } from '../models/userModel.js';
 import { AppError } from '../utils/_errors.js';
 
 // Throws AppError directly on invalid input so the error bubbles up through next(error) to the centralized error handler
@@ -14,14 +13,10 @@ const parsePositiveInt = (value, fieldName) => {
   return parsed;
 };
 
-/** Get all raft upgrades. Supports `?user_id=` and `?upgrade_type=` query params. */
+/** Get all upgrades owned by the authenticated survivor; supports `?upgrade_type=`. */
 export const getAllRaftUpgrades = async (req, res, next) => {
   try {
-    const filters = {};
-
-    if (req.query.user_id !== undefined) {
-      filters.user_id = parsePositiveInt(req.query.user_id, 'user_id');
-    }
+    const filters = { user_id: req.user.user_id };
 
     if (req.query.upgrade_type !== undefined) {
       filters.upgrade_type = req.query.upgrade_type;
@@ -38,32 +33,49 @@ export const getAllRaftUpgrades = async (req, res, next) => {
 /** Get a single raft upgrade by ID. */
 export const getRaftUpgradeById = async (req, res, next) => {
   try {
-    const upgradeId = parsePositiveInt(req.params.upgrade_id, 'upgrade_id');
-    const upgrade = await findRaftUpgradeById(upgradeId);
-
-    if (!upgrade) {
-      throw new AppError('NOT_FOUND', 'Raft upgrade not found');
-    }
-
-    res.status(200).json(upgrade);
+    res.status(200).json(res.locals.raftUpgrade);
   } catch (error) {
     next(error);
   }
 };
 
-/** Create a new raft upgrade. Validation rules are on the route; results checked here. */
-export const createRaftUpgrade = async (req, res, next) => {
+/** Verify that the requested upgrade owner is the authenticated survivor. */
+export const validateRaftUpgradeUser = async (req, res, next) => {
   try {
-    // Check FK exists before inserting — skipping this causes the DB to throw a raw constraint error (500)
-    const user = await findUserById(req.body.user_id);
-    if (!user) {
-      throw new AppError('NOT_FOUND', `User with id ${req.body.user_id} not found`);
+    if (Number(req.body.user_id) !== Number(req.user.user_id)) {
+      throw new AppError('VALIDATION_ERROR', 'user_id must match the authenticated user');
     }
 
+    res.locals.raftUpgradeUser = req.user;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Load a raft upgrade and ensure it belongs to the authenticated survivor. */
+export const loadRaftUpgradeForOwner = async (req, res, next) => {
+  try {
+    const upgradeId = parsePositiveInt(req.params.upgrade_id, 'upgrade_id');
+    const upgrade = await findRaftUpgradeById(upgradeId);
+
+    if (!upgrade || Number(upgrade.user_id) !== Number(req.user.user_id)) {
+      throw new AppError('NOT_FOUND', 'Raft upgrade not found');
+    }
+
+    res.locals.upgradeId = upgradeId;
+    res.locals.raftUpgrade = upgrade;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Create a new raft upgrade. This step calls only the upgrade insert model. */
+export const createRaftUpgrade = async (req, res, next) => {
+  try {
     const data = {
-      // Take the id from the row we just loaded, not from the body — it is already the
-      // integer the column expects, whatever JSON type the client sent.
-      user_id: user.user_id,
+      user_id: res.locals.raftUpgradeUser.user_id,
       upgrade_type: req.body.upgrade_type,
       material_cost: req.body.material_cost,
     };
@@ -78,7 +90,7 @@ export const createRaftUpgrade = async (req, res, next) => {
 /** Update a raft upgrade by ID. Accepts `upgrade_type` and `material_cost` in the body. */
 export const patchRaftUpgrade = async (req, res, next) => {
   try {
-    const upgradeId = parsePositiveInt(req.params.upgrade_id, 'upgrade_id');
+    const upgradeId = res.locals.upgradeId;
 
     // Only include fields that were actually sent — avoids overwriting fields the client didn't touch
     const data = {};
@@ -105,7 +117,7 @@ export const patchRaftUpgrade = async (req, res, next) => {
 /** Delete a raft upgrade by ID. Returns 204 on success, 404 if not found. */
 export const deleteRaftUpgrade = async (req, res, next) => {
   try {
-    const upgradeId = parsePositiveInt(req.params.upgrade_id, 'upgrade_id');
+    const upgradeId = res.locals.upgradeId;
     const upgrade = await removeRaftUpgrade(upgradeId);
 
     if (!upgrade) {

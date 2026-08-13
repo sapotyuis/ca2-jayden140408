@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RAFT_MAX_SPEED, stepRaftMotion } from '../../frontend/js/ocean/raftMotion.js';
+import { RAFT_MAX_SPEED, stepRaftMotion } from '../../public/js/ocean/raftMotion.js';
 
 describe('raft motion', () => {
   it('accelerates and coasts smoothly instead of changing speed instantly', () => {

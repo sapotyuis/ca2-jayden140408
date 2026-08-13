@@ -1,0 +1,67 @@
+/* A panel that reads as a slab of salvaged deck planking, lashed with rope. Chunky wooden
+   frame, a raised "lip" along the bottom for physical depth, and a faint plank-grain wash.
+   The inner surface + text flip with the day/night phase via semantic tokens. */
+.panel-panel {
+  position: relative;
+  padding: 1.4rem 1.5rem;
+  color: var(--text);
+  background:
+    repeating-linear-gradient(91deg, rgba(120, 82, 40, 0.05) 0 3px, transparent 3px 9px),
+    var(--surface);
+  border: 3px solid var(--wood-light);
+  border-radius: var(--r-md);
+  box-shadow:
+    0 0 0 3px var(--wood-darker),
+    0 7px 0 var(--wood-darker),
+    var(--shadow-md);
+  backdrop-filter: blur(6px);
+  animation: cc-rise 0.5s var(--ease-out) both;
+}
+
+/* rope lashing stitched across the top edge, tying the panel to the frame */
+.panel-panel::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 14px;
+  right: 14px;
+  height: 3px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--rope) 0 7px,
+    var(--rope-dark) 7px 11px
+  );
+  opacity: 0.5;
+}
+
+.panel-wide {
+  grid-column: 1 / -1;
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.05rem;
+  padding-top: 0.15rem;
+}
+
+.panel-title {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.55rem;
+  line-height: 1.05;
+  color: var(--text-strong);
+  letter-spacing: 0;
+}
+
+.panel-subtitle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-top: 0.25rem;
+}

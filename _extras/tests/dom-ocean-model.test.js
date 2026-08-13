@@ -8,7 +8,7 @@ import {
   getDebrisRenderKind,
   getWorldMotionClass,
   worldToCss,
-} from '../../frontend/js/ocean/domOceanModel.js';
+} from '../../public/js/ocean/domOceanModel.js';
 
 describe('DOM ocean world model', () => {
   it('maps the camera centre to the centre of the DOM viewport', () => {

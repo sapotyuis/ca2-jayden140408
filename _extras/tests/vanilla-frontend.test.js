@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const root = new URL('../../frontend/', import.meta.url);
+const root = new URL('../../public/', import.meta.url);
 
 describe('vanilla frontend architecture', () => {
   it('redirects signed-out users before rendering protected pages', () => {
@@ -11,7 +11,7 @@ describe('vanilla frontend architecture', () => {
     const renderIndex = app.indexOf('const cleanupPage = renderPage({ root, auth, toast, worldClock });');
 
     expect(guardIndex).toBeGreaterThanOrEqual(0);
-    expect(app).toContain("window.location.replace('/login.html');");
+    expect(app).toContain("window.location.replace('/html/login.html');");
     expect(guardIndex).toBeLessThan(worldClockIndex);
     expect(guardIndex).toBeLessThan(renderIndex);
   });
@@ -23,13 +23,9 @@ describe('vanilla frontend architecture', () => {
   });
 
   it('uses the vanilla entrypoint and removes the React runtime', () => {
-    const packageJson = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'));
     const app = readFileSync(new URL('js/app.js', root), 'utf8');
 
-    expect(packageJson.dependencies).not.toHaveProperty('react');
-    expect(packageJson.dependencies).not.toHaveProperty('react-dom');
-    expect(packageJson.dependencies).not.toHaveProperty('react-router-dom');
-    expect(packageJson.devDependencies).not.toHaveProperty('@vitejs/plugin-react');
+    expect(existsSync(new URL('package.json', root))).toBe(false);
     expect(app).toContain('createPageApp');
     expect(readFileSync(new URL('html/index.html', root), 'utf8')).toContain('/js/entries/login.js');
     expect(existsSync(new URL('js/main.jsx', root))).toBe(false);

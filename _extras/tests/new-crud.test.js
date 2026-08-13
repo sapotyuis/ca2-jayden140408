@@ -6,6 +6,8 @@ import { questRouter } from '../../src/routes/questRoutes.js';
 import { userQuestRouter } from '../../src/routes/userQuestRoutes.js';
 import { oceanEventRouter } from '../../src/routes/oceanEventRoutes.js';
 import { userEventRouter } from '../../src/routes/userEventRoutes.js';
+import { userItemRouter } from '../../src/routes/userItemRoutes.js';
+import { raftUpgradeRouter } from '../../src/routes/raftUpgradeRoutes.js';
 
 const app = express();
 app.use(express.json());
@@ -13,6 +15,8 @@ app.use('/api/quests', questRouter);
 app.use('/api/user-quests', userQuestRouter);
 app.use('/api/ocean-events', oceanEventRouter);
 app.use('/api/user-events', userEventRouter);
+app.use('/api/user-items', userItemRouter);
+app.use('/api/raft-upgrades', raftUpgradeRouter);
 app.use(errorHandler);
 
 // user_id is an autoincrement integer; the seed inserts SurvivorJay first and Ocean second.
@@ -120,7 +124,7 @@ describe('Ocean event CRUD', () => {
 
 describe('User quest CRUD', () => {
   it('supports list, detail, create, patch, and delete for the authenticated owner', async () => {
-    const list = await request(app).get(`/api/user-quests?user_id=${survivorId}`);
+    const list = await request(app).get(`/api/user-quests?user_id=${survivorId}`).set(authHeader());
     expect(list.status).toBe(200);
 
     // quest_id 1 is skipped here — the seed data already gives survivorId a progress row for
@@ -132,7 +136,7 @@ describe('User quest CRUD', () => {
     expect(created.status).toBe(201);
 
     const userQuestId = created.body.user_quest_id;
-    const detail = await request(app).get(`/api/user-quests/${userQuestId}`);
+    const detail = await request(app).get(`/api/user-quests/${userQuestId}`).set(authHeader());
     expect(detail.status).toBe(200);
 
     const patched = await request(app)
@@ -164,8 +168,8 @@ describe('User event CRUD', () => {
     expect(created.status).toBe(201);
 
     const userEventId = created.body.user_event_id;
-    expect((await request(app).get('/api/user-events')).status).toBe(200);
-    expect((await request(app).get(`/api/user-events/${userEventId}`)).status).toBe(200);
+    expect((await request(app).get('/api/user-events').set(authHeader())).status).toBe(200);
+    expect((await request(app).get(`/api/user-events/${userEventId}`).set(authHeader())).status).toBe(200);
 
     const patched = await request(app)
       .patch(`/api/user-events/${userEventId}`)
@@ -181,6 +185,69 @@ describe('User event CRUD', () => {
 
     const deleted = await request(app).delete(`/api/user-events/${userEventId}`).set(authHeader());
     expect(deleted.status).toBe(204);
+  });
+});
+
+describe('Owner-scoped user record reads', () => {
+  it('requires authentication for user-specific record lists', async () => {
+    for (const path of ['/api/user-items', '/api/user-quests', '/api/user-events', '/api/raft-upgrades']) {
+      const response = await request(app).get(path);
+      expect(response.status, path).toBe(401);
+    }
+
+    for (const path of [
+      '/api/user-items/999999',
+      '/api/user-quests/999999',
+      '/api/user-events/999999',
+      '/api/raft-upgrades/999999',
+    ]) {
+      const response = await request(app).get(path);
+      expect(response.status, path).toBe(401);
+    }
+  });
+
+  it('does not allow a user_id query to read another survivor\'s records', async () => {
+    for (const path of ['/api/user-items', '/api/user-quests', '/api/user-events', '/api/raft-upgrades']) {
+      const response = await request(app)
+        .get(`${path}?user_id=${otherSurvivorId}`)
+        .set(authHeader());
+      expect(response.status, path).toBe(200);
+      expect(response.body.every((row) => row.user_id === survivorId)).toBe(true);
+    }
+  });
+
+  it('does not allow an authenticated user to mutate another survivor\'s inventory or upgrades', async () => {
+    const items = await request(app).get('/api/user-items').set(authHeader());
+    const upgrades = await request(app).get('/api/raft-upgrades').set(authHeader());
+    expect(items.body.length).toBeGreaterThan(0);
+    expect(upgrades.body.length).toBeGreaterThan(0);
+
+    const itemId = items.body[0].user_item_id;
+    const upgradeId = upgrades.body[0].upgrade_id;
+
+    const itemCreate = await request(app)
+      .post('/api/user-items')
+      .set(authHeader(otherSurvivorId))
+      .send({ user_id: survivorId, item_type_id: 1, quantity: 1 });
+    expect(itemCreate.status).toBe(400);
+
+    const upgradeCreate = await request(app)
+      .post('/api/raft-upgrades')
+      .set(authHeader(otherSurvivorId))
+      .send({ user_id: survivorId, upgrade_type: 'Floor Extension', material_cost: 10 });
+    expect(upgradeCreate.status).toBe(400);
+
+    const itemPatch = await request(app)
+      .patch(`/api/user-items/${itemId}`)
+      .set(authHeader(otherSurvivorId))
+      .send({ quantity: 99 });
+    expect(itemPatch.status).toBe(404);
+
+    const upgradePatch = await request(app)
+      .patch(`/api/raft-upgrades/${upgradeId}`)
+      .set(authHeader(otherSurvivorId))
+      .send({ material_cost: 99 });
+    expect(upgradePatch.status).toBe(404);
   });
 });
 

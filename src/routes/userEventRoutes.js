@@ -3,12 +3,22 @@ import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
 import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
 import { loadCurrentUser } from '../controllers/meController.js';
-import { getAllUserEvents, getUserEventById, createUserEvent, patchUserEvent, deleteUserEvent } from '../controllers/userEventController.js';
+import {
+  getAllUserEvents,
+  getUserEventById,
+  validateUserEventSource,
+  validateUserEventRewardItem,
+  createUserEvent,
+  loadUserEventForOwner,
+  loadUserEventForMutation,
+  patchUserEvent,
+  deleteUserEvent,
+} from '../controllers/userEventController.js';
 
 export const userEventRouter = Router();
 
-userEventRouter.get('/', getAllUserEvents);
-userEventRouter.get('/:user_event_id', getUserEventById);
+userEventRouter.get('/', verifyToken, loadCurrentUser, getAllUserEvents);
+userEventRouter.get('/:user_event_id', verifyToken, loadCurrentUser, loadUserEventForOwner, getUserEventById);
 
 userEventRouter.post(
   '/',
@@ -24,6 +34,8 @@ userEventRouter.post(
     body('occurred_at').optional().isString().notEmpty().withMessage('occurred_at must be a non-empty string'),
   ],
   handleValidationErrors,
+  validateUserEventSource,
+  validateUserEventRewardItem,
   createUserEvent
 );
 
@@ -39,7 +51,9 @@ userEventRouter.patch(
     body('occurred_at').optional().isString().notEmpty().withMessage('occurred_at must be a non-empty string'),
   ],
   handleValidationErrors,
+  loadUserEventForMutation,
+  validateUserEventRewardItem,
   patchUserEvent
 );
 
-userEventRouter.delete('/:user_event_id', verifyToken, loadCurrentUser, deleteUserEvent);
+userEventRouter.delete('/:user_event_id', verifyToken, loadCurrentUser, loadUserEventForMutation, deleteUserEvent);

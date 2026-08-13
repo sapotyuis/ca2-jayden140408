@@ -1,6 +1,5 @@
 // Validation rules are defined on the route using body() + handleValidationErrors middleware
 import { findAllUserItems, findUserItemById, insertUserItem, updateUserItem, removeUserItem } from '../models/userItemModel.js';
-import { findUserById } from '../models/userModel.js';
 import { findItemTypeById } from '../models/itemTypeModel.js';
 import { AppError } from '../utils/_errors.js';
 
@@ -15,14 +14,10 @@ const parsePositiveInt = (value, fieldName) => {
   return parsed;
 };
 
-/** Get all user items. Supports `?user_id=<id>` and `?category=<category>` query params. */
+/** Get all inventory rows owned by the authenticated survivor; supports `?category=<category>`. */
 export const getAllUserItems = async (req, res, next) => {
   try {
-    const filters = {};
-
-    if (req.query.user_id !== undefined) {
-      filters.user_id = parsePositiveInt(req.query.user_id, 'user_id');
-    }
+    const filters = { user_id: req.user.user_id };
 
     if (req.query.category !== undefined) {
       filters.category = req.query.category;
@@ -39,37 +34,62 @@ export const getAllUserItems = async (req, res, next) => {
 /** Get a single user item by ID. */
 export const getUserItemById = async (req, res, next) => {
   try {
-    const userItemId = parsePositiveInt(req.params.user_item_id, 'user_item_id');
-    const userItem = await findUserItemById(userItemId);
-
-    if (!userItem) {
-      throw new AppError('NOT_FOUND', 'User item not found');
-    }
-
-    res.status(200).json(userItem);
+    res.status(200).json(res.locals.userItem);
   } catch (error) {
     next(error);
   }
 };
 
-/** Create a new user item. Validation rules are on the route; results checked here. */
-export const createUserItem = async (req, res, next) => {
+/** Load an inventory row and ensure it belongs to the authenticated survivor. */
+export const loadUserItemForOwner = async (req, res, next) => {
   try {
-    // Check FKs exist before inserting — skipping this causes the DB to throw a raw constraint error (500)
-    const user = await findUserById(req.body.user_id);
-    if (!user) {
-      throw new AppError('NOT_FOUND', `User with id ${req.body.user_id} not found`);
+    const userItemId = parsePositiveInt(req.params.user_item_id, 'user_item_id');
+    const userItem = await findUserItemById(userItemId);
+    if (!userItem || Number(userItem.user_id) !== Number(req.user.user_id)) {
+      throw new AppError('NOT_FOUND', 'User item not found');
     }
 
+    res.locals.userItemId = userItemId;
+    res.locals.userItem = userItem;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Verify that the requested inventory owner is the authenticated survivor. */
+export const validateUserItemOwner = async (req, res, next) => {
+  try {
+    if (Number(req.body.user_id) !== Number(req.user.user_id)) {
+      throw new AppError('VALIDATION_ERROR', 'user_id must match the authenticated user');
+    }
+
+    res.locals.userItemOwner = req.user;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Verify that the requested item type exists. */
+export const validateUserItemType = async (req, res, next) => {
+  try {
     const itemType = await findItemTypeById(req.body.item_type_id);
     if (!itemType) {
       throw new AppError('NOT_FOUND', `Item type with id ${req.body.item_type_id} not found`);
     }
 
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Create a new user item. This step calls only the inventory insert model. */
+export const createUserItem = async (req, res, next) => {
+  try {
     const data = {
-      // Take the id from the row we just loaded, not from the body — it is already the
-      // integer the column expects, whatever JSON type the client sent.
-      user_id: user.user_id,
+      user_id: res.locals.userItemOwner.user_id,
       item_type_id: req.body.item_type_id,
       quantity: req.body.quantity ?? 1,                            // ?? sets a default only when the value is null/undefined (unlike || which also triggers on 0)
       acquired_at: req.body.acquired_at ?? new Date().toISOString(), // default to current timestamp if not provided
@@ -85,7 +105,7 @@ export const createUserItem = async (req, res, next) => {
 /** Update a user item by ID. Accepts `quantity` and/or `acquired_at` in the body. */
 export const patchUserItem = async (req, res, next) => {
   try {
-    const userItemId = parsePositiveInt(req.params.user_item_id, 'user_item_id');
+    const userItemId = res.locals.userItemId;
 
     // Only include fields that were actually sent — avoids overwriting fields the client didn't touch
     const data = {};
@@ -112,7 +132,7 @@ export const patchUserItem = async (req, res, next) => {
 /** Delete a user item by ID. Returns 204 on success, 404 if not found. */
 export const deleteUserItem = async (req, res, next) => {
   try {
-    const userItemId = parsePositiveInt(req.params.user_item_id, 'user_item_id');
+    const userItemId = res.locals.userItemId;
     const userItem = await removeUserItem(userItemId);
 
     if (!userItem) {

@@ -3,7 +3,16 @@ import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
 import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
 import { VALID_EVENT_TYPES, VALID_UPGRADE_TYPES } from '../config/gameRules.js';
-import { getAllOceanEvents, getOceanEventById, createOceanEvent, patchOceanEvent, deleteOceanEvent } from '../controllers/oceanEventController.js';
+import {
+  getAllOceanEvents,
+  getOceanEventById,
+  validateOceanEventRewardItem,
+  validateOceanEventLossItem,
+  createOceanEvent,
+  loadOceanEventForPatch,
+  patchOceanEvent,
+  deleteOceanEvent,
+} from '../controllers/oceanEventController.js';
 
 export const oceanEventRouter = Router();
 
@@ -31,6 +40,8 @@ oceanEventRouter.post(
     body('is_active').optional().isInt({ min: 0, max: 1 }).withMessage('is_active must be 0 or 1'),
   ],
   handleValidationErrors,
+  validateOceanEventRewardItem,
+  validateOceanEventLossItem,
   createOceanEvent
 );
 
@@ -55,6 +66,9 @@ oceanEventRouter.patch(
     body('is_active').optional().isInt({ min: 0, max: 1 }).withMessage('is_active must be 0 or 1'),
   ],
   handleValidationErrors,
+  loadOceanEventForPatch,
+  validateOceanEventRewardItem,
+  validateOceanEventLossItem,
   patchOceanEvent
 );
 

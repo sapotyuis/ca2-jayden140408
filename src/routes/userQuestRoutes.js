@@ -3,12 +3,21 @@ import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
 import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
 import { loadCurrentUser } from '../controllers/meController.js';
-import { getAllUserQuests, getUserQuestById, createUserQuest, patchUserQuest, deleteUserQuest } from '../controllers/userQuestController.js';
+import {
+  getAllUserQuests,
+  getUserQuestById,
+  validateUserQuestSource,
+  createUserQuest,
+  loadUserQuestForOwner,
+  loadUserQuestForMutation,
+  patchUserQuest,
+  deleteUserQuest,
+} from '../controllers/userQuestController.js';
 
 export const userQuestRouter = Router();
 
-userQuestRouter.get('/', getAllUserQuests);
-userQuestRouter.get('/:user_quest_id', getUserQuestById);
+userQuestRouter.get('/', verifyToken, loadCurrentUser, getAllUserQuests);
+userQuestRouter.get('/:user_quest_id', verifyToken, loadCurrentUser, loadUserQuestForOwner, getUserQuestById);
 
 userQuestRouter.post(
   '/',
@@ -22,6 +31,7 @@ userQuestRouter.post(
     body('assigned_at').optional().isString().notEmpty().withMessage('assigned_at must be a non-empty string'),
   ],
   handleValidationErrors,
+  validateUserQuestSource,
   createUserQuest
 );
 
@@ -36,7 +46,8 @@ userQuestRouter.patch(
     body('claimed_at').optional().isString().notEmpty().withMessage('claimed_at must be a non-empty string'),
   ],
   handleValidationErrors,
+  loadUserQuestForMutation,
   patchUserQuest
 );
 
-userQuestRouter.delete('/:user_quest_id', verifyToken, loadCurrentUser, deleteUserQuest);
+userQuestRouter.delete('/:user_quest_id', verifyToken, loadCurrentUser, loadUserQuestForMutation, deleteUserQuest);

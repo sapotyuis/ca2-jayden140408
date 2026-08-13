@@ -3,7 +3,15 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
 import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
-import { getAllCraftingRecipes, getCraftingRecipeById, createCraftingRecipe, patchCraftingRecipe, deleteCraftingRecipe } from '../controllers/craftingRecipeController.js';
+import {
+  getAllCraftingRecipes,
+  getCraftingRecipeById,
+  validateRecipeResultItem,
+  validateRecipeIngredientItem,
+  createCraftingRecipe,
+  patchCraftingRecipe,
+  deleteCraftingRecipe,
+} from '../controllers/craftingRecipeController.js';
 
 export const craftingRecipeRouter = Router();
 
@@ -19,6 +27,8 @@ craftingRecipeRouter.post(
     body('quantity_required').optional().isInt({ min: 1 }).withMessage('quantity_required must be a positive integer'),
   ],
   handleValidationErrors,
+  validateRecipeResultItem,
+  validateRecipeIngredientItem,
   createCraftingRecipe
 );
 

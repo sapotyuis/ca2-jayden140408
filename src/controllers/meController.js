@@ -37,21 +37,30 @@ export const getMyProfile = async (req, res) => {
   res.status(200).json(req.user);
 };
 
-/** PATCH /api/me — rename the survivor. */
+/** Check whether a requested username conflicts with another survivor. */
+export const checkUsernameConflict = async (req, res, next) => {
+  try {
+    if (req.body.username === undefined) return next();
+
+    const conflict = await findUserByUsername(req.body.username);
+    if (conflict && conflict.user_id !== req.user.user_id) {
+      return res.status(409).json({
+        error: { code: 'CONFLICT', message: `Username "${req.body.username}" is already taken` },
+      });
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** PATCH /api/me — rename the survivor. This step calls only the user update model. */
 export const updateMyProfile = async (req, res, next) => {
   try {
     const data = {};
     if (req.body.username !== undefined) data.username = req.body.username;
     if (Object.keys(data).length === 0) throw new AppError('VALIDATION_ERROR', 'No fields provided to update');
-
-    if (data.username !== undefined) {
-      const conflict = await findUserByUsername(data.username);
-      if (conflict && conflict.user_id !== req.user.user_id) {
-        return res.status(409).json({
-          error: { code: 'CONFLICT', message: `Username "${data.username}" is already taken` },
-        });
-      }
-    }
 
     const user = await updateUser(req.user.user_id, data);
     res.status(200).json(user);

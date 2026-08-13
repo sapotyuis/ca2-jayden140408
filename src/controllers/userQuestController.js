@@ -16,11 +16,37 @@ const requireOwner = (record, userId) => {
   if (!record || record.user_id !== userId) throw new AppError('NOT_FOUND', 'User quest not found');
 };
 
-/** GET /api/user-quests — list quest progress records with optional filters. */
+/** Verify that the referenced quest exists before creating a user-quest record. */
+export const validateUserQuestSource = async (req, res, next) => {
+  try {
+    const quest = await findQuestById(req.body.quest_id);
+    if (!quest) throw new AppError('NOT_FOUND', `Quest with id ${req.body.quest_id} not found`);
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** Load and authorize a user-quest record for owner-scoped reads and writes. */
+export const loadUserQuestForOwner = async (req, res, next) => {
+  try {
+    const userQuestId = parsePositiveInt(req.params.user_quest_id, 'user_quest_id');
+    const existing = await findUserQuestById(userQuestId);
+    requireOwner(existing, req.user.user_id);
+    res.locals.userQuestId = userQuestId;
+    res.locals.userQuest = existing;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const loadUserQuestForMutation = loadUserQuestForOwner;
+
+/** GET /api/user-quests — list the owner's quest progress with optional quest/status filters. */
 export const getAllUserQuests = async (req, res, next) => {
   try {
-    const filters = {};
-    if (req.query.user_id !== undefined) filters.user_id = parsePositiveInt(req.query.user_id, 'user_id');
+    const filters = { user_id: req.user.user_id };
     if (req.query.quest_id !== undefined) filters.quest_id = parsePositiveInt(req.query.quest_id, 'quest_id');
     if (req.query.status !== undefined) filters.status = req.query.status;
 
@@ -34,11 +60,7 @@ export const getAllUserQuests = async (req, res, next) => {
 /** GET /api/user-quests/:user_quest_id — get one quest progress record. */
 export const getUserQuestById = async (req, res, next) => {
   try {
-    const userQuestId = parsePositiveInt(req.params.user_quest_id, 'user_quest_id');
-    const row = await findUserQuestById(userQuestId);
-    if (!row) throw new AppError('NOT_FOUND', 'User quest not found');
-
-    res.status(200).json(row);
+    res.status(200).json(res.locals.userQuest);
   } catch (error) {
     next(error);
   }
@@ -52,9 +74,6 @@ export const createUserQuest = async (req, res, next) => {
     if (Number(req.body.user_id) !== req.user.user_id) {
       throw new AppError('VALIDATION_ERROR', 'user_id must match the authenticated user');
     }
-
-    const quest = await findQuestById(req.body.quest_id);
-    if (!quest) throw new AppError('NOT_FOUND', `Quest with id ${req.body.quest_id} not found`);
 
     const data = {
       user_id: req.user.user_id,
@@ -74,9 +93,7 @@ export const createUserQuest = async (req, res, next) => {
 /** PATCH /api/user-quests/:user_quest_id — update the owner's quest progress. */
 export const patchUserQuest = async (req, res, next) => {
   try {
-    const userQuestId = parsePositiveInt(req.params.user_quest_id, 'user_quest_id');
-    const existing = await findUserQuestById(userQuestId);
-    requireOwner(existing, req.user.user_id);
+    const userQuestId = res.locals.userQuestId;
 
     const data = {};
     if (req.body.progress !== undefined) data.progress = req.body.progress;
@@ -96,9 +113,7 @@ export const patchUserQuest = async (req, res, next) => {
 /** DELETE /api/user-quests/:user_quest_id — remove the owner's quest record. */
 export const deleteUserQuest = async (req, res, next) => {
   try {
-    const userQuestId = parsePositiveInt(req.params.user_quest_id, 'user_quest_id');
-    const existing = await findUserQuestById(userQuestId);
-    requireOwner(existing, req.user.user_id);
+    const userQuestId = res.locals.userQuestId;
 
     await removeUserQuest(userQuestId);
     res.status(204).end();

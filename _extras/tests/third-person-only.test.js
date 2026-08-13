@@ -6,9 +6,9 @@ const readSource = (relativePath) => readFile(new URL(`../../${relativePath}`, i
 describe('voyage camera mode', () => {
   it('keeps the voyage page third-person only', async () => {
     const [page, scene, viewport] = await Promise.all([
-      readSource('frontend/js/pages/OceanPage.js'),
-      readSource('frontend/js/ocean/createOceanScene.js'),
-      readSource('frontend/js/components/oceanViewport.js'),
+      readSource('public/js/pages/OceanPage.js'),
+      readSource('public/js/ocean/createOceanScene.js'),
+      readSource('public/js/components/oceanViewport.js'),
     ]);
     const source = `${page}\n${scene}\n${viewport}`;
 

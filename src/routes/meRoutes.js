@@ -6,6 +6,7 @@ import { VALID_UPGRADE_TYPES } from '../config/gameRules.js';
 import {
   loadCurrentUser,
   getMyProfile,
+  checkUsernameConflict,
   updateMyProfile,
   deleteMyAccount,
   getMyInventory,
@@ -52,6 +53,7 @@ meRouter.patch(
     body('username').optional().notEmpty().withMessage('Username cannot be empty'),
   ],
   handleValidationErrors,
+  checkUsernameConflict,
   updateMyProfile
 );
 

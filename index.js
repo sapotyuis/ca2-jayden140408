@@ -24,22 +24,18 @@ const entryPoint = fileURLToPath(import.meta.url);
 const isVercel = Boolean(process.env.VERCEL);
 const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === entryPoint;
 
-// The vanilla JavaScript frontend is a separate Vite project in ./frontend. In development it runs on its
-// own dev server and proxies /api here (see frontend/vite.config.js). If someone has built it
-// (`cd frontend && npm run build`), we also serve that production bundle from this origin so the
-// whole game is reachable from one server — handy for a quick demo without two terminals.
+// The vanilla JavaScript frontend lives in ./public and is served directly by Express.
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicPath = path.join(__dirname, 'public');
-const distPath = path.join(__dirname, 'frontend', 'dist');
-const staticPath = fs.existsSync(path.join(publicPath, 'index.html')) ? publicPath : distPath;
-const hasBuiltFrontend = !isVercel && fs.existsSync(path.join(staticPath, 'index.html'));
+const frontendEntry = path.join(publicPath, 'html', 'index.html');
+const hasFrontend = fs.existsSync(frontendEntry);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(requestIdMiddleware);
-if (hasBuiltFrontend) {
-  app.use(express.static(staticPath));
+if (hasFrontend && !isVercel) {
+  app.use(express.static(publicPath));
 }
 app.use(requestLogger);
 
@@ -68,13 +64,13 @@ if (!isVercel) {
   await setupSwagger(app);
 }
 
-// SPA fallback: when a production build is being served, any non-API GET returns the vanilla
-// app's index.html so client-side routes (/camp, /voyage) resolve on a hard refresh instead of
-// 404ing. API and docs paths are left alone so they keep their real responses.
-if (hasBuiltFrontend) {
+// Frontend fallback: any non-API GET returns the organized login entry document so the root URL
+// and client-side routes resolve on a hard refresh instead of 404ing. API and docs paths are left
+// alone so they keep their real responses.
+if (hasFrontend && !isVercel) {
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api') || req.path.startsWith('/api-docs')) return next();
-    res.sendFile(path.join(staticPath, 'index.html'));
+    res.sendFile(frontendEntry);
   });
 }
 

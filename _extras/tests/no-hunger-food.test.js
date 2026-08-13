@@ -16,13 +16,13 @@ const sourceFiles = [
   'src/models/debrisModel.js',
   'src/models/unexpectedEventModel.js',
   'src/utils/unexpectedEventRules.js',
-  'frontend/js/pages/GamePage.js',
-  'frontend/js/pages/OceanPage.js',
-  'frontend/js/pages/LeaderboardPage.js',
-  'frontend/js/components/game/vanillaPanels.js',
-  'frontend/js/components/vanilla.js',
-  'frontend/js/lib/gameState.js',
-  'frontend/js/ocean/createOceanScene.js',
+  'public/js/pages/GamePage.js',
+  'public/js/pages/OceanPage.js',
+  'public/js/pages/LeaderboardPage.js',
+  'public/js/components/game/vanillaPanels.js',
+  'public/js/components/vanilla.js',
+  'public/js/lib/gameState.js',
+  'public/js/ocean/createOceanScene.js',
 ];
 
 const source = Object.fromEntries(

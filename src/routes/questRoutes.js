@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import { verifyToken } from '../middlewares/jwtMiddleware.js';
 import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
-import { getAllQuests, getQuestById, createQuest, patchQuest, deleteQuest } from '../controllers/questController.js';
+import { getAllQuests, getQuestById, validateQuestRewardItem, createQuest, patchQuest, deleteQuest } from '../controllers/questController.js';
 
 export const questRouter = Router();
 
@@ -24,6 +24,7 @@ questRouter.post(
     body('is_active').optional().isInt({ min: 0, max: 1 }).withMessage('is_active must be 0 or 1'),
   ],
   handleValidationErrors,
+  validateQuestRewardItem,
   createQuest
 );
 
@@ -42,6 +43,7 @@ questRouter.patch(
     body('is_active').optional().isInt({ min: 0, max: 1 }).withMessage('is_active must be 0 or 1'),
   ],
   handleValidationErrors,
+  validateQuestRewardItem,
   patchQuest
 );
 

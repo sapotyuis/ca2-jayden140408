@@ -1,251 +1,425 @@
 # Castaway Chronicles
 
-A raft-survival game with an Express + libSQL/Drizzle REST API and a vanilla JavaScript (Vite) frontend,
-connected by JWT auth. Sweep the night ocean for debris, survive what the sea throws at you,
-craft and upgrade your raft, and work a board of quests that advance as you play.
+Castaway Chronicles is a raft-survival game built with an Express REST API, a libSQL/SQLite
+database managed by Drizzle ORM, and a vanilla JavaScript frontend served directly by Express.
 
-## Game Theme
+The player collects floating debris, earns materials, crafts equipment, expands and protects a
+raft, completes quests, survives ocean events, and competes on a public leaderboard.
 
-You wake adrift on the open ocean clinging to a few planks of driftwood. In **Castaway
-Chronicles** you rebuild by sweeping floating debris for raw materials, crafting tools and gear,
-and applying structural upgrades that grow your raft plank by plank. A bigger raft casts a wider
-net — every debris run rewards more — so survival compounds into growth. The sea fights back:
-sharks, tsunamis, and downpours strike unannounced and cost you cargo unless you have built the
-    defence that stops them. You sail in a real third-person 3D view, and back at camp a
-quest board tracks objectives that tick up automatically as you play, paying out materials and
-gear when you claim them.
+## Current gameplay
 
-## Two core mechanics
+1. Register or sign in as a survivor.
+2. Use the raft camp to view status, quests, inventory, crafting, upgrades, and profile details.
+3. Start a voyage and control the raft in a third-person Three.js ocean scene.
+4. Collect server-owned debris. Each debris row can only be claimed once.
+5. Spend materials on crafting recipes and raft upgrades.
+6. Respond to unexpected events such as shark attacks, tsunamis, and heavy downpours.
+7. Return to camp to claim completed quest rewards.
+8. View the public leaderboard, ranked by raft size and then materials.
 
-- **Core Mechanic 1 — the raft-building loop.** Collect debris → earn materials → craft items and
-  buy raft upgrades → a bigger raft yields more per run. Debris collection happens live in the 3D
-  ocean; crafting and upgrades happen at camp.
-- **Core Mechanic 2 — the quest system.** Repeatable objectives (`collect_debris`, `survive_event`)
-  whose progress advances **as a side effect of playing** — collecting debris or surviving an event
-  automatically ticks matching quests server-side — and whose rewards feed materials and items back
-  into the loop when claimed. The two mechanics interact in both directions: playing Mechanic 1
-  drives quest progress, and quest rewards fuel more of Mechanic 1. A quest can also gate itself
-  behind `min_raft_size`, so Mechanic 1's progression decides which quests are reachable at all.
+The current game does not use hunger, food items, or a hunger consequence system. Survival is
+represented by energy, raft progression, cargo loss from hazards, defensive upgrades, quests, and
+the leaderboard.
 
-Two supporting systems tie the loop together:
+## Main game systems
 
-- **Server-owned debris.** Debris is not invented by the browser. The server spawns rows into the
-  `debris` table for each survivor (`GET /api/me/debris`), and collection claims one row by id
-  (`POST /api/me/debris/:debris_id/collect`). A row can only be claimed once, and every attempt —
-  accepted or rejected — is written to `debris_collection_logs`. The client cannot mint materials.
-- **Unexpected ocean events.** Shark attacks, tsunamis, and heavy downpours are rolled from the
-  `ocean_events` catalogue during a voyage and resolved at `POST /api/me/unexpected-events/resolve`.
-  Each one takes an item out of your hold — unless you own the matching defensive upgrade, or the
-  hold is empty of what it wanted — and each has a cooldown the server enforces with a `429`.
-  Surviving one advances `survive_event` quests.
+### Raft-building loop
 
-## Architecture
+Debris collection provides materials and items. Materials can be used for crafting or raft
+upgrades. Growth upgrades increase `raft_size`, which is also used for leaderboard ranking and
+some quest/event gates. Defensive upgrades prevent specific hazards from taking cargo.
 
+### Quest system
+
+Quest progress is advanced by gameplay actions on the server. Collecting debris advances
+`collect_debris` quests, while surviving an event advances `survive_event` quests. Completed quests
+are claimed from the camp quest board and can reward materials or items.
+
+### Server-owned debris
+
+The browser does not decide what it collected or how many materials it receives. The API spawns
+debris for the authenticated survivor, validates a collection by `debris_id`, updates the
+inventory/materials, and records every accepted or rejected attempt in
+`debris_collection_logs`.
+
+### Unexpected ocean events
+
+During a voyage, the frontend loads unexpected-event definitions from the API. The server resolves
+the outcome, applies any cargo loss or reward, records the event, enforces its cooldown, and
+advances the relevant quest progress. A matching defensive upgrade can prevent the cargo loss.
+
+## Project structure
+
+```text
+.
+├── index.js                         # Express entry point and static frontend server
+├── package.json                     # Backend scripts and dependencies
+├── src/
+│   ├── config/gameRules.js          # Upgrade costs and valid event/upgrade types
+│   ├── controllers/                 # HTTP controllers and controller middleware steps
+│   ├── db/
+│   │   ├── connection.js            # libSQL/SQLite connection
+│   │   ├── schema.js                # Drizzle table definitions
+│   │   └── seed.js                  # Reset-safe database seed
+│   ├── middlewares/                 # Shared auth, validation, logging, and transactions
+│   ├── models/                      # Database access functions
+│   ├── routes/                      # Endpoints, validation, and controller pipelines
+│   └── utils/                       # Errors, debris, quest, and upgrade helpers
+└── public/                          # Frontend served directly by Express
+    ├── html/                        # Page entry documents
+    ├── css/                         # Global, component, and page styles
+    ├── js/
+    │   ├── entries/                 # One JavaScript entry point per HTML page
+    │   ├── pages/                   # Login, register, camp, leaderboard, and voyage pages
+    │   ├── components/              # Reusable DOM and ocean viewport helpers
+    │   ├── lib/                     # API client, auth store, game state, and utilities
+    │   └── ocean/                   # Three.js scene, raft motion, and event effects
+    ├── assets/                      # Pixel icons and other game media
+    └── vendor/three/                 # Browser-ready Three.js modules
 ```
-├─ index.js               # Express app entry: mounts API routers, serves the built frontend
-├─ src/                   # backend (MVC)
-│  ├─ routes/             #   URL + method → validation → controller
-│  ├─ controllers/       #   HTTP handlers plus route-specific gameplay controller steps
-│  ├─ models/             #   Drizzle data-access functions (the only files that touch the DB)
-│  ├─ middlewares/        #   reusable auth, validation, logging, and transaction middleware
-│  ├─ db/                 #   schema.js, connection.js, seed.js
-│  ├─ config/             #   gameRules.js — upgrade costs and valid event types
-│  └─ utils/              #   error handler, debris spawning, quest/upgrade progression rules
-└─ frontend/              # Vanilla JavaScript + Vite app (its own npm project)
-   ├─ html/               #   index/login, register, camp, leaderboard, voyage entry documents
-   ├─ css/                #   global tokens and page/component styles
-   └─ js/                 #   page renderers, stores, API client, and Three.js scene
+
+The frontend is vanilla JavaScript. Each HTML document contains a `#root` element; its entry
+script fetches data and creates the page DOM with JavaScript. Express serves the files under
+`public/` directly, with the page documents organized under `public/html/`.
+
+### Backend controller organisation
+
+The backend follows a strict controller pipeline for multi-step operations:
+
+```text
+verifyToken → loadCurrentUser → validate input → perform one database operation → send response
 ```
 
-`src/middlewares` holds reusable auth, validation, logging, and transaction middleware. The
-gameplay controller steps live in `src/controllers/gameplayStepsController.js`: each step performs
-one model operation, stores its result in `res.locals`, and calls `next()`; the common transaction
-coordinator commits only after every step succeeds.
-`loadCurrentUser` deliberately lives in `src/controllers/meController.js` instead: it queries one
-specific resource (the current survivor) rather than providing a general capability, so it is
-controller middleware, not common middleware.
+Each controller function is intentionally limited to one model operation. When a route needs
+multiple operations, it chains controller steps. Intermediate results are stored in `res.locals`
+and passed to the next step.
 
-## Database
+Reusable authentication, validation, request logging, and transaction middleware remains in
+`src/middlewares/`. Route-specific controller middleware remains in `src/controllers/` because it
+performs resource-specific work. Gameplay mutation pipelines use a transaction coordinator so
+all related database changes commit together or roll back together.
 
-Eleven tables. `users` is the root; every gameplay table reaches back to it by foreign key.
-
-| Table                     | What it holds                                                        |
-| ------------------------- | -------------------------------------------------------------------- |
-| `users`                   | Survivor account, bcrypt password hash, `materials`, `raft_size`      |
-| `item_types`              | Catalogue of every item in the game (name, category, rarity)          |
-| `user_items`              | A survivor's inventory rows → `users`, `item_types`                   |
-| `debris`                  | Server-spawned floating debris; `claimed_at` makes it claimable once  |
-| `debris_collection_logs`  | Audit trail of every collection attempt, accepted or rejected         |
-| `crafting_recipes`        | Ingredient → result mappings between `item_types`                     |
-| `raft_upgrades`           | History of upgrades a survivor has applied → `users`                  |
-| `quests`                  | Quest catalogue: type, target, rewards, `min_raft_size` gate          |
-| `user_quests`             | Per-survivor progress and claim state (unique per user + quest)       |
-| `ocean_events`            | Catalogue of ocean events, including the unexpected hazards           |
-| `user_events`             | History of events a survivor has encountered → `users`, `ocean_events`|
-
-## Setup & Run
+## Setup and run
 
 ### Prerequisites
 
-- Node.js 18 or later, and npm.
+- Node.js 18 or later
+- npm
 
-### 1. Backend (API on http://localhost:3000)
+### 1. Configure the backend
 
-```bash
-# from the repo root
-cp .env.example .env      # then set a long random JWT_SECRET_KEY
-npm install               # install backend dependencies
-npm run db                # create + seed the SQLite database (local.db)
-npm run dev               # start the API with auto-reload (port 3000)
-```
-
-`JWT_SECRET_KEY` must be set before the first login — it signs every token.
-
-### 2. Frontend (Vite dev server on http://localhost:5173)
-
-In a **second terminal**:
+From the repository root:
 
 ```bash
-cd frontend
-npm install               # install frontend dependencies
-npm run dev               # start Vite (port 5173) — it proxies /api to the backend
+cp .env.example .env
 ```
 
-Open **http://localhost:5173** and sign in. The Vite dev server proxies every `/api` request to
-the backend on port 3000, so the two run side by side with no CORS setup needed.
+Set a long random `JWT_SECRET_KEY` in `.env`. The database defaults to `file:local.db` unless a
+different `DATABASE_URL` is configured.
 
-### Optional: one-server production build
-
-To serve everything from the backend on a single origin (no second terminal):
+### 2. Install dependencies and seed the database
 
 ```bash
-cd frontend && npm run build && cd ..   # builds into ../public
-npm run dev                             # backend now also serves the built app on :3000
+npm install
+npm run db
 ```
 
-Then open **http://localhost:3000**. (`public/` is a build artefact and is git-ignored.)
+`npm run db` applies the schema, clears the configured database in dependency order, and inserts
+the seed data in one transaction. Seed relationships use the IDs returned by the database, so the
+seed remains correct when autoincrement counters continue increasing after previous resets.
 
-### Seeded logins
+Running this command replaces the data in the configured database. Do not run it against a shared
+or production database unless that reset is intentional.
 
-`npm run db` drops the database, recreates it from `src/db/schema.js`, and seeds three survivors:
+### 3. Start the backend
 
-| Username      | Password        | State                                                          |
-| ------------- | --------------- | -------------------------------------------------------------- |
-| `SurvivorJay` | `password123`   | Fresh start — raft size 1, 0 materials, one Floor Extension     |
-| `Ocean`       | `password1234`  | Mid-game — raft size 3, 50 materials, Floor Extension + Sail    |
-| `Rafter`      | `password12345` | Late-game — raft size 8, 200 materials, all three growth upgrades |
+```bash
+npm start
+```
 
-None of the seeded survivors own a defensive upgrade, so unexpected events will cost them cargo
-until they buy one — that is the intended first lesson of the loop.
+The API runs at `http://localhost:3000`.
 
-### Scripts
+For backend development with automatic restart, use:
 
-| Where       | Command           | What it does                              |
-| ----------- | ----------------- | ----------------------------------------- |
-| root        | `npm run dev`     | Start the API (nodemon auto-reload)       |
-| root        | `npm run db`      | Drop, recreate, and reseed the database   |
-| root        | `npm test`        | Run the test suite (Vitest)               |
-| `frontend/` | `npm run dev`     | Start the Vite dev server (proxies `/api`)|
-| `frontend/` | `npm run build`   | Build the production bundle to `../public`|
+```bash
+npm run dev
+```
 
-API docs (Swagger): http://localhost:3000/api-docs
+### 4. Open the frontend
+
+Run `npm start`, then open `http://localhost:3000/`. Express serves the frontend directly from
+`public/`; the individual page documents are available under `/html/`.
+
+## Environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `PORT` | Backend port; defaults to `3000` |
+| `DATABASE_URL` | libSQL/SQLite URL; defaults to `file:local.db` |
+| `DATABASE_AUTH_TOKEN` | Authentication token for a remote libSQL database |
+| `JWT_SECRET_KEY` | Secret used to sign JWTs |
+| `JWT_EXPIRES_IN` | JWT lifetime, for example `1h` or `7d` |
+| `JWT_ALGORITHM` | JWT signing algorithm configured by the application |
+| `NODE_ENV` | Runtime environment |
+
+Never commit `.env` or database credentials.
+
+## Seeded accounts
+
+These accounts are available after `npm run db`:
+
+| Username | Password | Seeded state |
+| --- | --- | --- |
+| `SurvivorJay` | `password123` | Raft size 1, 0 materials, energy 90, Floor Extension history |
+| `Ocean` | `password1234` | Raft size 3, 50 materials, energy 75, Floor Extension and Sail history |
+| `Rafter` | `password12345` | Raft size 8, 200 materials, energy 45, Floor Extension, Sail, and Net Launcher history |
+
+The seeded survivors do not have defensive upgrades, so hazards can still remove cargo until the
+player purchases protection.
+
+## Frontend pages
+
+| Page | File | Purpose |
+| --- | --- | --- |
+| Sign in | `public/html/index.html` or `public/html/login.html` | Authenticate an existing survivor |
+| Register | `public/html/register.html` | Create a survivor account |
+| Camp | `public/html/camp.html` | Manage the raft, quests, inventory, crafting, and upgrades |
+| Voyage | `public/html/voyage.html` | Third-person 3D debris collection and ocean events |
+| Leaderboard | `public/html/leaderboard.html` | Public survivor rankings |
+
+Navigation uses ordinary document links between the multipage HTML documents. The protected camp
+and voyage pages redirect to `/html/login.html` immediately when no stored session exists.
+
+## Authentication and request flow
+
+1. Registration and login are public `POST` requests.
+2. A successful login returns a JWT.
+3. The frontend stores the JWT and the current user in browser `localStorage` under `cc_token` and
+   `cc_user` so a refresh can preserve the session.
+4. The frontend API client adds `Authorization: Bearer <token>` to protected requests.
+5. The backend verifies the token and loads the authenticated survivor.
+6. The frontend uses `fetch()` to read or mutate API data and updates the DOM with the response.
+7. A `401` response clears the stored session and sends protected pages back to sign in.
+
+For debugging, inspect the browser DevTools Network tab under Fetch/XHR. Protected requests should
+show the bearer token in the request headers; JSON request data appears under Payload and JSON API
+results appear under Response. The token itself can be inspected under Application → Local Storage.
 
 ## API overview
 
-Auth issues a JWT on login; protected routes require `Authorization: Bearer <token>` and reject
-anything else with `401`. Passwords are hashed with bcrypt and never returned in any response.
+Protected endpoints require `Authorization: Bearer <token>`. Passwords are bcrypt-hashed and are
+never returned by the API.
 
-### Auth — public
+### Authentication
 
-| Method | Route                 | Purpose                                        |
-| ------ | --------------------- | ---------------------------------------------- |
-| POST   | `/api/auth/register`  | Create a survivor. `409` if the name is taken   |
-| POST   | `/api/auth/login`     | Returns a JWT on success                        |
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `POST` | `/api/auth/register` | Create a survivor account |
+| `POST` | `/api/auth/login` | Verify credentials and return a JWT |
 
-### The logged-in survivor — every route requires a token and acts on the token's owner
+### Authenticated survivor routes
 
-| Method | Route                                  | Purpose                                  |
-| ------ | -------------------------------------- | ---------------------------------------- |
-| GET    | `/api/me`                              | Own profile                              |
-| PATCH  | `/api/me`                              | Rename the survivor (`409` on conflict)  |
-| DELETE | `/api/me`                              | Abandon the raft (`204`)                 |
-| GET    | `/api/me/status`                       | Whole progression state in one call      |
-| GET    | `/api/me/inventory?category=`          | Inventory, optionally filtered           |
-| GET    | `/api/me/upgrades`                     | Upgrade history                          |
-| GET    | `/api/me/quests`                       | Quest board with own progress merged in  |
-| GET    | `/api/me/collection-logs`              | Recent debris attempts + time between    |
-| GET    | `/api/me/debris`                       | Currently spawned, unclaimed debris      |
-| GET    | `/api/me/unexpected-events`            | Hazard catalogue for the HUD             |
-| POST   | `/api/me/debris/:debris_id/collect`    | Claim one debris row (`409` if gone)     |
-| POST   | `/api/me/unexpected-events/resolve`    | Resolve a hazard (`429` while cooling down) |
-| POST   | `/api/me/craft`                        | Craft from a recipe                      |
-| POST   | `/api/me/upgrade-raft`                 | Buy an upgrade                           |
-| POST   | `/api/me/quests/:quest_id/claim`       | Claim a completed quest's reward         |
+Every `/api/me` route requires a token and acts on the token owner.
 
-### Public survivor directory — read-only, no token
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/me` | Read the signed-in survivor's profile |
+| `PATCH` | `/api/me` | Rename the signed-in survivor |
+| `DELETE` | `/api/me` | Delete the signed-in survivor and raft |
+| `GET` | `/api/me/status` | Read progression state in one response |
+| `GET` | `/api/me/inventory?category=` | Read the survivor's inventory |
+| `GET` | `/api/me/upgrades` | Read the survivor's upgrade history |
+| `GET` | `/api/me/quests` | Read the quest board and own progress |
+| `GET` | `/api/me/collection-logs` | Read debris collection attempts |
+| `GET` | `/api/me/debris` | Read currently spawned, unclaimed debris |
+| `GET` | `/api/me/unexpected-events` | Read unexpected-event definitions |
+| `POST` | `/api/me/debris/:debris_id/collect` | Collect one debris row |
+| `POST` | `/api/me/collect-debris` | Legacy-compatible debris collection path |
+| `POST` | `/api/me/unexpected-events/resolve` | Resolve an unexpected event |
+| `POST` | `/api/me/craft` | Craft an item from a recipe |
+| `POST` | `/api/me/upgrade-raft` | Buy a raft upgrade |
+| `POST` | `/api/me/quests/:quest_id/claim` | Claim a completed quest reward |
 
-| Method | Route                                     | Purpose                          |
-| ------ | ----------------------------------------- | -------------------------------- |
-| GET    | `/api/users?search=&raft_size=`           | Filterable survivor list         |
-| GET    | `/api/users/leaderboard`                  | Top five by raft size, then materials |
-| GET    | `/api/users/:user_id`                     | One survivor's public profile    |
+### Public survivor routes
 
-There is no `POST/PATCH/DELETE /api/users` — creating a survivor is `POST /api/auth/register`,
-and changing or deleting one is `PATCH`/`DELETE /api/me`, which act on the token's owner.
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/health` | Check that the API is running |
+| `GET` | `/api/users?search=&raft_size=` | Search the public survivor directory |
+| `GET` | `/api/users/leaderboard` | Read the top five survivors |
+| `GET` | `/api/users/:user_id` | Read one public survivor profile |
 
-### Catalogues and records — reads are public, writes require a token
+There are no generic `POST/PATCH/DELETE /api/users` routes. Account creation uses registration,
+while profile changes use the authenticated `/api/me` routes.
 
-Each of these exposes the full `GET /` (filterable), `GET /:id`, `POST /`, `PATCH /:id`,
-`DELETE /:id` set:
+### Catalogue and record CRUD routes
 
-| Resource                 | Query filters on `GET /`                          |
-| ------------------------ | ------------------------------------------------- |
-| `/api/item-types`        | `?category=`, `?search=`                          |
-| `/api/crafting-recipes`  | `?result_item_type_id=`, `?ingredient_item_type_id=` |
-| `/api/quests`            | `?quest_type=`                                    |
-| `/api/ocean-events`      | `?event_type=`                                    |
-| `/api/user-items`        | `?user_id=`, `?category=`                         |
-| `/api/raft-upgrades`     | `?user_id=`, `?upgrade_type=`                     |
-| `/api/user-quests`       | `?user_id=`, `?quest_id=`, `?status=`             |
-| `/api/user-events`       | `?user_id=`, `?event_id=`                         |
+The catalogue routes expose public reads. User-owned record routes require a bearer token and
+only return or modify records belonging to the authenticated survivor. All update routes remain
+`PATCH` routes in this project.
 
-Writes to `/api/user-quests` and `/api/user-events` additionally check that the row belongs to
-the authenticated survivor and return `404` if it does not.
+#### Item types
 
-### Status codes
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/item-types` | List item types |
+| `GET` | `/api/item-types/:item_type_id` | Read one item type |
+| `POST` | `/api/item-types` | Create an item type |
+| `PATCH` | `/api/item-types/:item_type_id` | Update an item type |
+| `DELETE` | `/api/item-types/:item_type_id` | Delete an item type |
 
-`200` reads and successful actions · `201` created · `204` deleted · `400` validation ·
-`401` missing/invalid/expired token · `404` not found · `409` conflict (duplicate username,
-already-claimed debris or quest) · `429` event cooldown · `500` unexpected. Errors come back as
-`{ error: { code, message, status } }` from the central handler in `src/utils/_errors.js`.
+#### Crafting recipes
 
-## Assumptions
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/crafting-recipes` | List crafting recipes |
+| `GET` | `/api/crafting-recipes/:recipe_id` | Read one crafting recipe |
+| `POST` | `/api/crafting-recipes` | Create a crafting recipe |
+| `PATCH` | `/api/crafting-recipes/:recipe_id` | Update a crafting recipe |
+| `DELETE` | `/api/crafting-recipes/:recipe_id` | Delete a crafting recipe |
 
-- **Materials pool.** `materials` is a single integer per survivor — a generic pool of crafting
-  resources rather than individual stacks. Simplifies the model without losing the core loop.
-- **Two kinds of upgrade.** Growth upgrades are repeatable and raise `raft_size`: Floor Extension
-  (10 materials, +1), Sail (20, +2), Net Launcher (35, +3) — each visibly reshapes the 3D raft.
-  Defensive upgrades are one-time, add no size, and each cancels exactly one hazard: Spear Rack
-  (30) stops shark attacks, Roof (35) stops downpours, Shelter (45) stops tsunamis. Costs live in
-  `src/config/gameRules.js` so route validation and controller logic can never disagree.
-- **Raft size as score.** `raft_size` doubles as leaderboard rank and as the gate on which quests
-  and ocean events a survivor can reach.
-- **Server authority.** The client never reports what it found or how far a quest has come. Debris
-  is spawned and claimed server-side, quest progress is a side effect of the action routes, and
-  event outcomes are rolled on the server — so nothing in the browser can be edited into free
-  materials.
-- **Atomic gameplay writes.** Collect, craft, upgrade, quest-claim, and event-resolve each commit
-  their several DB changes in a single transaction — a failure leaves nothing half-applied, and an
-  unaffordable action changes nothing.
-- **Catalogue writes are token-gated, not role-gated.** There is no admin role in the game, so any
-  authenticated survivor can write to the catalogue routes (`/api/item-types`, `/api/quests`, …).
-  They exist to demonstrate full CRUD; the game itself never calls them.
-- **Surrogate integer primary keys.** `user_id` is an autoincrement `integer` PK assigned by the
-  database, not derived from the username. It carries no meaning, so renaming a survivor cannot
-  make it stale and there is nothing to cascade to the tables that reference it. `username` is the
-  mutable label; `user_id` is the immutable identity. `debris_id` is the deliberate exception — it
-  is a `text` UUID, because clients name debris in the URL and sequential integers there would let
-  one player probe another's unclaimed debris.
-- **Auth token in localStorage.** The frontend stores the JWT in `localStorage` so a refresh keeps
-  you signed in. A rejected token (`401`) clears the session in one place — `AuthContext` — and
-  `<RequireAuth>` bounces the user back to sign-in on the next render.
+#### User items
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/user-items` | List the authenticated survivor's inventory records |
+| `GET` | `/api/user-items/:user_item_id` | Read one owned inventory record |
+| `POST` | `/api/user-items` | Create an inventory record for the authenticated survivor |
+| `PATCH` | `/api/user-items/:user_item_id` | Update an owned inventory record |
+| `DELETE` | `/api/user-items/:user_item_id` | Delete an owned inventory record |
+
+#### Raft upgrades
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/raft-upgrades` | List the authenticated survivor's upgrade history |
+| `GET` | `/api/raft-upgrades/:upgrade_id` | Read one owned upgrade record |
+| `POST` | `/api/raft-upgrades` | Create an upgrade record for the authenticated survivor |
+| `PATCH` | `/api/raft-upgrades/:upgrade_id` | Update an owned upgrade record |
+| `DELETE` | `/api/raft-upgrades/:upgrade_id` | Delete an owned upgrade record |
+
+#### Quests
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/quests` | List quests |
+| `GET` | `/api/quests/:quest_id` | Read one quest |
+| `POST` | `/api/quests` | Create a quest |
+| `PATCH` | `/api/quests/:quest_id` | Update a quest |
+| `DELETE` | `/api/quests/:quest_id` | Delete a quest |
+
+#### User quests
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/user-quests` | List the authenticated survivor's quest progress |
+| `GET` | `/api/user-quests/:user_quest_id` | Read one owned quest-progress record |
+| `POST` | `/api/user-quests` | Create quest progress for the authenticated survivor |
+| `PATCH` | `/api/user-quests/:user_quest_id` | Update owned quest progress |
+| `DELETE` | `/api/user-quests/:user_quest_id` | Delete owned quest progress |
+
+#### Ocean events
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/ocean-events` | List ocean events |
+| `GET` | `/api/ocean-events/:event_id` | Read one ocean event |
+| `POST` | `/api/ocean-events` | Create an ocean event |
+| `PATCH` | `/api/ocean-events/:event_id` | Update an ocean event |
+| `DELETE` | `/api/ocean-events/:event_id` | Delete an ocean event |
+
+#### User events
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/user-events` | List the authenticated survivor's event history |
+| `GET` | `/api/user-events/:user_event_id` | Read one owned event-history record |
+| `POST` | `/api/user-events` | Create event history for the authenticated survivor |
+| `PATCH` | `/api/user-events/:user_event_id` | Update an owned event-history record |
+| `DELETE` | `/api/user-events/:user_event_id` | Delete an owned event-history record |
+
+The game UI uses the owner-scoped `/api/me` routes for gameplay. These catalogue and record routes
+are separate CRUD endpoints and are not used by the browser to award materials or resolve gameplay
+actions.
+
+### Common response statuses
+
+`200` successful read/action · `201` created · `204` deleted · `400` invalid input · `401` missing,
+invalid, or expired token · `404` resource not found · `409` conflict or already-claimed resource ·
+`429` event cooldown · `500` unexpected server error.
+
+Errors use the central shape:
+
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable explanation",
+    "status": 400
+  }
+}
+```
+
+Swagger documentation is available at `http://localhost:3000/api-docs` while the backend is
+running.
+
+## Database
+
+The database contains eleven Drizzle tables:
+
+| Table | Purpose |
+| --- | --- |
+| `users` | Survivor account, bcrypt password hash, materials, raft size, energy, level, and login progress |
+| `item_types` | Item catalogue with category, rarity, costs, and descriptions |
+| `user_items` | Inventory quantities owned by survivors |
+| `debris` | Server-spawned floating debris and its claim state |
+| `debris_collection_logs` | Audit trail of accepted and rejected collection attempts |
+| `crafting_recipes` | Ingredient-to-result crafting mappings |
+| `raft_upgrades` | Upgrade history for each survivor |
+| `quests` | Quest definitions, targets, rewards, and raft-size gates |
+| `user_quests` | Per-survivor quest progress and claim state |
+| `ocean_events` | Normal and unexpected event definitions |
+| `user_events` | History of events encountered by survivors |
+
+`user_id` and the other ordinary entity IDs are database-generated integer primary keys. The
+`debris_id` is a text UUID because debris identifiers are exposed to the browser and must be
+unique without relying on sequential values.
+
+## Game rules
+
+Upgrade balance is centralised in `src/config/gameRules.js`:
+
+| Upgrade | Cost | Effect |
+| --- | ---: | --- |
+| Floor Extension | 10 materials | `raft_size` +1; repeatable |
+| Sail | 20 materials | `raft_size` +2; repeatable |
+| Net Launcher | 35 materials | `raft_size` +3; repeatable |
+| Spear Rack | 30 materials | Prevents shark attacks; one-time |
+| Shelter | 45 materials | Prevents tsunamis; one-time |
+| Roof | 35 materials | Prevents heavy downpours; one-time |
+
+The server is authoritative for debris, materials, quest progress, crafting, upgrades, event
+outcomes, and cooldowns. Collection, crafting, upgrades, quest claims, and event resolution use
+transactions so related database changes are applied together.
+
+## Scripts
+
+| Location | Command | Purpose |
+| --- | --- | --- |
+| Root | `npm start` | Start the API and Express-served frontend on port 3000 |
+| Root | `npm run dev` | Start the API with nodemon |
+| Root | `npm run db` | Apply the schema, clear, and reseed the configured database |
+| Root | `npm test` | Run the Vitest test suite |
+| Root | `npm run export` | Create an export zip without `node_modules` |
+
+## Notes for assessment and debugging
+
+- The frontend uses the DOM directly through vanilla JavaScript; no React runtime or React Router
+  is required.
+- API calls are visible in DevTools under Network → Fetch/XHR, including request headers, payloads,
+  response JSON, status codes, and request IDs.
+- Frontend API logging is prefixed with `[FRONTEND]`; authentication logging uses `[AUTH]`.
+- Backend request, error, authentication, and controller-pipeline logs help trace a request from
+  the route to the database operation.
+- Images and 3D visuals are frontend assets/code; gameplay rewards and progression remain controlled
+  by the backend.

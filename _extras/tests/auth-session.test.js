@@ -1,4 +1,4 @@
-import { isTokenExpired, readStoredSession } from '../../frontend/js/lib/api.js';
+import { isTokenExpired, readStoredSession } from '../../public/js/lib/api.js';
 
 const tokenWithExpiry = (exp) => {
   const payload = Buffer.from(JSON.stringify({ exp })).toString('base64url');

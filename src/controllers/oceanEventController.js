@@ -13,19 +13,29 @@ const parsePositiveInt = (value, fieldName) => {
 };
 
 /** Checks that an optional event reward item exists. */
-const ensureRewardItemExists = async (itemTypeId) => {
-  if (itemTypeId === undefined) return;
+export const validateOceanEventRewardItem = async (req, res, next) => {
+  try {
+    if (req.body.reward_item_type_id === undefined) return next();
 
-  const itemType = await findItemTypeById(itemTypeId);
-  if (!itemType) throw new AppError('NOT_FOUND', `Item type with id ${itemTypeId} not found`);
+    const itemType = await findItemTypeById(req.body.reward_item_type_id);
+    if (!itemType) throw new AppError('NOT_FOUND', `Item type with id ${req.body.reward_item_type_id} not found`);
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 /** Checks that an optional item loss target exists in the item catalogue. */
-const ensureLossItemExists = async (itemTypeId) => {
-  if (itemTypeId === undefined) return;
+export const validateOceanEventLossItem = async (req, res, next) => {
+  try {
+    if (req.body.loss_item_type_id === undefined) return next();
 
-  const itemType = await findItemTypeById(itemTypeId);
-  if (!itemType) throw new AppError('NOT_FOUND', `loss_item_type_id ${itemTypeId} does not exist`);
+    const itemType = await findItemTypeById(req.body.loss_item_type_id);
+    if (!itemType) throw new AppError('NOT_FOUND', `loss_item_type_id ${req.body.loss_item_type_id} does not exist`);
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 /** Unexpected events must have a complete server-owned loss configuration. */
@@ -70,9 +80,6 @@ export const getOceanEventById = async (req, res, next) => {
 /** POST /api/ocean-events — create an ocean event. */
 export const createOceanEvent = async (req, res, next) => {
   try {
-    await ensureRewardItemExists(req.body.reward_item_type_id);
-    await ensureLossItemExists(req.body.loss_item_type_id);
-
     const minimum = req.body.min_materials ?? 0;
     const maximum = req.body.max_materials ?? 0;
     validateMaterialRange(minimum, maximum);
@@ -105,16 +112,29 @@ export const createOceanEvent = async (req, res, next) => {
   }
 };
 
-/** PATCH /api/ocean-events/:event_id — update an event without overwriting omitted fields. */
-export const patchOceanEvent = async (req, res, next) => {
+/** Load an event before a patch. This step calls only the event lookup model. */
+export const loadOceanEventForPatch = async (req, res, next) => {
   try {
     const eventId = parsePositiveInt(req.params.event_id, 'event_id');
     const existing = await findOceanEventById(eventId);
     if (!existing) throw new AppError('NOT_FOUND', 'Ocean event not found');
 
+    res.locals.oceanEventForPatch = existing;
+    res.locals.oceanEventId = eventId;
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+/** PATCH /api/ocean-events/:event_id — update an event without overwriting omitted fields. */
+export const patchOceanEvent = async (req, res, next) => {
+  try {
+    const eventId = res.locals.oceanEventId;
+    const existing = res.locals.oceanEventForPatch;
+
     const data = {};
     if (req.body.reward_item_type_id !== undefined) {
-      await ensureRewardItemExists(req.body.reward_item_type_id);
       data.reward_item_type_id = req.body.reward_item_type_id;
     }
     if (req.body.event_name !== undefined) data.event_name = req.body.event_name;
@@ -128,7 +148,6 @@ export const patchOceanEvent = async (req, res, next) => {
     if (req.body.reward_item_quantity !== undefined) data.reward_item_quantity = req.body.reward_item_quantity;
     if (req.body.prevention_upgrade_type !== undefined) data.prevention_upgrade_type = req.body.prevention_upgrade_type;
     if (req.body.loss_item_type_id !== undefined) {
-      await ensureLossItemExists(req.body.loss_item_type_id);
       data.loss_item_type_id = req.body.loss_item_type_id;
     }
     if (req.body.loss_item_quantity !== undefined) data.loss_item_quantity = req.body.loss_item_quantity;
