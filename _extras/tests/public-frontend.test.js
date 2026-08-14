@@ -5,6 +5,20 @@ const publicRoot = new URL('../../public/', import.meta.url);
 const file = (relativePath) => new URL(relativePath, publicRoot);
 
 describe('Express-served public frontend', () => {
+  it('defines clean gameplay page paths in Express', () => {
+    const serverSource = readFileSync(new URL('../../index.js', import.meta.url), 'utf8');
+    for (const [path, page] of [
+      ['/camp', 'camp.html'],
+      ['/leaderboard', 'leaderboard.html'],
+      ['/voyage', 'voyage.html'],
+      ['/login', 'login.html'],
+      ['/register', 'register.html'],
+    ]) {
+      expect(serverSource).toContain(`app.get('${path}'`);
+      expect(serverSource).toContain(`'${page}'`);
+    }
+  });
+
   it('keeps all page documents organized under public/html', () => {
     for (const page of ['index.html', 'login.html', 'register.html', 'camp.html', 'leaderboard.html', 'voyage.html']) {
       expect(existsSync(file(`html/${page}`))).toBe(true);
@@ -16,15 +30,15 @@ describe('Express-served public frontend', () => {
   it('keeps browser source files and static assets under public', () => {
     expect(existsSync(file('css/global.css'))).toBe(true);
     expect(existsSync(file('css/tokens.css'))).toBe(true);
-    expect(existsSync(file('js/entries/login.js'))).toBe(true);
-    expect(existsSync(file('js/lib/classNames.js'))).toBe(true);
+    expect(existsSync(file('js/page-startup/login.js'))).toBe(true);
+    expect(existsSync(file('js/helpers/cssClassNames.js'))).toBe(true);
     expect(existsSync(file('assets/pixel-icons/raft.png'))).toBe(true);
     expect(existsSync(new URL('../../frontend/css', import.meta.url))).toBe(false);
     expect(existsSync(new URL('../../frontend/js', import.meta.url))).toBe(false);
   });
 
   it('maps CSS module property names to stable browser class names', async () => {
-    const { createClassNames } = await import('../../public/js/lib/classNames.js');
+    const { createClassNames } = await import('../../public/js/helpers/cssClassNames.js');
     const styles = createClassNames('button');
     expect(styles.primary).toBe('button-primary');
     expect(styles.loading).toBe('button-loading');
@@ -35,7 +49,7 @@ describe('Express-served public frontend', () => {
       const html = readFileSync(file(`html/${page}`), 'utf8');
       expect(html).toContain('/css/tokens.css');
       expect(html).toContain('/css/global.css');
-      expect(html).toMatch(/<script type="module" src="\/js\/entries\/[^"/]+\.js"><\/script>/);
+      expect(html).toMatch(/<script type="module" src="\/js\/page-startup\/[^"/]+\.js"><\/script>/);
     }
     expect(readFileSync(file('css/Button.module.css'), 'utf8')).toContain('.button-btn');
     expect(readFileSync(file('css/Button.module.css'), 'utf8')).not.toMatch(/\.btn\s*\{/);
@@ -51,6 +65,6 @@ describe('Express-served public frontend', () => {
     ]) {
       expect(existsSync(file(relativePath))).toBe(true);
     }
-    expect(readFileSync(file('js/ocean/createOceanScene.js'), 'utf8')).toContain('../../vendor/three/three.module.js');
+    expect(readFileSync(file('js/voyage/voyageWorld.js'), 'utf8')).toContain('../../vendor/three/three.module.js');
   });
 });

@@ -69,11 +69,14 @@ advances the relevant quest progress. A matching defensive upgrade can prevent t
     ├── html/                        # Page entry documents
     ├── css/                         # Global, component, and page styles
     ├── js/
-    │   ├── entries/                 # One JavaScript entry point per HTML page
-    │   ├── pages/                   # Login, register, camp, leaderboard, and voyage pages
-    │   ├── components/              # Reusable DOM and ocean viewport helpers
-    │   ├── lib/                     # API client, auth store, game state, and utilities
-    │   └── ocean/                   # Three.js scene, raft motion, and event effects
+    │   ├── api/                     # Fetch client and stored-session helpers
+    │   ├── camp/                    # Camp panels and management UI pieces
+    │   ├── game/                    # Camp data, world clock, and leaderboard logic
+    │   ├── helpers/                 # Shared DOM, CSS-class, notification, and UI helpers
+    │   ├── page-startup/            # One JavaScript bootstrap per HTML page
+    │   ├── player/                  # Authentication and current-player session state
+    │   ├── screens/                 # Full-page renderers for camp, auth, voyage, and leaderboard
+    │   └── voyage/                  # Three.js ocean scene, raft controls, and event visuals
     ├── assets/                      # Pixel icons and other game media
     └── vendor/three/                 # Browser-ready Three.js modules
 ```
@@ -148,7 +151,7 @@ npm run dev
 ### 4. Open the frontend
 
 Run `npm start`, then open `http://localhost:3000/`. Express serves the frontend directly from
-`public/`; the individual page documents are available under `/html/`.
+`public/`. Use `/login`, `/register`, `/camp`, `/voyage`, and `/leaderboard` for the page routes.
 
 ## Environment variables
 
@@ -179,16 +182,17 @@ player purchases protection.
 
 ## Frontend pages
 
-| Page | File | Purpose |
+| Page | URL | Purpose |
 | --- | --- | --- |
-| Sign in | `public/html/index.html` or `public/html/login.html` | Authenticate an existing survivor |
-| Register | `public/html/register.html` | Create a survivor account |
-| Camp | `public/html/camp.html` | Manage the raft, quests, inventory, crafting, and upgrades |
-| Voyage | `public/html/voyage.html` | Third-person 3D debris collection and ocean events |
-| Leaderboard | `public/html/leaderboard.html` | Public survivor rankings |
+| Sign in | `/login` | Authenticate an existing survivor |
+| Register | `/register` | Create a survivor account |
+| Camp | `/camp` | Manage the raft, quests, inventory, crafting, and upgrades |
+| Voyage | `/voyage` | Third-person 3D debris collection and ocean events |
+| Leaderboard | `/leaderboard` | Public survivor rankings |
 
-Navigation uses ordinary document links between the multipage HTML documents. The protected camp
-and voyage pages redirect to `/html/login.html` immediately when no stored session exists.
+Navigation uses clean Express page routes that serve the organized HTML documents under
+`public/html/`. The protected camp and voyage pages redirect to `/login` immediately when no
+stored session exists.
 
 ## Authentication and request flow
 
@@ -252,11 +256,11 @@ Every `/api/me` route requires a token and acts on the token owner.
 There are no generic `POST/PATCH/DELETE /api/users` routes. Account creation uses registration,
 while profile changes use the authenticated `/api/me` routes.
 
-### Catalogue and record CRUD routes
+### Catalogue and player-history read routes
 
-The catalogue routes expose public reads. User-owned record routes require a bearer token and
-only return or modify records belonging to the authenticated survivor. All update routes remain
-`PATCH` routes in this project.
+The catalogue routes expose public reads. Player inventory, quest progress, event history, and
+raft-upgrade history are server-owned records, so their dedicated routes are read-only and require
+a bearer token. Gameplay writes happen only through the authenticated `/api/me` action routes.
 
 #### Item types
 
@@ -264,9 +268,6 @@ only return or modify records belonging to the authenticated survivor. All updat
 | --- | --- | --- |
 | `GET` | `/api/item-types` | List item types |
 | `GET` | `/api/item-types/:item_type_id` | Read one item type |
-| `POST` | `/api/item-types` | Create an item type |
-| `PATCH` | `/api/item-types/:item_type_id` | Update an item type |
-| `DELETE` | `/api/item-types/:item_type_id` | Delete an item type |
 
 #### Crafting recipes
 
@@ -274,9 +275,6 @@ only return or modify records belonging to the authenticated survivor. All updat
 | --- | --- | --- |
 | `GET` | `/api/crafting-recipes` | List crafting recipes |
 | `GET` | `/api/crafting-recipes/:recipe_id` | Read one crafting recipe |
-| `POST` | `/api/crafting-recipes` | Create a crafting recipe |
-| `PATCH` | `/api/crafting-recipes/:recipe_id` | Update a crafting recipe |
-| `DELETE` | `/api/crafting-recipes/:recipe_id` | Delete a crafting recipe |
 
 #### User items
 
@@ -284,9 +282,6 @@ only return or modify records belonging to the authenticated survivor. All updat
 | --- | --- | --- |
 | `GET` | `/api/user-items` | List the authenticated survivor's inventory records |
 | `GET` | `/api/user-items/:user_item_id` | Read one owned inventory record |
-| `POST` | `/api/user-items` | Create an inventory record for the authenticated survivor |
-| `PATCH` | `/api/user-items/:user_item_id` | Update an owned inventory record |
-| `DELETE` | `/api/user-items/:user_item_id` | Delete an owned inventory record |
 
 #### Raft upgrades
 
@@ -294,9 +289,6 @@ only return or modify records belonging to the authenticated survivor. All updat
 | --- | --- | --- |
 | `GET` | `/api/raft-upgrades` | List the authenticated survivor's upgrade history |
 | `GET` | `/api/raft-upgrades/:upgrade_id` | Read one owned upgrade record |
-| `POST` | `/api/raft-upgrades` | Create an upgrade record for the authenticated survivor |
-| `PATCH` | `/api/raft-upgrades/:upgrade_id` | Update an owned upgrade record |
-| `DELETE` | `/api/raft-upgrades/:upgrade_id` | Delete an owned upgrade record |
 
 #### Quests
 
@@ -304,9 +296,6 @@ only return or modify records belonging to the authenticated survivor. All updat
 | --- | --- | --- |
 | `GET` | `/api/quests` | List quests |
 | `GET` | `/api/quests/:quest_id` | Read one quest |
-| `POST` | `/api/quests` | Create a quest |
-| `PATCH` | `/api/quests/:quest_id` | Update a quest |
-| `DELETE` | `/api/quests/:quest_id` | Delete a quest |
 
 #### User quests
 
@@ -314,9 +303,6 @@ only return or modify records belonging to the authenticated survivor. All updat
 | --- | --- | --- |
 | `GET` | `/api/user-quests` | List the authenticated survivor's quest progress |
 | `GET` | `/api/user-quests/:user_quest_id` | Read one owned quest-progress record |
-| `POST` | `/api/user-quests` | Create quest progress for the authenticated survivor |
-| `PATCH` | `/api/user-quests/:user_quest_id` | Update owned quest progress |
-| `DELETE` | `/api/user-quests/:user_quest_id` | Delete owned quest progress |
 
 #### Ocean events
 
@@ -324,9 +310,6 @@ only return or modify records belonging to the authenticated survivor. All updat
 | --- | --- | --- |
 | `GET` | `/api/ocean-events` | List ocean events |
 | `GET` | `/api/ocean-events/:event_id` | Read one ocean event |
-| `POST` | `/api/ocean-events` | Create an ocean event |
-| `PATCH` | `/api/ocean-events/:event_id` | Update an ocean event |
-| `DELETE` | `/api/ocean-events/:event_id` | Delete an ocean event |
 
 #### User events
 
@@ -334,13 +317,10 @@ only return or modify records belonging to the authenticated survivor. All updat
 | --- | --- | --- |
 | `GET` | `/api/user-events` | List the authenticated survivor's event history |
 | `GET` | `/api/user-events/:user_event_id` | Read one owned event-history record |
-| `POST` | `/api/user-events` | Create event history for the authenticated survivor |
-| `PATCH` | `/api/user-events/:user_event_id` | Update an owned event-history record |
-| `DELETE` | `/api/user-events/:user_event_id` | Delete an owned event-history record |
 
-The game UI uses the owner-scoped `/api/me` routes for gameplay. These catalogue and record routes
-are separate CRUD endpoints and are not used by the browser to award materials or resolve gameplay
-actions.
+The game UI uses the owner-scoped `/api/me` routes for gameplay. These read routes expose current
+state and history only; they cannot award materials, change quest progress, install upgrades, or
+resolve gameplay actions.
 
 ### Common response statuses
 

@@ -1,7 +1,7 @@
 /**
  * How far from the origin salvage may spawn.
  *
- * This must stay comfortably inside the renderer's WORLD_LIMIT (public/js/ocean/
+ * This must stay comfortably inside the renderer's WORLD_LIMIT (public/js/voyage/
  * createPixelOceanScene.js). The raft collects with its deck, which sits ahead of the hull, so a
  * piece spawned right on the edge of the sailable area could never be driven over. The renderer
  * currently sails to +/-180, which leaves this radius roughly 20 units of slack.

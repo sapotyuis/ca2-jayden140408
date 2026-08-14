@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { transactionalPipeline } from '../../src/middlewares/transactionMiddleware.js';
 
-const meRoutes = readFileSync(new URL('../../src/routes/meRoutes.js', import.meta.url), 'utf8');
-const gameplayMiddleware = readFileSync(new URL('../../src/controllers/gameplayStepsController.js', import.meta.url), 'utf8');
+const playerRoutes = readFileSync(new URL('../../src/routes/playerRoutes.js', import.meta.url), 'utf8');
+const gameplayMiddleware = readFileSync(new URL('../../src/controllers/gameplayActionsController.js', import.meta.url), 'utf8');
 const controllersPath = fileURLToPath(new URL('../../src/controllers/', import.meta.url));
 
 const exportedFunctionBodies = (source) => {
@@ -35,13 +35,13 @@ const importedModelFunctions = (source) => [...source.matchAll(
 
 describe('strict gameplay middleware pipelines', () => {
   it('routes multi-step gameplay actions through transactional model middleware', () => {
-    expect(meRoutes).toContain("from '../controllers/gameplayStepsController.js'");
+    expect(playerRoutes).toContain("from '../controllers/gameplayActionsController.js'");
     expect(gameplayMiddleware).toContain('transactionalPipeline');
-    expect(meRoutes).toContain('collectDebrisPipeline');
-    expect(meRoutes).toContain('craftItemPipeline');
-    expect(meRoutes).toContain('raftUpgradePipeline');
-    expect(meRoutes).toContain('unexpectedEventPipeline');
-    expect(meRoutes).toContain('questRewardPipeline');
+    expect(playerRoutes).toContain('collectDebrisAction');
+    expect(playerRoutes).toContain('craftItemAction');
+    expect(playerRoutes).toContain('upgradeRaftAction');
+    expect(playerRoutes).toContain('resolveOceanEventAction');
+    expect(playerRoutes).toContain('claimQuestRewardAction');
   });
 
   it('passes one shared transaction client through every middleware step', async () => {
@@ -71,6 +71,9 @@ describe('strict gameplay middleware pipelines', () => {
 
     for (const filename of readdirSync(controllersPath)) {
       if (!filename.endsWith('.js')) continue;
+      // Registration intentionally checks for an existing username before inserting the new user.
+      // It is an authentication flow, not a gameplay pipeline step.
+      if (filename === 'authController.js') continue;
       const source = readFileSync(join(controllersPath, filename), 'utf8');
       const modelFunctions = importedModelFunctions(source);
 

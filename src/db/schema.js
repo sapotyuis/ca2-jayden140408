@@ -95,7 +95,7 @@ export const user_quests = sqliteTable('user_quests', {
   completed_at: text('completed_at'),
   claimed_at: text('claimed_at'),
 }, (table) => ({
-  // One progress row per survivor per quest — auto-assignment in advanceQuestProgress()
+  // One progress row per survivor per quest — auto-assignment in updateQuestProgress()
   // relies on this to stay a lookup-or-insert instead of ever creating duplicates.
   userQuestUnique: uniqueIndex('user_quests_user_id_quest_id_idx').on(table.user_id, table.quest_id),
 }));

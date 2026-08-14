@@ -15,7 +15,7 @@ vi.mock('../../src/db/connection.js', () => ({
   },
 }));
 
-import { removeUser } from '../../src/models/userModel.js';
+import { removeUser } from '../../src/models/survivorDirectoryModel.js';
 import {
   debris,
   debris_collection_logs,

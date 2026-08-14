@@ -1,205 +1,106 @@
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 import request from 'supertest';
 
 let app;
+let survivorId;
+let token;
 
 beforeAll(async () => {
   execSync('node src/db/seed.js', { stdio: 'ignore' });
   const mod = await import('../../index.js');
   app = mod.default;
+
+  const users = await request(app).get('/api/users?search=SurvivorJay');
+  survivorId = users.body[0].user_id;
+
+  const login = await request(app)
+    .post('/api/auth/login')
+    .send({ username: 'SurvivorJay', password: 'password123' });
+  token = login.body.token;
 });
 
-// ─── GET /api/users ───────────────────────────────────────────────────────────
-
-describe('GET /api/users', () => {
-  it('should return 200 with an array of users', async () => {
-    const res = await request(app).get('/api/users');
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBeGreaterThanOrEqual(3);
+describe('Public survivor directory', () => {
+  it('returns public survivor records without password hashes', async () => {
+    const response = await request(app).get('/api/users');
+    expect(response.status).toBe(200);
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body.length).toBeGreaterThanOrEqual(3);
+    expect(response.body.every((user) => user.password === undefined)).toBe(true);
   });
 
-  it('should filter by search term (username)', async () => {
-    const res = await request(app).get('/api/users?search=Ocean');
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body.length).toBeGreaterThanOrEqual(1);
-    for (const user of res.body) {
-      expect(user.username.toLowerCase()).toContain('ocean');
-    }
+  it('supports username and raft-size query filters', async () => {
+    const byName = await request(app).get('/api/users?search=Ocean');
+    expect(byName.status).toBe(200);
+    expect(byName.body.every((user) => user.username.toLowerCase().includes('ocean'))).toBe(true);
+
+    const byRaftSize = await request(app).get('/api/users?raft_size=3');
+    expect(byRaftSize.status).toBe(200);
+    expect(byRaftSize.body.every((user) => user.raft_size === 3)).toBe(true);
   });
 
-  it('should filter by raft_size', async () => {
-    const res = await request(app).get('/api/users?raft_size=3');
-    expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    for (const user of res.body) {
-      expect(user.raft_size).toBe(3);
-    }
-  });
-});
+  it('returns one public profile and rejects an unknown profile', async () => {
+    const profile = await request(app).get(`/api/users/${survivorId}`);
+    expect(profile.status).toBe(200);
+    expect(profile.body.username).toBe('SurvivorJay');
+    expect(profile.body.password).toBeUndefined();
 
-// ─── GET /api/users/:user_id ──────────────────────────────────────────────────
-
-describe('GET /api/users/:user_id', () => {
-  it('should return 200 with a user object for a valid id', async () => {
-    // user_id 1 is SurvivorJay — the first row the seed inserts.
-    const res = await request(app).get('/api/users/1');
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('user_id');
-    expect(res.body).toHaveProperty('username');
-    expect(res.body).toHaveProperty('materials');
-    expect(res.body).toHaveProperty('raft_size');
-  });
-
-  it('should return 404 for a non-existent id', async () => {
-    const res = await request(app).get('/api/users/99999');
-    expect(res.status).toBe(404);
+    expect((await request(app).get('/api/users/999999')).status).toBe(404);
   });
 });
 
-// ─── POST /api/users ──────────────────────────────────────────────────────────
-
-describe('POST /api/users', () => {
-  it('should return 201 with the created user for a valid body', async () => {
-    const res = await request(app)
-      .post('/api/users')
-      .send({ username: 'NewSurvivor', password: 'securepass' });
-    expect(res.status).toBe(201);
-    expect(res.body).toHaveProperty('user_id');
-    expect(res.body.username).toBe('NewSurvivor');
-    expect(res.body.materials).toBe(0);
-    expect(res.body.raft_size).toBe(1);
-  });
-
-  it('should return 400 when username is missing', async () => {
-    const res = await request(app)
-      .post('/api/users')
-      .send({ password: 'securepass' });
-    expect(res.status).toBe(400);
-  });
-
-  it('should return 400 when password is missing', async () => {
-    const res = await request(app)
-      .post('/api/users')
-      .send({ username: 'AnotherUser' });
-    expect(res.status).toBe(400);
-  });
-
-  it('should return 400 when username is already taken', async () => {
-    const res = await request(app)
-      .post('/api/users')
-      .send({ username: 'SurvivorJay', password: 'doesntmatter' });
-    expect(res.status).toBe(400);
+describe('Public survivor write protection', () => {
+  it('does not expose account or gameplay writes through /api/users', async () => {
+    expect((await request(app).post('/api/users').send({ username: 'Unsafe', password: 'password123' })).status).toBe(404);
+    expect((await request(app).patch(`/api/users/${survivorId}`).send({ materials: 999 })).status).toBe(404);
+    expect((await request(app).delete(`/api/users/${survivorId}`)).status).toBe(404);
+    expect((await request(app).post(`/api/users/${survivorId}/collect-debris`)).status).toBe(404);
+    expect((await request(app).post(`/api/users/${survivorId}/upgrade-raft`).send({ upgrade_type: 'Sail' })).status).toBe(404);
   });
 });
 
-// ─── PUT /api/users/:user_id ──────────────────────────────────────────────────
+describe('API error responses', () => {
+  it('returns a structured 400 response for malformed JSON', async () => {
+    const response = await request(app)
+      .post('/api/auth/login')
+      .set('Content-Type', 'application/json')
+      .send('{"username":');
 
-describe('PUT /api/users/:user_id', () => {
-  it('should return 200 with the updated user for a valid id', async () => {
-    const res = await request(app)
-      .put('/api/users/rafter_SurvivorJay')
-      .send({ materials: 99 });
-    expect(res.status).toBe(200);
-    expect(res.body.materials).toBe(99);
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({
+      error: {
+        code: 'INVALID_JSON',
+        message: 'Request body contains invalid JSON',
+        status: 400,
+      },
+    });
   });
 
-  it('should return 400 when no fields are provided', async () => {
-    const res = await request(app)
-      .put('/api/users/rafter_SurvivorJay')
-      .send({});
-    expect(res.status).toBe(400);
-  });
+  it('returns a structured 404 response for an unknown API route', async () => {
+    const response = await request(app).get('/api/does-not-exist');
 
-  it('should return 404 for a non-existent id', async () => {
-    const res = await request(app)
-      .put('/api/users/99999')
-      .send({ materials: 10 });
-    expect(res.status).toBe(404);
-  });
-});
-
-// ─── DELETE /api/users/:user_id ───────────────────────────────────────────────
-
-describe('DELETE /api/users/:user_id', () => {
-  it('should return 204 when deleting an existing user', async () => {
-    const created = await request(app)
-      .post('/api/users')
-      .send({ username: 'ToBeDeleted', password: 'pass' });
-    const res = await request(app).delete(`/api/users/${created.body.user_id}`);
-    expect(res.status).toBe(204);
-  });
-
-  it('should return 404 for a non-existent id', async () => {
-    const res = await request(app).delete('/api/users/99999');
-    expect(res.status).toBe(404);
+    expect(response.status).toBe(404);
+    expect(response.body).toEqual({
+      error: {
+        code: 'NOT_FOUND',
+        message: 'API route not found',
+        status: 404,
+      },
+    });
   });
 });
 
-// ─── POST /api/users/:user_id/collect-debris ──────────────────────────────────
+describe('Authenticated survivor actions', () => {
+  it('allows a valid token to reach the authenticated profile route', async () => {
+    const response = await request(app)
+      .get('/api/me')
+      .set('Authorization', `Bearer ${token}`);
 
-describe('POST /api/users/:user_id/collect-debris', () => {
-  it('should return 200 with collected materials info', async () => {
-    const res = await request(app).post('/api/users/rafter_SurvivorJay/collect-debris');
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('message');
-    expect(res.body).toHaveProperty('collected');
-    expect(res.body).toHaveProperty('new_materials');
-    expect(typeof res.body.collected).toBe('number');
-    expect(res.body.collected).toBeGreaterThan(0);
+    expect(response.status).toBe(200);
+    expect(response.body.username).toBe('SurvivorJay');
   });
 
-  it('should return 404 for a non-existent user', async () => {
-    const res = await request(app).post('/api/users/99999/collect-debris');
-    expect(res.status).toBe(404);
-  });
-});
-
-// ─── POST /api/users/:user_id/upgrade-raft ────────────────────────────────────
-
-describe('POST /api/users/:user_id/upgrade-raft', () => {
-  it('should return 200 with upgrade details when user has enough materials', async () => {
-    // rafter_Ocean starts with 50 materials — enough for a Floor Extension (costs 10)
-    const res = await request(app)
-      .post('/api/users/rafter_Ocean/upgrade-raft')
-      .send({ upgrade_type: 'Floor Extension' });
-    expect(res.status).toBe(200);
-    expect(res.body).toHaveProperty('message');
-    expect(res.body).toHaveProperty('upgrade');
-    expect(res.body).toHaveProperty('user');
-    expect(res.body.upgrade.upgrade_type).toBe('Floor Extension');
-  });
-
-  it('should return 400 when user does not have enough materials', async () => {
-    // Create a fresh user with 0 materials — avoids relying on seeded user 1 which may have been mutated by earlier tests
-    const created = await request(app)
-      .post('/api/users')
-      .send({ username: 'PoorUser', password: 'pass' });
-    const res = await request(app)
-      .post(`/api/users/${created.body.user_id}/upgrade-raft`)
-      .send({ upgrade_type: 'Floor Extension' });
-    expect(res.status).toBe(400);
-  });
-
-  it('should return 400 when upgrade_type is missing', async () => {
-    const res = await request(app)
-      .post('/api/users/rafter_Ocean/upgrade-raft')
-      .send({});
-    expect(res.status).toBe(400);
-  });
-
-  it('should return 400 when upgrade_type is invalid', async () => {
-    const res = await request(app)
-      .post('/api/users/rafter_Ocean/upgrade-raft')
-      .send({ upgrade_type: 'Invalid Upgrade' });
-    expect(res.status).toBe(400);
-  });
-
-  it('should return 404 for a non-existent user', async () => {
-    const res = await request(app)
-      .post('/api/users/99999/upgrade-raft')
-      .send({ upgrade_type: 'Floor Extension' });
-    expect(res.status).toBe(404);
+  it('rejects protected actions without a token', async () => {
+    expect((await request(app).get('/api/me/status')).status).toBe(401);
+    expect((await request(app).post('/api/me/craft').send({ result_item_type_id: 4 })).status).toBe(401);
   });
 });

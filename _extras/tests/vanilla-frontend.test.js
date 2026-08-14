@@ -11,7 +11,7 @@ describe('vanilla frontend architecture', () => {
     const renderIndex = app.indexOf('const cleanupPage = renderPage({ root, auth, toast, worldClock });');
 
     expect(guardIndex).toBeGreaterThanOrEqual(0);
-    expect(app).toContain("window.location.replace('/html/login.html');");
+    expect(app).toContain("window.location.replace('/login');");
     expect(guardIndex).toBeLessThan(worldClockIndex);
     expect(guardIndex).toBeLessThan(renderIndex);
   });
@@ -27,7 +27,7 @@ describe('vanilla frontend architecture', () => {
 
     expect(existsSync(new URL('package.json', root))).toBe(false);
     expect(app).toContain('createPageApp');
-    expect(readFileSync(new URL('html/index.html', root), 'utf8')).toContain('/js/entries/login.js');
+    expect(readFileSync(new URL('html/index.html', root), 'utf8')).toContain('/js/page-startup/login.js');
     expect(existsSync(new URL('js/main.jsx', root))).toBe(false);
   });
 
@@ -36,14 +36,14 @@ describe('vanilla frontend architecture', () => {
       expect(existsSync(new URL(`html/${page}`, root))).toBe(true);
       expect(readFileSync(new URL(`html/${page}`, root), 'utf8')).toContain('<div id="root"></div>');
     }
-    expect(readFileSync(new URL('html/camp.html', root), 'utf8')).toContain('/js/entries/camp.js');
-    expect(readFileSync(new URL('html/voyage.html', root), 'utf8')).toContain('/js/entries/voyage.js');
+    expect(readFileSync(new URL('html/camp.html', root), 'utf8')).toContain('/js/page-startup/camp.js');
+    expect(readFileSync(new URL('html/voyage.html', root), 'utf8')).toContain('/js/page-startup/voyage.js');
   });
 
   it('passes the shared world clock into the auth shell using one consistent name', () => {
-    const authShell = readFileSync(new URL('js/pages/authShell.js', root), 'utf8');
-    const loginPage = readFileSync(new URL('js/pages/LoginPage.js', root), 'utf8');
-    const registerPage = readFileSync(new URL('js/pages/RegisterPage.js', root), 'utf8');
+    const authShell = readFileSync(new URL('js/screens/accountLayout.js', root), 'utf8');
+    const loginPage = readFileSync(new URL('js/screens/loginPage.js', root), 'utf8');
+    const registerPage = readFileSync(new URL('js/screens/registerPage.js', root), 'utf8');
 
     expect(authShell).toMatch(/renderAuthShell = \(\{ root, auth, worldClockStore,/);
     expect(authShell).toContain('worldClock(worldClockStore.getState(), true)');

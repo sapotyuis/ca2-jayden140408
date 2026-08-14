@@ -5,7 +5,7 @@ import {
   getEventEffectProfile,
   getNextUnexpectedEventDelay,
   pickUnexpectedEvent,
-} from '../../public/js/ocean/unexpectedEventFlow.js';
+} from '../../public/js/voyage/oceanEventScheduler.js';
 
 describe('automatic unexpected event flow', () => {
   it('schedules events inside the intended sailing interval', () => {

@@ -28,21 +28,3 @@ export const findCraftingRecipeById = async (id) => {
   const rows = await db.select().from(crafting_recipes).where(eq(crafting_recipes.recipe_id, Number(id)));
   return rows[0];
 };
-
-/** Create a new crafting recipe. */
-export const insertCraftingRecipe = async (data) => {
-  const rows = await db.insert(crafting_recipes).values(data).returning();
-  return rows[0];
-};
-
-/** Update a crafting recipe by ID. Returns undefined if not found. */
-export const updateCraftingRecipe = async (id, data) => {
-  const rows = await db.update(crafting_recipes).set(data).where(eq(crafting_recipes.recipe_id, Number(id))).returning();
-  return rows[0];
-};
-
-/** Delete a crafting recipe by ID. Returns undefined if not found. */
-export const removeCraftingRecipe = async (id) => {
-  const rows = await db.delete(crafting_recipes).where(eq(crafting_recipes.recipe_id, Number(id))).returning();
-  return rows[0];
-};

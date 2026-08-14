@@ -178,8 +178,8 @@ describe('Property 7: MVC separation — models have no HTTP concerns', () => {
 // Validates: Requirements 10.3
 describe('Property 9: Example functions have JSDoc comments', () => {
   const exampleFiles = [
-    'src/models/exampleModel.js',
-    'src/controllers/exampleController.js',
+    'src/models/survivorDirectoryModel.js',
+    'src/controllers/survivorDirectoryController.js',
   ];
 
   let exportedFunctions = [];
@@ -225,8 +225,8 @@ describe('Property 9: Example functions have JSDoc comments', () => {
 // Validates: Requirements 10.6
 describe('Property 10: Async functions use async/await', () => {
   const targetFiles = [
-    'src/models/exampleModel.js',
-    'src/controllers/exampleController.js',
+    'src/models/survivorDirectoryModel.js',
+    'src/controllers/survivorDirectoryController.js',
   ];
 
   let asyncFunctions = [];

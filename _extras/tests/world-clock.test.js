@@ -5,7 +5,7 @@ import {
   getWorldClockKey,
   getOrCreateWorldStart,
   getWorldTime,
-} from '../../public/js/lib/worldClock.js';
+} from '../../public/js/game/gameClock.js';
 
 describe('world clock', () => {
   it('starts in night and counts down three minutes', () => {

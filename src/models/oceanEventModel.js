@@ -20,21 +20,3 @@ export const findOceanEventById = async (id) => {
   const rows = await db.select().from(ocean_events).where(eq(ocean_events.event_id, Number(id)));
   return rows[0];
 };
-
-/** Insert an ocean event and return the created row. */
-export const insertOceanEvent = async (data) => {
-  const rows = await db.insert(ocean_events).values(data).returning();
-  return rows[0];
-};
-
-/** Update an ocean event by id. */
-export const updateOceanEvent = async (id, data) => {
-  const rows = await db.update(ocean_events).set(data).where(eq(ocean_events.event_id, Number(id))).returning();
-  return rows[0];
-};
-
-/** Delete an ocean event by id. */
-export const removeOceanEvent = async (id) => {
-  const rows = await db.delete(ocean_events).where(eq(ocean_events.event_id, Number(id))).returning();
-  return rows[0];
-};

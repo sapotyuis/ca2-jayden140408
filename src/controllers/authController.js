@@ -1,7 +1,8 @@
-import { findUserByUsername, insertUser } from '../models/userModel.js';
+// Handles survivor registration and login requests.
+import { findUserByUsername, insertUser } from '../models/survivorDirectoryModel.js';
 
 /** Register a new user. Validation runs as route middleware. Returns 409 if the username is already taken. */
-export const registerUser = async (req, res, next) => {
+export const registerPlayer = async (req, res, next) => {
   try {
     console.log('[AUTH] register attempt', { username: req.body.username });
     const existing = await findUserByUsername(req.body.username);
@@ -20,7 +21,7 @@ export const registerUser = async (req, res, next) => {
 };
 
 /** Loads the user data required by comparePassword and generateToken. */
-export const loginUser = async (req, res, next) => {
+export const loginPlayer = async (req, res, next) => {
   try {
     console.log('[AUTH] login attempt', { username: req.body.username });
     const user = await findUserByUsername(req.body.username);

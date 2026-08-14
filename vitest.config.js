@@ -4,5 +4,6 @@ export default defineConfig({
   test: {
     include: ['_extras/tests/**/*.test.js'],
     globals: true,
+    fileParallelism: false,
   },
 });

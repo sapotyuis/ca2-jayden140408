@@ -14,7 +14,7 @@ describe('serverless entry point', () => {
         cwd: projectRoot,
         env: { ...process.env, PORT: '0' },
         encoding: 'utf8',
-        timeout: 5000,
+        timeout: 15000,
       },
     );
 

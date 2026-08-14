@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeCatch } from '../../public/js/ocean/catchMessage.js';
+import { describeCatch } from '../../public/js/voyage/debrisMessages.js';
 
 describe('debris collection message', () => {
   it('does not show zero materials for an item-only reward', () => {

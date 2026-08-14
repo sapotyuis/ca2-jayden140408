@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { authedFetch, loginRequest } from '../../public/js/lib/api.js';
+import { authedFetch, loginRequest } from '../../public/js/api/api.js';
 
 afterEach(() => {
   vi.restoreAllMocks();

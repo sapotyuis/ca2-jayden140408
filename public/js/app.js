@@ -1,7 +1,8 @@
-import { createAuthStore } from './lib/authStore.js';
-import { createToastStore } from './lib/toastStore.js';
-import { createWorldClockStore } from './lib/worldClockStore.js';
-import { refreshWorldClocks } from './components/vanilla.js';
+// Starts shared authentication, notification, world-clock, and page-protection behavior for every screen.
+import { createAuthStore } from './player/playerSession.js';
+import { createToastStore } from './helpers/notifications.js';
+import { createWorldClockStore } from './game/gameClockStore.js';
+import { refreshWorldClocks } from './helpers/uiComponents.js';
 
 /**
  * Shared bootstrap for each HTML document. Every page gets the same auth, toast, and world-clock
@@ -13,7 +14,7 @@ export const createPageApp = (renderPage, { protectedPage = false } = {}) => {
 
   const auth = createAuthStore();
   if (protectedPage && !auth.getState().isAuthed) {
-    window.location.replace('/html/login.html');
+    window.location.replace('/login');
     return {
       auth,
       toast: null,
@@ -31,7 +32,7 @@ export const createPageApp = (renderPage, { protectedPage = false } = {}) => {
     refreshWorldClocks(time);
   });
   const unsubscribeAuth = auth.subscribe((state) => {
-    if (protectedPage && !state.isAuthed) window.location.replace('/html/login.html');
+    if (protectedPage && !state.isAuthed) window.location.replace('/login');
   });
   const cleanupPage = renderPage({ root, auth, toast, worldClock });
 

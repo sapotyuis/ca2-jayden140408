@@ -61,7 +61,7 @@ describe('whitepaper bcrypt middleware', () => {
     expect(compareResult.type).toBe('next');
   });
 
-  it('rejects a wrong password with the whitepaper response', async () => {
+  it('rejects a wrong password with the structured authentication response', async () => {
     const hashResponse = createResponse();
     await runMiddleware(hashPassword, { body: { password: 'password123' } }, hashResponse);
 
@@ -70,7 +70,13 @@ describe('whitepaper bcrypt middleware', () => {
 
     expect(compareResult.type).toBe('response');
     expect(compareResponse.statusCode).toBe(401);
-    expect(compareResponse.body).toEqual({ message: 'Wrong password' });
+    expect(compareResponse.body).toEqual({
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Wrong password',
+        status: 401,
+      },
+    });
   });
 });
 
@@ -101,7 +107,7 @@ describe('whitepaper JWT middleware', () => {
     );
     expect(verifyResult.type).toBe('next');
     // toBe is strict, so this also pins that the JWT round-trip preserves the integer type
-    // rather than handing back "1" — loadCurrentUser and the ownership checks rely on it.
+    // rather than handing back "1" — loadLoggedInPlayer and the ownership checks rely on it.
     expect(verifyResponse.locals.userId).toBe(1);
     expect(verifyResponse.locals.tokenTimestamp).toBeTruthy();
   });
@@ -125,12 +131,18 @@ describe('whitepaper JWT middleware', () => {
     expect(verifyResponse.locals.userId).toBe(1);
   });
 
-  it('uses the whitepaper responses for missing and invalid tokens', async () => {
+  it('uses structured responses for missing and invalid tokens', async () => {
     const missingResponse = createResponse();
     const missingResult = await runMiddleware(verifyToken, { headers: {} }, missingResponse);
     expect(missingResult.type).toBe('response');
     expect(missingResponse.statusCode).toBe(401);
-    expect(missingResponse.body).toEqual({ error: 'Invalid token' });
+    expect(missingResponse.body).toEqual({
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Invalid token',
+        status: 401,
+      },
+    });
 
     const invalidResponse = createResponse();
     const invalidResult = await runMiddleware(
@@ -140,6 +152,12 @@ describe('whitepaper JWT middleware', () => {
     );
     expect(invalidResult.type).toBe('response');
     expect(invalidResponse.statusCode).toBe(401);
-    expect(invalidResponse.body).toEqual({ error: 'Invalid token' });
+    expect(invalidResponse.body).toEqual({
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Invalid token',
+        status: 401,
+      },
+    });
   });
 });

@@ -1,9 +1,10 @@
+// Defines public registration and login endpoints.
 import { Router } from 'express';
 import { body } from 'express-validator';
 import { handleValidationErrors } from '../middlewares/validationMiddleware.js';
 import { comparePassword, hashPassword } from '../middlewares/bcryptMiddleware.js';
 import { generateToken, sendToken } from '../middlewares/jwtMiddleware.js';
-import { registerUser, loginUser } from '../controllers/authController.js';
+import { registerPlayer, loginPlayer } from '../controllers/authController.js';
 
 export const authRouter = Router();
 
@@ -15,7 +16,7 @@ authRouter.post(
   ],
   handleValidationErrors,
   hashPassword,
-  registerUser
+  registerPlayer
 );
 
 authRouter.post(
@@ -25,7 +26,7 @@ authRouter.post(
     body('password').notEmpty().withMessage('password is required'),
   ],
   handleValidationErrors,
-  loginUser,
+  loginPlayer,
   comparePassword,
   generateToken,
   sendToken

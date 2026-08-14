@@ -10,7 +10,7 @@ describe('action diagnostic logging', () => {
   });
 
   it('marks game-action controller logs with the GAME scope', async () => {
-    const source = await readSource('src/controllers/meController.js');
+    const source = await readSource('src/controllers/playerController.js');
     expect(source).toContain('[GAME]');
   });
 });

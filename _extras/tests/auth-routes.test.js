@@ -1,13 +1,13 @@
 import express from 'express';
 import request from 'supertest';
 import { authRouter } from '../../src/routes/authRoutes.js';
-import { meRouter } from '../../src/routes/meRoutes.js';
+import { playerRouter } from '../../src/routes/playerRoutes.js';
 import { errorHandler } from '../../src/utils/_errors.js';
 
 const app = express();
 app.use(express.json());
 app.use('/api/auth', authRouter);
-app.use('/api/me', meRouter);
+app.use('/api/me', playerRouter);
 app.use(errorHandler);
 
 const username = `Whitepaper${Date.now()}`;
@@ -45,12 +45,18 @@ describe('whitepaper authentication flow', () => {
     expect(response.body.username).toBe(username);
   });
 
-  it('returns the whitepaper wrong-password response', async () => {
+  it('returns the structured wrong-password response', async () => {
     const response = await request(app)
       .post('/api/auth/login')
       .send({ username, password: 'incorrect-password' });
 
     expect(response.status).toBe(401);
-    expect(response.body).toEqual({ message: 'Wrong password' });
+    expect(response.body).toEqual({
+      error: {
+        code: 'UNAUTHORIZED',
+        message: 'Wrong password',
+        status: 401,
+      },
+    });
   });
 });

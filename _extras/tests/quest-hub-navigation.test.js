@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const gamePage = readFileSync(new URL('../../public/js/pages/GamePage.js', import.meta.url), 'utf8');
-const questsPanel = readFileSync(new URL('../../public/js/components/game/vanillaPanels.js', import.meta.url), 'utf8');
-const leaderboardPage = readFileSync(new URL('../../public/js/pages/LeaderboardPage.js', import.meta.url), 'utf8');
+const gamePage = readFileSync(new URL('../../public/js/screens/campPage.js', import.meta.url), 'utf8');
+const questsPanel = readFileSync(new URL('../../public/js/camp/campPanels.js', import.meta.url), 'utf8');
+const leaderboardPage = readFileSync(new URL('../../public/js/screens/LeaderboardPage.js', import.meta.url), 'utf8');
 
 describe('quest hub navigation', () => {
   it('keeps the camp page focused on quests instead of mounting the ocean scene', () => {
@@ -13,17 +13,17 @@ describe('quest hub navigation', () => {
   });
 
   it('keeps voyage navigation as the explicit start-voyage action', () => {
-    expect(gamePage).toContain("window.location.assign('/html/voyage.html')");
+    expect(gamePage).toContain("window.location.assign('/voyage')");
     expect(gamePage).toContain('START VOYAGE');
   });
 
   it('lets signed-in survivors open the leaderboard from camp', () => {
-    expect(gamePage).toContain("window.location.assign('/html/leaderboard.html')");
+    expect(gamePage).toContain("window.location.assign('/leaderboard')");
     expect(gamePage).toContain('LEADERBOARD');
   });
 
   it('lets signed-in survivors return to camp from the leaderboard', () => {
-    expect(leaderboardPage).toContain("auth.getState().isAuthed ? '/html/camp.html' : '/html/login.html'");
+    expect(leaderboardPage).toContain("auth.getState().isAuthed ? '/camp' : '/login'");
     expect(leaderboardPage).toContain('BACK TO CAMP');
   });
 

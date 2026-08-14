@@ -2,20 +2,34 @@ import bcrypt from 'bcrypt';
 
 const saltRounds = 10;
 
+const sendInternalError = (res) => res.status(500).json({
+    error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Internal server error',
+        status: 500,
+    },
+});
+
+const sendUnauthorized = (res, message) => res.status(401).json({
+    error: {
+        code: 'UNAUTHORIZED',
+        message,
+        status: 401,
+    },
+});
+
 export const comparePassword = (req, res, next) => {
     const callback = (err, isMatch) => {
         if (err) {
             console.log('password comparison error', err);
             console.error('Error bcrypt:', err);
-            res.status(500).json(err);
+            sendInternalError(res);
         } else {
             if (isMatch) {
                 next();
             } else {
                 console.log('password comparison rejected');
-                res.status(401).json({
-                    message: 'Wrong password',
-                });
+                sendUnauthorized(res, 'Wrong password');
             }
         }
     };
@@ -28,7 +42,7 @@ export const hashPassword = (req, res, next) => {
         if (err) {
             console.log('password hashing error', err);
             console.error('Error bcrypt:', err);
-            res.status(500).json(err);
+            sendInternalError(res);
         } else {
             res.locals.hash = hash;
             next();

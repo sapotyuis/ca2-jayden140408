@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { OCEAN_RENDER_TUNING } from '../../public/js/ocean/createOceanScene.js';
+import { OCEAN_RENDER_TUNING } from '../../public/js/voyage/voyageWorld.js';
 
-const oceanSource = readFileSync(new URL('../../public/js/ocean/createOceanScene.js', import.meta.url), 'utf8');
+const oceanSource = readFileSync(new URL('../../public/js/voyage/voyageWorld.js', import.meta.url), 'utf8');
 
 describe('ocean rendering tuning', () => {
   it('keeps ordinary water highlights below the bloom threshold', () => {

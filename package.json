@@ -1,7 +1,7 @@
 {
   "name": "castaway-chronicles",
   "version": "1.0.0",
-  "description": "Castaway Chronicles — BED CA1 REST API built with Express.js, libsql, and Drizzle ORM",
+  "description": "Castaway Chronicles — BED CA2 raft-survival game built with Express.js, libSQL, Drizzle ORM, and vanilla JavaScript",
   "type": "module",
   "main": "index.js",
   "scripts": {

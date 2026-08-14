@@ -19,7 +19,7 @@ const publicUserFields = {
 };
 
 /** Get the active unexpected-event catalogue. */
-export const findUnexpectedEvents = async () => {
+export const findActiveUnexpectedEvents = async () => {
   return await db
     .select()
     .from(ocean_events)
@@ -43,7 +43,7 @@ export const findUnexpectedEventById = async (eventId, executor = db) => {
  * Resolve one event atomically. The event ID is supplied by the client, but every consequence
  * is read from the server's event row and applied inside this transaction.
  */
-export const resolveUnexpectedEventAtomic = async ({ userId, event, now = new Date().toISOString(), executor = db }) => {
+export const resolveOceanEvent = async ({ userId, event, now = new Date().toISOString(), executor = db }) => {
   const operation = async (tx) => {
     const [user] = await tx
       .select(publicUserFields)

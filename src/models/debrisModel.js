@@ -20,7 +20,7 @@ const debrisDetails = {
 };
 
 /** Returns only unclaimed debris owned by the current survivor. */
-export const findActiveDebrisForUser = async (userId, executor = db) => {
+export const findPlayerDebris = async (userId, executor = db) => {
   return await executor
     .select(debrisDetails)
     .from(debris)
@@ -30,8 +30,8 @@ export const findActiveDebrisForUser = async (userId, executor = db) => {
 };
 
 /** Ensures a survivor has a small server-owned field of collectible debris. */
-export const ensureActiveDebris = async (userId, executor = db) => {
-  const active = await findActiveDebrisForUser(userId, executor);
+export const ensurePlayerDebris = async (userId, executor = db) => {
+  const active = await findPlayerDebris(userId, executor);
   if (active.length >= TARGET_ACTIVE_DEBRIS) return active;
 
   const catalog = await executor
@@ -82,11 +82,11 @@ export const ensureActiveDebris = async (userId, executor = db) => {
     previousItemName = item.item_name;
   }
 
-  return await findActiveDebrisForUser(userId, executor);
+  return await findPlayerDebris(userId, executor);
 };
 
 /** Claims one server-owned debris row and grants its item exactly once. */
-export const collectDebrisByIdAtomic = async (userId, debrisId, attemptedAt = new Date().toISOString(), executor = db) => {
+export const collectDebris = async (userId, debrisId, attemptedAt = new Date().toISOString(), executor = db) => {
   const operation = async (tx) => {
     const [claimed] = await tx
       .update(debris)
