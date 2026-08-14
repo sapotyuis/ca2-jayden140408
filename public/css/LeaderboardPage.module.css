@@ -466,9 +466,6 @@
     min-height: 0;
   }
 
-  .leaderboard-page-place2 { grid-area: second; }
-  .leaderboard-page-place3 { grid-area: third; }
-
   .leaderboard-page-rosterCount,
   .leaderboard-page-sortNote {
     margin-top: 0.25rem;

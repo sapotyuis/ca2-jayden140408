@@ -2,8 +2,6 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { quests, user_quests } from '../db/schema.js';
 
-export { quests };
-
 /** Get all quests with optional type and active-state filters. */
 export const findAllQuests = async (filters = {}, executor = db) => {
   const conditions = [];

@@ -21,8 +21,6 @@ import {
   users,
   item_types,
   user_items,
-  debris,
-  debris_collection_logs,
   crafting_recipes,
   raft_upgrades,
   quests,
@@ -323,9 +321,6 @@ const seedData = async (db) => {
   await db.insert(user_events).values(userEventRows);
   console.log(`  Inserted ${userEventRows.length} user_events`);
 };
-
-/** Insert seed data in a transaction when called independently. */
-export const seed = async (db) => db.transaction((tx) => seedData(tx));
 
 // --- Database reset (no need to modify below) ---
 

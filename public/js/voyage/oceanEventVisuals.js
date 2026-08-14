@@ -2,8 +2,6 @@
 import * as THREE from '../../vendor/three/three.module.js';
 import { getEventEffectProfile } from './oceanEventScheduler.js';
 
-const UP = new THREE.Vector3(0, 1, 0);
-
 const disposeObject = (object) => {
   object.traverse((child) => {
     child.geometry?.dispose?.();
@@ -438,5 +436,5 @@ export function createUnexpectedEventEffects({ scene, camera, raft, raftState, w
     if (active.elapsed >= active.duration) stop();
   };
 
-  return { start, update, stop, dispose: stop };
+  return { start, update };
 }

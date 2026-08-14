@@ -33,7 +33,7 @@ export const user_items = sqliteTable('user_items', {
 
 /** Server-owned floating debris. A non-null claimed_at makes a row collectible only once. */
 export const debris = sqliteTable('debris', {
-  debris_id: text('debris_id').primaryKey(),
+  debris_id: integer('debris_id').primaryKey({autoIncrement: true}),
   user_id: integer('user_id').notNull().references(() => users.user_id),
   item_type_id: integer('item_type_id').notNull().references(() => item_types.item_type_id),
   quantity: integer('quantity').notNull().default(1),
@@ -47,7 +47,7 @@ export const debris = sqliteTable('debris', {
 export const debris_collection_logs = sqliteTable('debris_collection_logs', {
   collection_log_id: integer('collection_log_id').primaryKey({autoIncrement: true}),
   user_id: integer('user_id').notNull().references(() => users.user_id),
-  debris_id: text('debris_id'),
+  debris_id: integer('debris_id'),
   result: text('result').notNull(),
   reason: text('reason').notNull().default(''),
   collected_materials: integer('collected_materials').notNull().default(0),

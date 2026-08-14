@@ -50,7 +50,6 @@ export const loadRaftUpgradeForOwner = async (req, res, next) => {
       throw new AppError('NOT_FOUND', 'Raft upgrade not found');
     }
 
-    res.locals.upgradeId = upgradeId;
     res.locals.raftUpgrade = upgrade;
     next();
   } catch (error) {

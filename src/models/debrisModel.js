@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { and, desc, eq, isNotNull, isNull } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { debris, debris_collection_logs, item_types, user_items, users } from '../db/schema.js';
@@ -70,7 +69,6 @@ export const ensurePlayerDebris = async (userId, executor = db) => {
       random: Math.random,
     });
     await executor.insert(debris).values({
-      debris_id: randomUUID(),
       user_id: Number(userId),
       item_type_id: item.item_type_id,
       quantity: item.category === 'equipment' ? 1 : 1 + Math.floor(Math.random() * 2),
@@ -92,7 +90,7 @@ export const collectDebris = async (userId, debrisId, attemptedAt = new Date().t
       .update(debris)
       .set({ claimed_at: attemptedAt })
       .where(and(
-        eq(debris.debris_id, String(debrisId)),
+        eq(debris.debris_id, Number(debrisId)),
         eq(debris.user_id, Number(userId)),
         isNull(debris.claimed_at),
       ))
@@ -140,7 +138,7 @@ export const collectDebris = async (userId, debrisId, attemptedAt = new Date().t
 
     await tx.insert(debris_collection_logs).values({
       user_id: Number(userId),
-      debris_id: String(debrisId),
+      debris_id: Number(debrisId),
       result: 'accepted',
       reason: '',
       collected_materials: collectedMaterials,

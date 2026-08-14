@@ -2,8 +2,6 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { ocean_events } from '../db/schema.js';
 
-export { ocean_events };
-
 /** Get ocean events with optional type and active-state filters. */
 export const findAllOceanEvents = async (filters = {}) => {
   const conditions = [];

@@ -1,4 +1,4 @@
-// Creates temporary success, error, and information notifications for the interface.
+// Creates temporary success, error, and quest notifications for the interface.
 import { createClassNames } from './cssClassNames.js';
 import { escapeHtml } from './domHelpers.js';
 
@@ -11,11 +11,11 @@ export const createToastStore = (root) => {
   root.append(host);
   let nextId = 0;
 
-  const push = (message, tone = 'info') => {
+  const push = (message, tone) => {
     const toast = document.createElement('button');
     const id = nextId++;
     toast.type = 'button';
-    toast.className = `${styles.toast} ${styles[tone] || styles.info}`;
+    toast.className = `${styles.toast} ${styles[tone]}`;
     toast.textContent = message;
     host.append(toast);
     const remove = () => toast.remove();
@@ -24,5 +24,5 @@ export const createToastStore = (root) => {
     console.log('[TOAST] displayed', { id, tone, message: escapeHtml(message) });
   };
 
-  return { push, dispose: () => host.remove() };
+  return { push };
 };

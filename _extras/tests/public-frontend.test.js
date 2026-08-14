@@ -40,8 +40,8 @@ describe('Express-served public frontend', () => {
   it('maps CSS module property names to stable browser class names', async () => {
     const { createClassNames } = await import('../../public/js/helpers/cssClassNames.js');
     const styles = createClassNames('button');
-    expect(styles.primary).toBe('button-primary');
-    expect(styles.loading).toBe('button-loading');
+    expect(styles.lantern).toBe('button-lantern');
+    expect(styles.ghost).toBe('button-ghost');
   });
 
   it('links direct CSS and module entry scripts from every page', () => {

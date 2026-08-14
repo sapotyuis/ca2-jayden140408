@@ -18,9 +18,9 @@ export const createWorldClockStore = (authStore) => {
     return { ...time, visualPhase: time.visualPhase || time.phase, isDay: time.phase === 'day', clockIdentity: identity };
   };
 
-  const unsubscribeAuth = authStore.subscribe(reset);
+  authStore.subscribe(reset);
   reset();
-  const interval = window.setInterval(() => {
+  window.setInterval(() => {
     now = Date.now();
     document.documentElement.dataset.phase = getState().isDay ? 'day' : 'night';
     document.documentElement.dataset.visualPhase = getState().visualPhase;
@@ -32,12 +32,6 @@ export const createWorldClockStore = (authStore) => {
     subscribe: (listener) => {
       listeners.add(listener);
       listener(getState());
-      return () => listeners.delete(listener);
-    },
-    dispose: () => {
-      unsubscribeAuth();
-      window.clearInterval(interval);
-      listeners.clear();
     },
   };
 };

@@ -1,7 +1,7 @@
 // ⚠️ DO NOT MODIFY THIS FILE — it tests the project's error handling infrastructure.
 
 import { vi } from 'vitest';
-import { ERROR_CODES, AppError, errorHandler } from '../../src/utils/_errors.js';
+import { AppError, errorHandler } from '../../src/utils/_errors.js';
 
 describe('AppError', () => {
   it('creates an error with correct code, status, and message for a known code', () => {

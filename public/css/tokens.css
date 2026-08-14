@@ -19,7 +19,6 @@
   /* --- radius (chunky) --- */
   --r-sm: 10px;
   --r-md: 16px;
-  --r-lg: 24px;
 
   /* --- motion --- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -47,55 +46,28 @@
 
   --success: #5fa845;
   --danger: #d9584a;
-  --danger-deep: #8f3226;
 
   /* The survivor's logbook (auth pages) is a physical parchment object, and toasts are dark
      overlays — both read the same in any light, so these stay constant across phases. Older
      component CSS also references some of these names. */
   --parchment: #ecdfbe;
-  --parchment-dim: #d9c9a1;
-  --paper-edge: #b9a577;
-  --ink: #241f18;
-  --ink-soft: rgba(36, 31, 24, 0.72);
-  --rust: #a5633c;
-  --rust-deep: #8b5738;
-  --olive: #6e7452;
   --olive-bright: #99a06f;
-  --navy: #16293c;
   --lantern: var(--accent);
   --lantern-bright: var(--accent-bright);
-  --panel: rgba(14, 27, 40, 0.84);
   --panel-raised: rgba(24, 42, 60, 0.92);
   --panel-solid: #101f2d;
-  --hairline: var(--edge);
   --hairline-strong: var(--edge-strong);
-  --gold-line: rgba(242, 163, 60, 0.5);
-  --glow-lantern: 0 0 24px rgba(242, 163, 60, 0.35);
 
   /* ===== phased tokens: default = NIGHT ===== */
   --sky-top: #050c16;
   --sky-mid: #0b1c2e;
   --sky-horizon: #1a3149;
-  --sea-horizon: #123047;
-  --sea-mid: #0a1c2c;
-  --sea-deep: #04090f;
-  --orb: #eef3f7; /* moon */
-  --orb-glow: rgba(223, 233, 240, 0.4);
-  --orb-halo: rgba(180, 205, 225, 0.18);
-  --wave-1: #0e2233;
-  --wave-2: #0a1a28;
-  --wave-3: #06121d;
-
-  --page-tint: rgba(4, 9, 15, 0.4);
 
   --text: #f0e4c4;
   --text-dim: rgba(240, 228, 196, 0.62);
   --text-strong: #fbefcf;
-  --text-invert: #2a1808;
 
   --surface: rgba(18, 33, 48, 0.82);
-  --surface-2: rgba(28, 48, 68, 0.9);
-  --surface-solid: #101f2d;
   --surface-inset: rgba(3, 9, 15, 0.55);
 
   --edge: rgba(240, 228, 196, 0.16);
@@ -113,26 +85,12 @@
   --sky-top: #2f8fd0;
   --sky-mid: #63b6e6;
   --sky-horizon: #bfe8f4;
-  --sea-horizon: #4fd0d8;
-  --sea-mid: #1fa9c4;
-  --sea-deep: #10748f;
-  --orb: #fff4c2; /* sun */
-  --orb-glow: rgba(255, 232, 150, 0.65);
-  --orb-halo: rgba(255, 224, 140, 0.35);
-  --wave-1: #37bfce;
-  --wave-2: #24a6bf;
-  --wave-3: #178ba8;
-
-  --page-tint: rgba(120, 196, 224, 0.14);
 
   --text: #34220f;
   --text-dim: rgba(52, 34, 15, 0.66);
   --text-strong: #24160a;
-  --text-invert: #2a1808;
 
   --surface: rgba(250, 238, 208, 0.94);
-  --surface-2: rgba(255, 247, 224, 0.97);
-  --surface-solid: #f7ead0;
   --surface-inset: rgba(120, 82, 40, 0.16);
 
   --edge: rgba(90, 58, 28, 0.42);

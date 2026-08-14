@@ -8,7 +8,7 @@ describe('vanilla frontend architecture', () => {
     const app = readFileSync(new URL('js/app.js', root), 'utf8');
     const guardIndex = app.indexOf("if (protectedPage && !auth.getState().isAuthed)");
     const worldClockIndex = app.indexOf('const worldClock = createWorldClockStore(auth);');
-    const renderIndex = app.indexOf('const cleanupPage = renderPage({ root, auth, toast, worldClock });');
+    const renderIndex = app.indexOf('renderPage({ root, auth, toast, worldClock });');
 
     expect(guardIndex).toBeGreaterThanOrEqual(0);
     expect(app).toContain("window.location.replace('/login');");
@@ -46,7 +46,7 @@ describe('vanilla frontend architecture', () => {
     const registerPage = readFileSync(new URL('js/screens/registerPage.js', root), 'utf8');
 
     expect(authShell).toMatch(/renderAuthShell = \(\{ root, auth, worldClockStore,/);
-    expect(authShell).toContain('worldClock(worldClockStore.getState(), true)');
+    expect(authShell).toContain('worldClock(worldClockStore.getState())');
     expect(loginPage).toContain('root, auth, worldClockStore: worldClock,');
     expect(registerPage).toContain('root, auth, worldClockStore: worldClock,');
   });

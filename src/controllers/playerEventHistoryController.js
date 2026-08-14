@@ -22,7 +22,6 @@ export const loadUserEventForOwner = async (req, res, next) => {
     const userEventId = parsePositiveInt(req.params.user_event_id, 'user_event_id');
     const existing = await findUserEventById(userEventId);
     requireOwner(existing, req.user.user_id);
-    res.locals.userEventId = userEventId;
     res.locals.userEvent = existing;
     next();
   } catch (error) {

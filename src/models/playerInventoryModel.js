@@ -2,8 +2,6 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { user_items, item_types } from '../db/schema.js';
 
-export { user_items };
-
 // Shared column selection — joins item_types so callers get full item details in one query
 const itemDetail = {
   user_item_id: user_items.user_item_id,
@@ -48,12 +46,6 @@ export const findUserItemById = async (id) => {
     .from(user_items)
     .innerJoin(item_types, eq(user_items.item_type_id, item_types.item_type_id))
     .where(eq(user_items.user_item_id, id));
-  return rows[0];
-};
-
-/** Create a new user item. Returns the inserted row. */
-export const insertUserItem = async (data) => {
-  const rows = await db.insert(user_items).values(data).returning();
   return rows[0];
 };
 

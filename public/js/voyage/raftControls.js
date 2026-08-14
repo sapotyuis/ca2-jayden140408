@@ -1,7 +1,7 @@
 // Calculates smooth raft acceleration, reversing, steering, and turning during the voyage.
 export const RAFT_MAX_SPEED = 11;
-export const RAFT_REVERSE_SPEED = 4.5;
-export const RAFT_TURN_SPEED = 1.65;
+const RAFT_REVERSE_SPEED = 4.5;
+const RAFT_TURN_SPEED = 1.65;
 
 const SPEED_RESPONSE = 4.2;
 const STEERING_RESPONSE = 8;

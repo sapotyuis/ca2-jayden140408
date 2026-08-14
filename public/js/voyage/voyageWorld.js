@@ -21,8 +21,8 @@ export const OCEAN_RENDER_TUNING = Object.freeze({
  * Framework-agnostic Three.js night-ocean scene. It knows nothing about the UI framework — the page
  * component passes in a canvas, an authenticated `api` function, and a set of callbacks it uses
  * to push HUD updates back out (status, catch log, and event changes...). This keeps the imperative
- * 3D loop cleanly separated from the DOM HUD around it, and returns a handle with { triggerDemoEvent, dispose } so the
- * component can drive it and tear it down on unmount.
+ * 3D loop cleanly separated from the DOM HUD around it, and returns a handle that lets the
+ * component trigger demo events.
  *
  * Tone mapping + bloom are what make the night read as cinematic rather than flat: without them
  * the bright emissive materials (moon, lantern, collectibles) look like matte shapes instead of
@@ -45,10 +45,8 @@ export function createOceanScene({
   onUnexpectedEvent,
   onReady,
 }) {
-  const listeners = [];
   const on = (target, type, handler, opts) => {
     target.addEventListener(type, handler, opts);
-    listeners.push({ target, type, handler, opts });
   };
 
   let interacted = false;
@@ -599,8 +597,8 @@ export function createOceanScene({
     const heading = raftState.heading;
     if (mode !== 'voyage') {
       const showcaseOrbit = Math.sin(elapsed * 0.08) * 0.06;
-      const distance = mode === 'camp' ? 11.5 : 12.5;
-      const height = mode === 'camp' ? 4.8 : 5.1;
+      const distance = 12.5;
+      const height = 5.1;
       const desired = raftState.position.clone().add(
         new THREE.Vector3(Math.sin(showcaseOrbit) * distance, height, -Math.cos(showcaseOrbit) * distance)
       );
@@ -886,9 +884,8 @@ export function createOceanScene({
 
   /* ---- main loop ---- */
   const clock = new THREE.Clock();
-  let rafId = null;
   const animate = () => {
-    rafId = requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
     const dt = Math.min(clock.getDelta(), 0.1);
     const elapsed = clock.getElapsedTime();
     updateRaft(dt, elapsed);
@@ -940,21 +937,5 @@ export function createOceanScene({
     signalReady();
   });
 
-  /* ---- teardown ---- */
-  const dispose = () => {
-    if (rafId) cancelAnimationFrame(rafId);
-    for (const { target, type, handler, opts } of listeners) target.removeEventListener(type, handler, opts);
-    eventEffects.dispose();
-    for (const item of [...collectibles]) removeCollectible(item);
-    scene.traverse((obj) => {
-      obj.geometry?.dispose?.();
-      if (Array.isArray(obj.material)) obj.material.forEach((m) => m.dispose());
-      else obj.material?.dispose?.();
-    });
-    starTexture.dispose();
-    composer.dispose();
-    renderer.dispose();
-  };
-
-  return { triggerDemoEvent, dispose };
+  return { triggerDemoEvent };
 }

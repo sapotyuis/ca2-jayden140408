@@ -23,9 +23,6 @@
   backdrop-filter: blur(6px);
 }
 
-.toast-provider-info {
-  border-left: 3px solid var(--rust);
-}
 .toast-provider-success {
   border-left: 3px solid var(--success);
 }

@@ -25,10 +25,6 @@
   line-height: 1.5;
   color: var(--text);
 }
-.game-nextHint b {
-  color: var(--accent-deep);
-}
-
 /* ---- inventory ---- */
 .game-invGrid {
   display: grid;

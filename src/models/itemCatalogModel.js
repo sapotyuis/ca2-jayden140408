@@ -2,8 +2,6 @@ import { eq, like, and, inArray } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { item_types } from '../db/schema.js';
 
-export { item_types };
-
 /** Get all item types. Supports optional `category` and `search` (item_name) filters. */
 export const findAllItemTypes = async (filters = {}) => {
   const conditions = [];

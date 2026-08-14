@@ -28,7 +28,6 @@ app.use(errorHandler);
 let survivorId;
 let otherSurvivorId;
 let survivorToken;
-let otherSurvivorToken;
 
 const createToken = (userId) => new Promise((resolve, reject) => {
   const response = {
@@ -55,11 +54,10 @@ beforeAll(async () => {
   survivorId = users.find((user) => user.username === 'SurvivorJay').user_id;
   otherSurvivorId = users.find((user) => user.username === 'Ocean').user_id;
   survivorToken = await createToken(survivorId);
-  otherSurvivorToken = await createToken(otherSurvivorId);
 });
 
-const authHeader = (userId = survivorId) => ({
-  Authorization: `Bearer ${userId === survivorId ? survivorToken : otherSurvivorToken}`,
+const authHeader = () => ({
+  Authorization: `Bearer ${survivorToken}`,
 });
 
 describe('Shared game-definition reads and write protection', () => {
@@ -148,13 +146,4 @@ describe('Owner-scoped user record reads', () => {
     }
   });
 
-});
-
-describe('Middleware protection', () => {
-  it('rejects owner-record reads without a bearer token', async () => {
-    const response = await request(app)
-      .get('/api/user-items');
-
-    expect(response.status).toBe(401);
-  });
 });

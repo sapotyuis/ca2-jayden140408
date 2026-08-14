@@ -54,6 +54,9 @@ describe('Castaway Chronicles game feature schema', () => {
 
   it('models server-owned debris with a one-time claim state and world position', () => {
     expect(debris).toHaveProperty('debris_id');
+    expect(debris.debris_id.dataType).toBe('number');
+    expect(debris.debris_id.autoIncrement).toBe(true);
+    expect(debris_collection_logs.debris_id.dataType).toBe('number');
     expect(debris).toHaveProperty('user_id');
     expect(debris).toHaveProperty('item_type_id');
     expect(debris).toHaveProperty('x_position');

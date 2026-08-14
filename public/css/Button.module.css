@@ -47,10 +47,6 @@
   padding: 0.95rem 1.55rem;
   font-size: 0.85rem;
 }
-.button-block {
-  width: 100%;
-}
-
 /* lantern (primary) — warm brass, chunky */
 .button-lantern {
   color: #3a1f05;
@@ -72,15 +68,12 @@
 
 /* ghost (secondary) — carved wood tab */
 .button-ghost {
-  color: var(--text);
+  color: #f4e6c8;
   background: linear-gradient(180deg, var(--wood-light), var(--wood));
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.14),
     0 4px 0 var(--wood-darker),
     0 8px 14px rgba(0, 0, 0, 0.28);
-}
-.button-ghost {
-  color: #f4e6c8;
 }
 .button-ghost:hover:not(:disabled) {
   filter: brightness(1.08);
@@ -107,32 +100,4 @@
   box-shadow:
     inset 0 2px 0 rgba(255, 255, 255, 0.15),
     0 1px 0 #6f2419;
-}
-
-/* loading */
-.button-loading {
-  cursor: progress;
-}
-.button-hiddenLabel {
-  visibility: hidden;
-}
-.button-spinner {
-  position: absolute;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  border: 2.5px solid rgba(58, 31, 5, 0.3);
-  border-top-color: #3a1f05;
-  animation: btn-spin 0.7s linear infinite;
-}
-.button-ghost .button-spinner,
-.button-danger .button-spinner {
-  border-color: rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-}
-
-@keyframes btn-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }

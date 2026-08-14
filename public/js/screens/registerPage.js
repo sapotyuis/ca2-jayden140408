@@ -7,7 +7,7 @@ const buttonStyles = createClassNames('button');
 
 export const renderRegisterPage = ({ root, auth, worldClock }) => {
   const view = renderAuthShell({
-    root, auth, worldClockStore: worldClock, tone: 'dawn',
+    root, auth, worldClockStore: worldClock,
     status: 'Create a new survivor account',
     title: 'Create your survivor account',
     lede: 'Create an account to start playing.',
@@ -54,5 +54,4 @@ export const renderRegisterPage = ({ root, auth, worldClock }) => {
     }
   };
   registerForm.addEventListener('submit', onSubmit);
-  return () => { registerForm.removeEventListener('submit', onSubmit); view.dispose(); };
 };

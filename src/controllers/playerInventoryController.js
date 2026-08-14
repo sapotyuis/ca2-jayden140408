@@ -49,7 +49,6 @@ export const loadUserItemForOwner = async (req, res, next) => {
       throw new AppError('NOT_FOUND', 'User item not found');
     }
 
-    res.locals.userItemId = userItemId;
     res.locals.userItem = userItem;
     next();
   } catch (error) {

@@ -2,8 +2,6 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { user_events } from '../db/schema.js';
 
-export { user_events };
-
 /** Get event history with optional owner and event filters. */
 export const findAllUserEvents = async (filters = {}) => {
   const conditions = [];

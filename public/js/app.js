@@ -15,37 +15,19 @@ export const createPageApp = (renderPage, { protectedPage = false } = {}) => {
   const auth = createAuthStore();
   if (protectedPage && !auth.getState().isAuthed) {
     window.location.replace('/login');
-    return {
-      auth,
-      toast: null,
-      worldClock: null,
-      dispose: () => {},
-    };
+    return;
   }
 
   const toast = createToastStore(root);
   const worldClock = createWorldClockStore(auth);
-  const unsubscribeClock = worldClock.subscribe((time) => {
+  worldClock.subscribe((time) => {
     window.__ccWorldTime = time;
     document.documentElement.dataset.phase = time.isDay ? 'day' : 'night';
     document.documentElement.dataset.visualPhase = time.visualPhase;
     refreshWorldClocks(time);
   });
-  const unsubscribeAuth = auth.subscribe((state) => {
+  auth.subscribe((state) => {
     if (protectedPage && !state.isAuthed) window.location.replace('/login');
   });
-  const cleanupPage = renderPage({ root, auth, toast, worldClock });
-
-  return {
-    auth,
-    toast,
-    worldClock,
-    dispose: () => {
-      cleanupPage?.();
-      unsubscribeAuth();
-      unsubscribeClock();
-      worldClock.dispose();
-      toast.dispose();
-    },
-  };
+  renderPage({ root, auth, toast, worldClock });
 };

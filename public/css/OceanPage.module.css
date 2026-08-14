@@ -6,13 +6,6 @@
   color: var(--text);
 }
 
-.ocean-page-canvas {
-  position: fixed;
-  inset: 0;
-  display: block;
-  cursor: grab;
-}
-
 /* cinematic vignette so the frame reads composed, not just a viewport */
 .ocean-page-vignette {
   position: fixed;
@@ -349,9 +342,6 @@
     gap: 0.55rem;
   }
   .ocean-page-stat {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
     font-size: 0.74rem;
   }
   .ocean-page-topActions {

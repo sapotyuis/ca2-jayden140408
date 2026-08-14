@@ -4,12 +4,12 @@ import { createOceanScene } from './voyageWorld.js';
 
 const oceanStyles = createClassNames('ocean-viewport');
 
-export const mountOceanViewport = (container, { auth, worldClock, mode = 'title', interactive = false, collectiblesEnabled = false, fetchStatus = false, className = '', ...callbacks } = {}) => {
+export const mountOceanViewport = (container, { auth, worldClock, mode = 'title', interactive = false, collectiblesEnabled = false, fetchStatus = false, ...callbacks } = {}) => {
   const canvas = document.createElement('canvas');
-  canvas.className = `${oceanStyles.canvas} ${className}`;
+  canvas.className = oceanStyles.canvas;
   canvas.setAttribute('aria-hidden', interactive ? 'false' : 'true');
   container.append(canvas);
-  const scene = createOceanScene({
+  return createOceanScene({
     canvas,
     api: (path, options) => auth?.api(path, options),
     getWorldTime: () => worldClock.getState(),
@@ -19,8 +19,4 @@ export const mountOceanViewport = (container, { auth, worldClock, mode = 'title'
     fetchStatus,
     ...callbacks,
   });
-  const dispose = () => scene.dispose();
-  dispose.scene = scene;
-  dispose.canvas = canvas;
-  return dispose;
 };

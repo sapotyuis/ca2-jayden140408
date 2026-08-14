@@ -31,10 +31,17 @@ const txOf = (res) => res.locals.tx;
 // Debris collection -------------------------------------------------------
 
 export const checkDebrisCollection = (req, res, next) => {
-  const debrisId = req.params.debris_id || req.body?.debris_id;
-  if (!debrisId) return next(new AppError('VALIDATION_ERROR', 'debris_id is required'));
+  const rawDebrisId = req.params.debris_id ?? req.body?.debris_id;
+  if (rawDebrisId === undefined || rawDebrisId === null || rawDebrisId === '') {
+    return next(new AppError('VALIDATION_ERROR', 'debris_id is required'));
+  }
 
-  res.locals.debrisId = String(debrisId);
+  const debrisId = Number(rawDebrisId);
+  if (!Number.isInteger(debrisId) || debrisId < 1) {
+    return next(new AppError('VALIDATION_ERROR', 'debris_id must be a positive integer'));
+  }
+
+  res.locals.debrisId = debrisId;
   res.locals.attemptedAt = new Date().toISOString();
   next();
 };

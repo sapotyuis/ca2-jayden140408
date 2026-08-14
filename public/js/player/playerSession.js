@@ -72,7 +72,6 @@ export const createAuthStore = () => {
     getState,
     subscribe: (listener) => {
       listeners.add(listener);
-      return () => listeners.delete(listener);
     },
     login,
     register,

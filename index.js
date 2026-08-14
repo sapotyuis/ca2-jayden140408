@@ -111,7 +111,7 @@ if (!isVercel) {
 // so they keep their real responses.
 if (hasFrontend && !isVercel) {
   app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/api-docs')) return next();
+    if (req.path.startsWith('/api')) return next();
     res.sendFile(frontendEntry);
   });
 }

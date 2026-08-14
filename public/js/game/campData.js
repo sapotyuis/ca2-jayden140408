@@ -76,7 +76,6 @@ export const createGameState = ({ auth, toast }) => {
     getView,
     subscribe: (listener) => {
       listeners.add(listener);
-      return () => listeners.delete(listener);
     },
     loadAll,
     craft: (resultItemTypeId) => runMutation('/api/me/craft', { result_item_type_id: resultItemTypeId }, 'Item crafted.', true),

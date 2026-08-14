@@ -2,8 +2,6 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { crafting_recipes } from '../db/schema.js';
 
-export { crafting_recipes };
-
 /** Get all crafting recipes. Supports optional `result_item_type_id` and `ingredient_item_type_id` filters. */
 export const findAllCraftingRecipes = async (filters = {}, executor = db) => {
   const conditions = [];

@@ -2,8 +2,6 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { quests, user_quests } from '../db/schema.js';
 
-export { user_quests };
-
 /** Get survivor quest records with optional owner, quest, and status filters. */
 export const findAllUserQuests = async (filters = {}, executor = db) => {
   const conditions = [];

@@ -68,22 +68,6 @@ button {
   }
 }
 
-@keyframes cc-flicker {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  38% {
-    opacity: 0.85;
-  }
-  55% {
-    opacity: 0.95;
-  }
-  72% {
-    opacity: 0.82;
-  }
-}
-
 /* Reduced-motion users get a still, complete scene — motion is garnish, never load-bearing. */
 @media (prefers-reduced-motion: reduce) {
   *,

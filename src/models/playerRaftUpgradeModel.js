@@ -2,8 +2,6 @@ import { eq, and } from 'drizzle-orm';
 import { db } from '../db/connection.js';
 import { raft_upgrades } from '../db/schema.js';
 
-export { raft_upgrades };
-
 /** Get all raft upgrades. Supports optional `user_id` and `upgrade_type` filters. */
 export const findAllRaftUpgrades = async (filters = {}) => {
   const conditions = [];

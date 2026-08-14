@@ -27,7 +27,7 @@ describe('request tracing', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
     const request = {
       method: 'POST',
-      originalUrl: '/api/me/debris/debris-42/collect',
+      originalUrl: '/api/me/debris/42/collect',
       requestId: 'audit-request-42',
     };
     const response = {
@@ -45,7 +45,7 @@ describe('request tracing', () => {
     expect(log).toHaveBeenCalledWith('[API] request completed', expect.objectContaining({
       request_id: 'audit-request-42',
       method: 'POST',
-      path: '/api/me/debris/debris-42/collect',
+      path: '/api/me/debris/42/collect',
       status: 200,
     }));
     log.mockRestore();

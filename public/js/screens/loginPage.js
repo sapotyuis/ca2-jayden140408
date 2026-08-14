@@ -8,7 +8,7 @@ const buttonStyles = createClassNames('button');
 export const renderLoginPage = ({ root, auth, worldClock }) => {
   if (auth.getState().isAuthed) {
     window.location.replace('/camp');
-    return () => {};
+    return;
   }
   const view = renderAuthShell({
     root, auth, worldClockStore: worldClock,
@@ -49,5 +49,4 @@ export const renderLoginPage = ({ root, auth, worldClock }) => {
     }
   };
   loginForm.addEventListener('submit', onSubmit);
-  return () => { loginForm.removeEventListener('submit', onSubmit); view.dispose(); };
 };

@@ -361,9 +361,8 @@ The database contains eleven Drizzle tables:
 | `ocean_events` | Normal and unexpected event definitions |
 | `user_events` | History of events encountered by survivors |
 
-`user_id` and the other ordinary entity IDs are database-generated integer primary keys. The
-`debris_id` is a text UUID because debris identifiers are exposed to the browser and must be
-unique without relying on sequential values.
+All entity IDs, including `debris_id`, are database-generated integer primary keys. The browser
+treats a debris ID as an opaque value and sends it back when collecting that debris row.
 
 ## Game rules
 

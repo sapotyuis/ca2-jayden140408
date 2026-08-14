@@ -22,7 +22,6 @@ export const loadUserQuestForOwner = async (req, res, next) => {
     const userQuestId = parsePositiveInt(req.params.user_quest_id, 'user_quest_id');
     const existing = await findUserQuestById(userQuestId);
     requireOwner(existing, req.user.user_id);
-    res.locals.userQuestId = userQuestId;
     res.locals.userQuest = existing;
     next();
   } catch (error) {

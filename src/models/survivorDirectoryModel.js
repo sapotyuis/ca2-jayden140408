@@ -10,8 +10,6 @@ import {
   user_events,
 } from '../db/schema.js';
 
-export { users };
-
 // Excludes password from API responses
 const publicUserFields = {
   user_id: users.user_id,
